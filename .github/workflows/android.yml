@@ -3,8 +3,10 @@
 # under the run's "Artifacts".
 name: Build Android
 
-# Push trigger is enabled once ProjectSettings/ and Packages/ are in the repo (exported from the PC).
 on:
+  push:
+    branches: [ main ]
+    paths: [ 'Assets/**', 'ProjectSettings/**', 'Packages/**', '.github/workflows/**' ]
   workflow_dispatch:
 
 concurrency:
@@ -54,6 +56,15 @@ jobs:
           path: Library
           key: Library-Android-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: Library-Android-
+
+      - name: Check Unity licence secret
+        env:
+          HAS_LICENSE: ${{ secrets.UNITY_LICENSE != '' }}
+        run: |
+          if [ "$HAS_LICENSE" != "true" ]; then
+            echo "::error::Add the UNITY_LICENSE, UNITY_EMAIL and UNITY_PASSWORD secrets (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
 
       - name: Build with Unity
         uses: game-ci/unity-builder@v4
