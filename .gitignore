@@ -1,0 +1,13 @@
+Library/
+Temp/
+Obj/
+Logs/
+UserSettings/
+Build/
+Builds/
+build/
+*.csproj
+*.sln
+*.keystore
+*.ulf
+.vs/

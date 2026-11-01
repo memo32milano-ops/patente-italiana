@@ -1,0 +1,6 @@
+{
+    "name": "ZipImport.Editor",
+    "includePlatforms": ["Editor"],
+    "references": [],
+    "autoReferenced": false
+}

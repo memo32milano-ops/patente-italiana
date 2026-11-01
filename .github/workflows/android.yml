@@ -1,0 +1,65 @@
+# Builds Patente Italiana in the cloud (GitHub Actions + GameCI) on every push to main,
+# or by hand from the Actions tab ("Run workflow"). Results: APK (to test) and AAB (for Google Play)
+# under the run's "Artifacts".
+name: Build Android
+
+# Push trigger is enabled once ProjectSettings/ and Packages/ are in the repo (exported from the PC).
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: android-build
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - kind: apk
+            appBundle: false
+          - kind: aab
+            appBundle: true
+    steps:
+      - name: Free disk space (Unity images are big)
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-Android-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: Library-Android-
+
+      - name: Build with Unity
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: Android
+          buildName: PatenteItaliana-${{ matrix.kind }}
+          androidExportType: ${{ matrix.appBundle && 'androidAppBundle' || 'androidPackage' }}
+          androidKeystoreName: upload.keystore
+          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
+          androidTargetSdkVersion: AndroidApiLevel35
+          versioning: Semantic
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PatenteItaliana-${{ matrix.kind }}
+          path: build/Android
+          retention-days: 30
