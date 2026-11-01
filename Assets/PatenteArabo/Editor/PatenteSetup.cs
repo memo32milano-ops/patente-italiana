@@ -247,6 +247,87 @@ namespace PatenteArabo.EditorTools
             }
         }
 
+        // ------------------------------------------------------------------ cloud build (GitHub Actions / GameCI)
+        static string Arg(string name)
+        {
+            var a = System.Environment.GetCommandLineArgs();
+            for (int i = 0; i < a.Length - 1; i++) if (a[i] == name) return a[i + 1];
+            return null;
+        }
+
+        /// <summary>Creates a URP asset when the project has none (fresh project in the cloud), by reflection
+        /// so this file also compiles where URP is missing.</summary>
+        static void EnsureUrp()
+        {
+            if (UnityEngine.Rendering.GraphicsSettings.defaultRenderPipeline != null) return;
+            var assetT = System.Type.GetType("UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset, Unity.RenderPipelines.Universal.Runtime");
+            var dataT = System.Type.GetType("UnityEngine.Rendering.Universal.UniversalRendererData, Unity.RenderPipelines.Universal.Runtime");
+            if (assetT == null || dataT == null) { Debug.LogWarning("[Patente] URP not installed"); return; }
+            Directory.CreateDirectory("Assets/Settings");
+            var data = ScriptableObject.CreateInstance(dataT);
+            AssetDatabase.CreateAsset(data, "Assets/Settings/Cloud_Renderer.asset");
+            var create = assetT.GetMethod("Create", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            var asset = (UnityEngine.Rendering.RenderPipelineAsset)create.Invoke(null, new object[] { data });
+            AssetDatabase.CreateAsset(asset, "Assets/Settings/Cloud_URP.asset");
+            AssetDatabase.SaveAssets();
+            UnityEngine.Rendering.GraphicsSettings.defaultRenderPipeline = asset;
+            for (int q = 0; q < QualitySettings.names.Length; q++) { QualitySettings.SetQualityLevel(q, false); QualitySettings.renderPipeline = asset; }
+            Debug.Log("[Patente] URP asset created");
+        }
+
+        static string[] EnsureScene()
+        {
+            var scenes = EditorBuildSettings.scenes.Where(s => s.enabled && File.Exists(s.path)).Select(s => s.path).ToArray();
+            if (scenes.Length > 0) return scenes;
+            var any = AssetDatabase.FindAssets("t:Scene", new[] { "Assets" }).Select(AssetDatabase.GUIDToAssetPath).FirstOrDefault();
+            if (any == null)
+            {
+                Directory.CreateDirectory("Assets/Scenes");
+                var sc = UnityEditor.SceneManagement.EditorSceneManager.NewScene(UnityEditor.SceneManagement.NewSceneSetup.DefaultGameObjects, UnityEditor.SceneManagement.NewSceneMode.Single);
+                any = "Assets/Scenes/Main.unity";
+                UnityEditor.SceneManagement.EditorSceneManager.SaveScene(sc, any);
+            }
+            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(any, true) };
+            return new[] { any };
+        }
+
+        /// <summary>Entry point for the cloud build: game-ci passes -customBuildPath (.apk or .aab) and the keystore args.</summary>
+        public static void CloudBuild()
+        {
+            int code = 1;
+            try
+            {
+                EnsureUrp();
+                SetupAll();
+                var scenes = EnsureScene();
+                string path = Arg("-customBuildPath") ?? "build/Android/PatenteItaliana.apk";
+                bool aab = path.EndsWith(".aab");
+                PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
+                PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64 | AndroidArchitecture.ARMv7;
+                PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel23;
+                PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)35;
+                var ks = Arg("-androidKeystoreName");
+                if (!string.IsNullOrEmpty(ks) && File.Exists(ks) && !string.IsNullOrEmpty(Arg("-androidKeystorePass")))
+                {
+                    PlayerSettings.Android.useCustomKeystore = true;
+                    PlayerSettings.Android.keystoreName = Path.GetFullPath(ks);
+                    PlayerSettings.Android.keystorePass = Arg("-androidKeystorePass");
+                    PlayerSettings.Android.keyaliasName = Arg("-androidKeyaliasName");
+                    PlayerSettings.Android.keyaliasPass = Arg("-androidKeyaliasPass");
+                }
+                else PlayerSettings.Android.useCustomKeystore = false;
+                var vc = System.Environment.GetEnvironmentVariable("GITHUB_RUN_NUMBER");
+                if (int.TryParse(vc, out int run)) PlayerSettings.Android.bundleVersionCode = 100 + run;   // always higher than any PC build
+                EditorUserBuildSettings.buildAppBundle = aab;
+                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes = scenes, locationPathName = path, target = BuildTarget.Android, options = BuildOptions.None });
+                Debug.Log("[Patente] Cloud build: " + report.summary.result + " -> " + path + "\n" + Errors(report));
+                code = report.summary.result == BuildResult.Succeeded ? 0 : 1;
+            }
+            catch (System.Exception e) { Debug.LogError("[Patente] Cloud build failed: " + e); }
+            EditorApplication.Exit(code);
+        }
+
         [MenuItem("PatenteArabo/3. Switch platform to Android")]
         public static void SwitchAndroid()
         {
