@@ -349,7 +349,7 @@ namespace PatenteArabo
         }
 
         public const string StoreUrl = "https://play.google.com/store/apps/details?id=com.memo.patentemondo";
-        public const string PrivacyUrl = "https://claude.ai/artifact/BFGqP6C9nCbAcVn8QRvUJ8"; // public privacy policy page (share it publicly)
+        public const string PrivacyUrl = "https://memo32milano-ops.github.io/patente-italiana/privacy.html"; // GitHub Pages (docs/privacy.html)
         public const string SupportMail = ""; // put your support e-mail here to show "Contact us" in Settings
     }
 }
