@@ -1,0 +1,19 @@
+name: fetch-listati
+on:
+  push:
+    paths: ['.github/workflows/fetch-listati.yml', 'tools/fetch_listati.sh']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash tools/fetch_listati.sh
+      - run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add sources/
+          git commit -m "Fetch official listati" || echo nothing
+          git push
