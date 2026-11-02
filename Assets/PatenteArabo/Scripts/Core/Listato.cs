@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace PatenteArabo
 {
-    [Serializable] public class ChapterInfo { public int n; public string it; public int count; public int exam; }
+    [Serializable] public class ChapterInfo { public int n; public string it; public int count; public int exam; public int sec; public int c1; }
 
     [Serializable]
     public class Stmt
@@ -24,30 +24,44 @@ namespace PatenteArabo
     [Serializable] class ListatoFile { public string version; public ChapterInfo[] chapters; public Stmt[] stmts; }
     [Serializable] class TextFile { public int[] ids; public string[] tx; }
 
-    /// <summary>The official question list for licence B (Ministero delle Infrastrutture e dei Trasporti).</summary>
+    /// <summary>The official question list of the current course (B, C/CE or CQC) published by the Ministero delle Infrastrutture e dei Trasporti.</summary>
     public static class Listato
     {
         static ListatoFile _file;
+        static string _loaded;
+        static ChapterInfo[] _chapters;
+        static Stmt[] _all;
         static Dictionary<int, Stmt> _byId;
         static Dictionary<int, List<Stmt>> _byChapter;
 
+        public static void Reset() { _chapters = null; _all = null; _loaded = null; _file = null; }
+
         static void Ensure()
         {
-            if (_file != null) return;
-            var ta = Resources.Load<TextAsset>("PatenteArabo/data/listato_b");
-            _file = ta != null ? JsonUtility.FromJson<ListatoFile>(ta.text) : new ListatoFile { chapters = new ChapterInfo[0], stmts = new Stmt[0] };
-            _byId = _file.stmts.ToDictionary(s => s.id);
-            _byChapter = _file.stmts.GroupBy(s => s.c).ToDictionary(g => g.Key, g => g.ToList());
+            if (_chapters != null) return;
+            string name = Course.DataName;
+            if (_file == null || _loaded != name)
+            {
+                var ta = Resources.Load<TextAsset>("PatenteArabo/data/" + name);
+                _file = ta != null ? JsonUtility.FromJson<ListatoFile>(ta.text) : new ListatoFile { chapters = new ChapterInfo[0], stmts = new Stmt[0] };
+                _loaded = name;
+            }
+            _chapters = _file.chapters.Where(Course.Visible).ToArray();
+            var vis = new HashSet<int>(_chapters.Select(c => c.n));
+            _all = _file.stmts.Where(s => vis.Contains(s.c)).ToArray();
+            _byId = _all.ToDictionary(s => s.id);
+            _byChapter = _all.GroupBy(s => s.c).ToDictionary(g => g.Key, g => g.ToList());
         }
 
         public static string Version { get { Ensure(); return _file.version; } }
-        public static ChapterInfo[] Chapters { get { Ensure(); return _file.chapters; } }
-        public static IReadOnlyList<Stmt> All { get { Ensure(); return _file.stmts; } }
+        public static ChapterInfo[] Chapters { get { Ensure(); return _chapters; } }
+        public static IReadOnlyList<Stmt> All { get { Ensure(); return _all; } }
         public static Stmt Get(int id) { Ensure(); return _byId.TryGetValue(id, out var s) ? s : null; }
         public static List<Stmt> Chapter(int n) { Ensure(); return _byChapter.TryGetValue(n, out var l) ? l : new List<Stmt>(); }
 
         static Dictionary<string, (int off, int len)> _figIndex;
         static byte[] _figData;
+        static string _figFile;
         static readonly Dictionary<string, Texture2D> _figCache = new Dictionary<string, Texture2D>();
 
         /// <summary>The official picture of a statement (all 400+ pictures are packed in one file).</summary>
@@ -55,10 +69,11 @@ namespace PatenteArabo
         {
             if (s == null || string.IsNullOrEmpty(s.f)) return null;
             if (_figCache.TryGetValue(s.f, out var tex) && tex != null) return tex;
-            if (_figIndex == null)
+            if (_figIndex == null || _figFile != Course.FigureFile)
             {
+                _figFile = Course.FigureFile;
                 _figIndex = new Dictionary<string, (int, int)>();
-                var ta = Resources.Load<TextAsset>("PatenteArabo/data/figures");
+                var ta = Resources.Load<TextAsset>("PatenteArabo/data/" + _figFile);
                 if (ta != null)
                 {
                     _figData = ta.bytes;
@@ -85,23 +100,34 @@ namespace PatenteArabo
             return tex;
         }
 
-        /// <summary>A 30-statement sheet with the official chapter distribution, never two statements from the same quesito.</summary>
-        public static List<Stmt> ExamSheet(System.Random rnd = null)
+        /// <summary>An exam sheet with the official chapter distribution of the mode, never two statements from the same quesito
+        /// (when a chapter has too few quesiti, the rest is filled with other statements of the same chapter).</summary>
+        public static List<Stmt> ExamSheet(ExamMode mode = null, System.Random rnd = null)
         {
             Ensure();
+            mode = mode ?? Course.DefaultMode;
             rnd = rnd ?? new System.Random();
             var res = new List<Stmt>();
-            foreach (var ch in _file.chapters)
+            foreach (var ch in _chapters)
             {
+                int want = mode.Quota != null ? mode.Quota(ch) : ch.exam;
+                if (want <= 0) continue;
                 var pool = Chapter(ch.n);
                 var usedQ = new HashSet<int>();
                 // prefer statements the learner has not seen yet
                 var ordered = pool.OrderBy(s => Srs.Seen(s.id) ? 1 : 0).ThenBy(_ => rnd.Next()).ToList();
+                var taken = new List<Stmt>();
                 foreach (var s in ordered)
                 {
-                    if (res.Count(x => x.c == ch.n) >= ch.exam) break;
-                    if (usedQ.Add(s.q)) res.Add(s);
+                    if (taken.Count >= want) break;
+                    if (usedQ.Add(s.q)) taken.Add(s);
                 }
+                foreach (var s in ordered)
+                {
+                    if (taken.Count >= want) break;
+                    if (!taken.Contains(s)) taken.Add(s);
+                }
+                res.AddRange(taken);
             }
             return res;
         }
@@ -110,7 +136,7 @@ namespace PatenteArabo
         public static List<Stmt> Find(string[] keywords, int[] chapters = null, bool needFigure = false)
         {
             Ensure();
-            return _file.stmts.Where(s =>
+            return _all.Where(s =>
                 (chapters == null || chapters.Contains(s.c)) &&
                 (!needFigure || !string.IsNullOrEmpty(s.f)) &&
                 keywords.Any(k => s.it.ToLowerInvariant().Contains(k))).ToList();
@@ -127,7 +153,7 @@ namespace PatenteArabo
         static Dictionary<string, string> _mt;
         static bool _mtDirty;
 
-        public static void Reset() { _loadedLang = null; }
+        public static void Reset() { _loadedLang = null; _exIt = null; }
 
         static Dictionary<int, string> LoadTexts(string res)
         {
@@ -142,13 +168,19 @@ namespace PatenteArabo
 
         static void Ensure()
         {
-            string code = Lang.Code;
+            string code = Lang.Code + Course.TextSuffix;
             if (_loadedLang == code) return;
             _loadedLang = code;
             _tx = LoadTexts("PatenteArabo/i18n/q_" + code);
             _ex = LoadTexts("PatenteArabo/i18n/ex_" + code);
-            var g = Resources.Load<TextAsset>("PatenteArabo/i18n/gloss_" + code);
+            var g = Resources.Load<TextAsset>("PatenteArabo/i18n/gloss_" + Lang.Code);
             _gloss = MiniJson.ReadStringMap(g != null ? g.text : null);
+            if (!Course.IsB)
+            {
+                // technical words of trucks / CQC on top of the general ones
+                var gp = Resources.Load<TextAsset>("PatenteArabo/i18n/gloss_" + Lang.Code + "_pro");
+                foreach (var kv in MiniJson.ReadStringMap(gp != null ? gp.text : null)) _gloss[kv.Key] = kv.Value;
+            }
             _mt = null;
         }
 
@@ -187,7 +219,7 @@ namespace PatenteArabo
             if (s == null || Lang.Code == "it") return null;
             Ensure();
             if (_tx.TryGetValue(s.id, out var t)) return t;
-            if (Mt.TryGetValue(s.id.ToString(), out t)) { machine = true; return t; }
+            if (Mt.TryGetValue(Course.MtPrefix + s.id, out t)) { machine = true; return t; }
             return null;
         }
 
@@ -197,7 +229,7 @@ namespace PatenteArabo
             if (s == null || !Lang.Info.MlKit || Lang.Code == "it") { done?.Invoke(null); return; }
             Translator.Translate(s.it, Lang.Code, res =>
             {
-                if (!string.IsNullOrEmpty(res)) { Mt[s.id.ToString()] = res; _mtDirty = true; SaveMt(); }
+                if (!string.IsNullOrEmpty(res)) { Mt[Course.MtPrefix + s.id] = res; _mtDirty = true; SaveMt(); }
                 done?.Invoke(res);
             });
         }
@@ -215,7 +247,7 @@ namespace PatenteArabo
                 var s = list[i++];
                 Translator.Translate(s.it, Lang.Code, res =>
                 {
-                    if (!string.IsNullOrEmpty(res)) { Mt[s.id.ToString()] = res; _mtDirty = true; }
+                    if (!string.IsNullOrEmpty(res)) { Mt[Course.MtPrefix + s.id] = res; _mtDirty = true; }
                     if (i % 25 == 0) SaveMt();
                     if (res == null && i <= 1) { progress?.Invoke(-1, list.Count); return; }
                     Next();
@@ -232,7 +264,7 @@ namespace PatenteArabo
             if (s == null) return null;
             Ensure();
             if (_ex.TryGetValue(s.id, out var e)) return e;
-            if (Lang.Code != "it" && Mt.TryGetValue("x" + s.id, out e)) return e;
+            if (Lang.Code != "it" && Mt.TryGetValue(Course.MtPrefix + "x" + s.id, out e)) return e;
             return null;
         }
 
@@ -240,7 +272,7 @@ namespace PatenteArabo
         public static string ExplanationIt(Stmt s)
         {
             if (s == null) return null;
-            if (_exIt == null) _exIt = LoadTexts("PatenteArabo/i18n/ex_it");
+            if (_exIt == null) _exIt = LoadTexts("PatenteArabo/i18n/ex_it" + Course.TextSuffix);
             return _exIt.TryGetValue(s.id, out var e) ? e : null;
         }
 
@@ -269,7 +301,7 @@ namespace PatenteArabo
             Translator.TranslateFrom("it", it, Lang.Code, res =>
             {
                 if (string.IsNullOrEmpty(res)) return;
-                Mt["x" + s.id] = res; _mtDirty = true; SaveMt();
+                Mt[Course.MtPrefix + "x" + s.id] = res; _mtDirty = true; SaveMt();
                 if (label.panel == null) return;
                 var t = U.T(parent, res, "ex-text");
                 t.PlaceBehind(label); label.RemoveFromHierarchy();
@@ -291,7 +323,7 @@ namespace PatenteArabo
 
         public static string ChapterTitle(int n)
         {
-            var key = "ch" + n;
+            var key = (Course.IsB ? "ch" : Course.Id == Course.C ? "chc" : "chq") + n;
             var t = Lang.T(key);
             if (t == key)
             {
@@ -311,7 +343,8 @@ namespace PatenteArabo
         static Store _s;
         static Dictionary<int, Item> _map;
         static readonly long[] Intervals = { 0, 600, 86400, 3 * 86400, 7 * 86400, 21 * 86400 };
-        static string PathFile => System.IO.Path.Combine(Application.persistentDataPath, "progress.json");
+        static string PathFile => System.IO.Path.Combine(Application.persistentDataPath, "progress" + Course.StoreSuffix + ".json");
+        public static void Reset() { _s = null; _map = null; }
 
         static long Now => DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
@@ -371,11 +404,11 @@ namespace PatenteArabo
         public static float OverallReadiness() =>
             Listato.Chapters.Length == 0 ? 0 : Listato.Chapters.Sum(c => Readiness(c.n) * c.exam) / Listato.Chapters.Sum(c => (float)c.exam);
 
-        public static void ExamDone(int errors)
+        public static void ExamDone(int errors, int maxErrors = 3)
         {
             Ensure();
             _s.exams++;
-            if (errors <= 3) _s.passed++;
+            if (errors <= maxErrors) _s.passed++;
             if (_s.bestExam < 0 || errors < _s.bestExam) _s.bestExam = errors;
             Save();
         }
@@ -394,7 +427,8 @@ namespace PatenteArabo
         {
             _s = new Store();
             _map = new Dictionary<int, Item>();
-            try { if (File.Exists(PathFile)) File.Delete(PathFile); } catch { }
+            try { foreach (var f in Directory.GetFiles(Application.persistentDataPath, "progress*.json")) File.Delete(f); } catch { }
+            try { foreach (var f in Directory.GetFiles(Application.persistentDataPath, "exams*.json")) File.Delete(f); } catch { }
             foreach (var f in Directory.GetFiles(Application.persistentDataPath, "mt_*.json"))
                 try { File.Delete(f); } catch { }
             Gamify.Reset();
@@ -402,7 +436,7 @@ namespace PatenteArabo
             // keep the language and everything that was paid for (or already given once, like the free trial)
             var keepS = new Dictionary<string, string>();
             var keepI = new Dictionary<string, int>();
-            foreach (var k in new[] { "pa_lang", "pa_pass_until" }) if (PlayerPrefs.HasKey(k)) keepS[k] = PlayerPrefs.GetString(k);
+            foreach (var k in new[] { "pa_lang", "pa_pass_until", "pa_course" }) if (PlayerPrefs.HasKey(k)) keepS[k] = PlayerPrefs.GetString(k);
             var intKeys = new List<string> { "pa_pass_paid", "pa_trial_given", "pa_trial_shown" };
             foreach (var id in Premium.InApp) intKeys.Add("pa_own_" + id);
             foreach (var id in Premium.Subs) intKeys.Add("pa_own_" + id);
@@ -433,7 +467,7 @@ namespace PatenteArabo
                 if (_set == null)
                 {
                     _set = new HashSet<int>();
-                    foreach (var p in PlayerPrefs.GetString("pa_bookmarks", "").Split(','))
+                    foreach (var p in PlayerPrefs.GetString("pa_bookmarks" + Course.StoreSuffix, "").Split(','))
                         if (int.TryParse(p, out var id)) _set.Add(id);
                 }
                 return _set;
@@ -443,7 +477,7 @@ namespace PatenteArabo
         public static void Toggle(int id)
         {
             if (!Set.Remove(id)) Set.Add(id);
-            PlayerPrefs.SetString("pa_bookmarks", string.Join(",", Set));
+            PlayerPrefs.SetString("pa_bookmarks" + Course.StoreSuffix, string.Join(",", Set));
             PlayerPrefs.Save();
         }
         public static List<Stmt> List() => Set.Select(Listato.Get).Where(s => s != null).ToList();
@@ -453,10 +487,13 @@ namespace PatenteArabo
     /// <summary>History of finished exams (kept on the phone, last 50).</summary>
     public static class ExamHistory
     {
-        [Serializable] public class Entry { public long time; public int errors; public int seconds; public int[] ids; public int[] ans; }
+        [Serializable] public class Entry { public long time; public int errors; public int seconds; public int[] ids; public int[] ans; public int max; }
+        /// <summary>Errors allowed in that exam (old entries of licence B have 0 = 3).</summary>
+        public static int MaxOf(Entry e) => e.max > 0 ? e.max : 3;
         [Serializable] class Store { public List<Entry> list = new List<Entry>(); }
         static Store _s;
-        static string PathFile => Path.Combine(Application.persistentDataPath, "exams.json");
+        static string PathFile => Path.Combine(Application.persistentDataPath, "exams" + Course.StoreSuffix + ".json");
+        public static void Reset() { _s = null; }
 
         static void Ensure()
         {
@@ -465,12 +502,12 @@ namespace PatenteArabo
             if (_s == null) _s = new Store();
         }
 
-        public static void Add(List<Stmt> sheet, bool?[] ans, int errors, float seconds)
+        public static void Add(List<Stmt> sheet, bool?[] ans, int errors, float seconds, int max = 3)
         {
             Ensure();
             _s.list.Insert(0, new Entry
             {
-                time = DateTimeOffset.UtcNow.ToUnixTimeSeconds(), errors = errors, seconds = Mathf.RoundToInt(seconds),
+                time = DateTimeOffset.UtcNow.ToUnixTimeSeconds(), errors = errors, seconds = Mathf.RoundToInt(seconds), max = max,
                 ids = sheet.Select(x => x.id).ToArray(),
                 ans = ans.Select(a => a.HasValue ? (a.Value ? 1 : 0) : -1).ToArray()
             });

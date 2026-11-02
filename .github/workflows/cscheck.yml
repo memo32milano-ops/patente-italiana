@@ -1,0 +1,14 @@
+name: C# syntax check
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'Assets/**/*.cs', 'tools/cscheck/**', '.github/workflows/cscheck.yml' ]
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: '8.0.x' }
+      - run: dotnet run --project tools/cscheck -- Assets

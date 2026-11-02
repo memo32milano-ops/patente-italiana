@@ -68,7 +68,7 @@ namespace PatenteArabo
                 case Source.List: _list = new List<Stmt>(); break;
             }
             // free plan: random/weak/pictures/saved lists only use the statements that are open
-            if (src != Source.Chapter && src != Source.List && !Premium.Has) _list = _list.Where(Premium.StmtOpen).ToList();
+            if (src != Source.Chapter && src != Source.List && !Premium.Unlocked) _list = _list.Where(Premium.StmtOpen).ToList();
         }
 
         public override void Tick(float dt) { Gamify.StudyTick(dt); }
@@ -119,7 +119,7 @@ namespace PatenteArabo
                 lockBox.style.flexGrow = 1;
                 U.Icon(lockBox, "lock", 120, U.Hex("F2C94C"));
                 U.T(lockBox, Lang.T("locked_chapter", Premium.FreePerChapter), "h2", "wraptext").style.unityTextAlign = TextAnchor.MiddleCenter;
-                U.IB(lockBox, "premium", Lang.T("go_premium"), () => App.I.Go(() => new PaywallPage()), "btn-gold").style.width = 600;
+                U.IB(lockBox, "premium", Lang.T("go_premium"), () => ProPaywallPage.OpenForCourse(), "btn-gold").style.width = 600;
                 U.B(lockBox, Lang.T("back"), () => App.I.Back(), "btn-ghost").style.width = 600;
                 return;
             }

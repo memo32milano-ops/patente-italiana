@@ -27,7 +27,10 @@ namespace PatenteArabo
 
         public static readonly string[] AddOns = { AddExams, AddDrive, AddListen, AddGold };
         public static readonly string[] InApp = { Lifetime, Pass3M, AddDrive, AddListen, AddExams, AddGold, PackAM, PackPro };
-        public static readonly string[] Subs = { Monthly };
+        // professional licences (C/CE, CQC goods, CQC passengers): separate subscription, not included in the B premium
+        public const string ProMonthly = "pro_monthly";        // monthly with 3-day free trial
+        public const string ProYearly = "pro_yearly";          // yearly
+        public static readonly string[] Subs = { Monthly, ProMonthly, ProYearly };
 
         // free plan
         public const int FreeChapters = 3;          // chapters 1..3 fully open
@@ -52,6 +55,10 @@ namespace PatenteArabo
 
         static bool Own(string id) => PlayerPrefs.GetInt("pa_own_" + id, 0) == 1;
         public static bool Owns(string id) => Own(id);
+        /// <summary>The professional section (C/CE + CQC goods + CQC passengers).</summary>
+        public static bool HasPro => Own(ProMonthly) || Own(ProYearly) || Own(PackPro);
+        /// <summary>Everything of the course being studied is unlocked.</summary>
+        public static bool Unlocked => Course.IsPro ? HasPro : Has;
         public static bool HasDrive => Has || Own(AddDrive);
         public static bool HasListen => Has || Own(AddListen);
         public static bool HasExams => Has || Own(AddExams);
@@ -218,18 +225,30 @@ namespace PatenteArabo
             PlayerPrefs.Save();
         }
 
-        public static bool CanStartExam => HasExams || Used("exam") < FreeExamsPerDay;
-        public static void ExamStarted() { if (!HasExams) Use("exam"); }
+        public const int FreeProExamsPerDay = 1;
+        public const int FreeProChaptersC = 2, FreeProChaptersCqc = 1;
+        static string ExamKey => Course.IsPro ? "exam_" + Course.Id : "exam";
+        public static bool CanStartExam => Course.IsPro ? (HasPro || Used(ExamKey) < FreeProExamsPerDay) : (HasExams || Used("exam") < FreeExamsPerDay);
+        public static void ExamStarted() { if (Course.IsPro ? !HasPro : !HasExams) Use(ExamKey); }
         public static bool CanDriveQuestion => HasDrive || Used("drive") < FreeDriveQuestionsPerDay;
         public static void DriveQuestionAsked() { if (!HasDrive) Use("drive"); }
-        public static bool ChapterOpen(int chapter) => Has || chapter <= FreeChapters;
+        public static bool ChapterOpen(int chapter)
+        {
+            if (Unlocked) return true;
+            if (!Course.IsPro) return chapter <= FreeChapters;
+            int free = Course.Id == Course.C ? FreeProChaptersC : FreeProChaptersCqc;
+            var chs = Listato.Chapters;
+            for (int i = 0; i < chs.Length && i < free; i++) if (chs[i].n == chapter) return true;
+            return false;
+        }
 
         static Dictionary<int, int> _rank;
+        public static void ResetRank() { _rank = null; }
         /// <summary>Free plan: chapters 1..3 fully, plus the first FreePerChapter statements of every other chapter
         /// (same order as the chapter study list) — whichever way the statement is reached (random, search, games...).</summary>
         public static bool StmtOpen(Stmt s)
         {
-            if (s == null || Has || ChapterOpen(s.c)) return true;
+            if (s == null || Unlocked || ChapterOpen(s.c)) return true;
             if (_rank == null)
             {
                 _rank = new Dictionary<int, int>();

@@ -339,12 +339,12 @@ namespace PatenteArabo
             foreach (var e in ExamHistory.All)
             {
                 var entry = e;
-                bool pass = e.errors <= 3;
+                bool pass = e.errors <= ExamHistory.MaxOf(e);
                 var row = U.Raw(c, "", () =>
                 {
                     var sheet = entry.ids.Select(Listato.Get).Where(x => x != null).ToList();
                     var ans = entry.ans.Select(a => a < 0 ? (bool?)null : a == 1).ToArray();
-                    App.I.Go(() => new ExamResultPage(sheet, ans, false, entry.seconds));
+                    App.I.Go(() => new ExamResultPage(sheet, ans, false, entry.seconds, ExamHistory.MaxOf(entry)));
                 }, "card", pass ? "verdict-ok" : "verdict-ko");
                 row.style.flexDirection = FlexDirection.Row; row.style.alignItems = Align.Center;
                 U.It(row, pass ? "IDONEO" : "NON IDONEO", "h2").style.flexGrow = 1;

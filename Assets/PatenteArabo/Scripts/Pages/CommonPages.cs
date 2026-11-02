@@ -99,7 +99,8 @@ namespace PatenteArabo
             quick.style.marginTop = 10;
             U.IB(quick, "random", Lang.T("random_all"), () => App.I.Go(() => new StudyPage(StudyPage.Source.Random, 0)), "btn-primary");
             U.IB(quick, "warning", Lang.T("weak_only"), () => App.I.Go(() => new StudyPage(StudyPage.Source.Weak, 0)));
-            U.IB(quick, "image", Lang.T("signs_only"), () => App.I.Go(() => new StudyPage(StudyPage.Source.Figures, 0)));
+            if (Listato.All.Any(s => !string.IsNullOrEmpty(s.f))) U.IB(quick, "image", Lang.T(Course.IsB ? "signs_only" : "figures_only"), () => App.I.Go(() => new StudyPage(StudyPage.Source.Figures, 0)));
+            if (Course.IsPro) U.IB(quick, "language", Lang.T("glossary"), () => App.I.Go(() => new GlossaryPage()));
 
             var grid = U.Row(sc.contentContainer, "wrap");
             grid.style.justifyContent = Justify.Center;
@@ -108,7 +109,7 @@ namespace PatenteArabo
             {
                 var c = ch;
                 bool open = Premium.ChapterOpen(c.n);
-                var tile = U.Raw(grid, "", () => { Sfx.Click(); App.I.Go(() => new TheoryPage(c.n)); }, "chapter-tile");
+                var tile = U.Raw(grid, "", () => { Sfx.Click(); if (Course.IsB) App.I.Go(() => new TheoryPage(c.n)); else App.I.Go(() => new StudyPage(StudyPage.Source.Chapter, c.n)); }, "chapter-tile");
                 var row = U.Row(tile);
                 var num = new Label(c.n.ToString()); num.AddToClassList("chapter-num");
                 row.Add(num);
@@ -267,6 +268,8 @@ namespace PatenteArabo
 
             // ---- account
             Section("sec_account");
+            if (Premium.HasPro) Row("drive", Lang.T("pro_active"), null, null);
+            else Row("drive", Lang.T("pro_title"), Lang.T("pro_headline"), () => App.I.Go(() => new ProPaywallPage()));
             if (Premium.Has) Row("premium", Lang.T("premium_active"), null, null);
             else Row("premium", Lang.T("go_premium"), Lang.T("premium_headline"), () => App.I.Go(() => new PaywallPage()));
             Row("download", Lang.T("restore"), null, Premium.Restore);

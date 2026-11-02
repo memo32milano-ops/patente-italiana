@@ -110,9 +110,9 @@ namespace PatenteArabo
             var chips = U.Row(top);
             Chip(chips, "bell", Gamify.Streak.ToString(), Lang.T("streak_days"), "F97316");
             Chip(chips, "check", Gamify.GoalToday + "/" + Gamify.DailyGoal, Lang.T("goal_today"), "22C55E");
-            if (!Premium.Has)
+            if (Course.IsPro ? !Premium.HasPro : !Premium.Has)
             {
-                var pb = U.IB(top, "premium", Lang.T("go_premium"), () => App.I.Go(() => new PaywallPage()), "btn-gold", "btn-small", "glow");
+                var pb = U.IB(top, "premium", Course.IsPro ? "PRO" : Lang.T("go_premium"), () => ProPaywallPage.OpenForCourse(), "btn-gold", "btn-small", "glow");
                 pb.style.flexShrink = 0;
             }
             Chrome.IconButton(top, "language", () => App.I.Go(() => new LanguagePage(false)));
@@ -125,6 +125,10 @@ namespace PatenteArabo
             U.It(brand, Brand.Name, "brand-name");
             if (Lang.Code != "it") U.T(brand, Lang.T("app_sub"), "brand-sub");
             else U.It(brand, Lang.T("app_sub"), "brand-sub");
+            if (!Course.IsB) U.T(brand, "· " + Course.Name, "brand-sub", "gold");
+
+            // ---------- licence being studied: B, C/CE, CQC goods, CQC passengers
+            CourseSwitcher.Make(c);
 
             // ---------- readiness verdict + study plan
             float ready = Srs.OverallReadiness();
@@ -161,9 +165,14 @@ namespace PatenteArabo
             int due = Srs.DueList().Count;
             GlossCard.Make(grid, "study", "study", Lang.T("study"), Lang.T("study_sub"), () => App.I.Go(() => new ChaptersPage()));
             GlossCard.Make(grid, "exam", "exam", Lang.T("exam"), Lang.T("exam_sub"), () => ExamIntroPage.Open(false));
-            GlossCard.Make(grid, "drive", "drive", Lang.T("drive"), Lang.T("drive_sub"), () => App.I.Go(() => new DrivePage()), badge: "3D");
-            GlossCard.Make(grid, "challenge", "star", Lang.T("challenge"), Lang.T("challenge_sub"), () => App.I.Go(() => new LeaderboardPage()), badge: "TOP");
-            GlossCard.Make(grid, "signs", "image", Lang.T("signs"), Lang.T("signs_sub"), () => App.I.Go(() => new SignsPage()));
+            if (Course.IsB)
+            {
+                GlossCard.Make(grid, "drive", "drive", Lang.T("drive"), Lang.T("drive_sub"), () => App.I.Go(() => new DrivePage()), badge: "3D");
+                GlossCard.Make(grid, "challenge", "star", Lang.T("challenge"), Lang.T("challenge_sub"), () => App.I.Go(() => new LeaderboardPage()), badge: "TOP");
+                GlossCard.Make(grid, "signs", "image", Lang.T("signs"), Lang.T("signs_sub"), () => App.I.Go(() => new SignsPage()));
+            }
+            else
+                GlossCard.Make(grid, "signs", "language", Lang.T("glossary"), Lang.T("glossary_sub", ProGlossary.ForCourse.Count()), () => App.I.Go(() => new GlossaryPage()));
             GlossCard.Make(grid, "review", "review", Lang.T("review"), due > 0 ? Lang.T("review_due", due) : Lang.T("review_sub"),
                 () => App.I.Go(() => new StudyPage(StudyPage.Source.Review, 0)), badge: due > 0 ? due.ToString() : null);
             GlossCard.Make(grid, "progress", "progress", Lang.T("progress"), Lang.T("progress_sub", Mathf.RoundToInt(Srs.OverallReadiness() * 100)),

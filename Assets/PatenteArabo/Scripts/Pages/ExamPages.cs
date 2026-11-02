@@ -11,6 +11,7 @@ namespace PatenteArabo
         public bool Translation;   // show the user's language under each statement
         public bool Audio;         // read every statement aloud (like the headphones option at the real exam)
         public string Name = "COGNOME NOME";
+        public ExamMode Mode = Course.DefaultMode;   // official numbers of the licence being studied
     }
 
     // ------------------------------------------------------------------ intro (app style, user's language)
@@ -28,8 +29,8 @@ namespace PatenteArabo
         /// <summary>Opens the exam (or the paywall when the free plan limit is reached).</summary>
         public static void Open(bool audio)
         {
-            if (audio && !Premium.HasListen) { App.I.Go(() => new PaywallPage(Lang.T("listen_premium"), Premium.AddListen)); return; }
-            if (!Premium.CanStartExam) { App.I.Go(() => new PaywallPage(Lang.T("exam_limit"), Premium.AddExams)); return; }
+            if (audio && !(Course.IsPro ? Premium.HasPro : Premium.HasListen)) { App.I.Go(() => Course.IsPro ? (Page)new ProPaywallPage(Lang.T("listen_premium")) : new PaywallPage(Lang.T("listen_premium"), Premium.AddListen)); return; }
+            if (!Premium.CanStartExam) { App.I.Go(() => Course.IsPro ? (Page)new ProPaywallPage(Lang.T("exam_limit")) : new PaywallPage(Lang.T("exam_limit"), Premium.AddExams)); return; }
             App.I.Go(() => new ExamIntroPage(audio));
         }
 
@@ -42,13 +43,55 @@ namespace PatenteArabo
 
             var rules = U.Col(c, "card");
             U.T(rules, Lang.T("exam_rules_title"), "h2");
-            U.T(rules, "- " + Lang.T("rule_30"), "ex-text");
-            U.T(rules, "- " + Lang.T("rule_20"), "ex-text");
-            U.T(rules, "- " + Lang.T("rule_3"), "ex-text");
-            U.T(rules, "- " + Lang.T("rule_lang"), "ex-text");
-            if (_audio) U.T(rules, "- " + Lang.T("rule_audio"), "ex-text", "gold");
-
             var opt = new ExamOptions { Audio = _audio, Translation = DefaultHelp && Lang.Code != "it", Name = PlayerPrefs.GetString("pa_name", "COGNOME NOME") };
+            var modes = Course.Modes;
+            int saved = Mathf.Clamp(PlayerPrefs.GetInt("pa_exmode_" + Course.Id, 0), 0, modes.Count - 1);
+            opt.Mode = modes[saved];
+            var ruleBox = U.Col(rules);
+            void ShowRules()
+            {
+                ruleBox.Clear();
+                var cm = opt.Mode;
+                if (Course.IsB)
+                {
+                    U.T(ruleBox, "- " + Lang.T("rule_30"), "ex-text");
+                    U.T(ruleBox, "- " + Lang.T("rule_20"), "ex-text");
+                    U.T(ruleBox, "- " + Lang.T("rule_3"), "ex-text");
+                }
+                else
+                {
+                    U.T(ruleBox, "- " + Lang.T("rule_n", cm.Questions), "ex-text");
+                    U.T(ruleBox, "- " + Lang.T("rule_min", cm.Minutes), "ex-text");
+                    U.T(ruleBox, "- " + Lang.T("rule_err", cm.MaxErrors), "ex-text");
+                    U.T(ruleBox, "- " + Lang.T(cm.Key + "_info"), "ex-text", "muted");
+                }
+                U.T(ruleBox, "- " + Lang.T("rule_lang"), "ex-text");
+                if (_audio) U.T(ruleBox, "- " + Lang.T("rule_audio"), "ex-text", "gold");
+            }
+            ShowRules();
+
+            if (modes.Count > 1)
+            {
+                var typeCard = U.Col(c, "card");
+                U.T(typeCard, Lang.T("exam_type"), "h2");
+                var trow = U.Row(typeCard, "wrap");
+                var btns = new List<Button>();
+                for (int i = 0; i < modes.Count; i++)
+                {
+                    int ii = i;
+                    var m = modes[i];
+                    Button b = null;
+                    b = U.B(trow, Lang.T(m.Key) + "  (" + m.Questions + " / " + m.Minutes + "' / " + m.MaxErrors + ")", () =>
+                    {
+                        opt.Mode = modes[ii];
+                        PlayerPrefs.SetInt("pa_exmode_" + Course.Id, ii);
+                        foreach (var x in btns) x.RemoveFromClassList("btn-primary");
+                        b.AddToClassList("btn-primary");
+                        ShowRules();
+                    }, i == saved ? "btn-primary" : "");
+                    btns.Add(b);
+                }
+            }
             var modeCard = U.Col(c, "card");
             U.T(modeCard, Lang.T("exam_mode"), "h2");
             var row = U.Row(modeCard, "wrap");
@@ -82,7 +125,10 @@ namespace PatenteArabo
         readonly string _scheda;
         View _view = View.Welcome;
         int _cur, _instr, _sumTop;
-        float _timeLeft = 20 * 60;
+        float _timeLeft;
+        readonly ExamMode _mode;
+        float Total => _mode.Minutes * 60f;
+        int Groups => (_sheet.Count + 9) / 10;
         bool _running, _finished;
         VisualElement _scaler, _frame;
         Label _timer;
@@ -92,7 +138,9 @@ namespace PatenteArabo
         public ExamPage(ExamOptions opt)
         {
             _opt = opt;
-            _sheet = Listato.ExamSheet();
+            _mode = opt.Mode ?? Course.DefaultMode;
+            _timeLeft = Total;
+            _sheet = Listato.ExamSheet(_mode);
             _ans = new bool?[_sheet.Count];
             _scheda = UnityEngine.Random.Range(10000000, 19999999).ToString();
             if (opt.Translation) QuestionText.PrefetchAll(_sheet, (d, n) => { if (d == n && _view == View.Questions) Render(); }, () => _finished);
@@ -162,7 +210,7 @@ namespace PatenteArabo
             var h = U.El(f, "ex-header");
             var left = U.Col(h);
             left.style.width = 360;
-            var badge = new Label("PATENTE B"); badge.AddToClassList("ex-head-left"); left.Add(badge);
+            var badge = new Label(_mode.Badge); badge.AddToClassList("ex-head-left"); left.Add(badge);
             var sub = new Label("simulazione d'esame"); sub.style.fontSize = 20; sub.style.color = U.Hex("5A6470"); left.Add(sub);
             var mid = new Label("SCHEDA\nESAME"); mid.AddToClassList("ex-head-mid"); h.Add(mid);
             var right = U.RowLtr(h);
@@ -180,14 +228,21 @@ namespace PatenteArabo
             p.style.backgroundColor = U.Hex("DFE6EB");
             var t1 = new Label("Quiz per Esame di Teoria Informatizzato"); t1.style.fontSize = 36; t1.style.color = U.Hex("1E1E1E"); t1.style.marginTop = 120;
             p.Add(t1);
-            var t2 = new Label("Simulazione - Patente B"); t2.style.fontSize = 28; t2.style.color = U.Hex("505A64"); t2.style.marginTop = 20;
+            var t2 = new Label("Simulazione - " + (Course.IsCqc ? _mode.Badge : "Patente " + _mode.Abil)); t2.style.fontSize = 28; t2.style.color = U.Hex("505A64"); t2.style.marginTop = 20;
             p.Add(t2);
             var b = U.Raw(p, "Pronto per la Prova d'Esame", () => { _view = View.Instructions; _instr = 0; Render(); }, "ex-light-btn");
             b.style.width = 360; b.style.height = 70; b.style.marginTop = 80; b.style.fontSize = 24;
             if (_opt.Translation) Tr(p, Lang.T("ready_exam")).style.marginTop = 20;
         }
 
-        static readonly string[][] InstrPages =
+        string[][] InstrPages => new[]
+        {
+            BaseInstr[0], BaseInstr[1],
+            new[] { BaseInstr[2][0], BaseInstr[2][1], BaseInstr[2][2], BaseInstr[2][3],
+                "La prova è superata se gli errori sono al massimo " + _mode.MaxErrors + " su " + _sheet.Count + " domande." },
+        };
+
+        static readonly string[][] BaseInstr =
         {
             new[] { "Introduzione generale",
                 "La scheda d'esame si compila toccando lo schermo con le dita.",
@@ -216,7 +271,7 @@ namespace PatenteArabo
             {
                 var l = new Label(page[i]); l.AddToClassList("ex-light-text"); box.Add(l);
             }
-            if (_opt.Translation) Tr(box, Lang.T(trKeys[_instr]));
+            if (_opt.Translation) Tr(box, _instr == 2 && !Course.IsB ? Lang.T("instr3_n", _mode.MaxErrors) : Lang.T(trKeys[_instr]));
             var nav = U.RowLtr(p);
             nav.style.justifyContent = Justify.Center;
             nav.style.marginTop = 16;
@@ -246,14 +301,17 @@ namespace PatenteArabo
             int group = _cur / 10;
 
             var groups = U.El(_frame, "ex-groups");
-            for (int g = 0; g < 3; g++)
+            int ng = Groups;
+            for (int g = 0; g < ng; g++)
             {
                 int gg = g;
-                var b = U.Raw(groups, "Domande da " + (g * 10 + 1) + " a " + (g * 10 + 10), () => { _cur = gg * 10; Render(); SpeakCurrent(); }, "ex-group");
+                int last = Mathf.Min(_sheet.Count, g * 10 + 10);
+                var b = U.Raw(groups, (ng > 4 ? "" : "Domande da ") + (g * 10 + 1) + (ng > 4 ? "-" : " a ") + last, () => { _cur = gg * 10; Render(); SpeakCurrent(); }, "ex-group");
+                if (ng > 4) { b.style.width = Mathf.Min(300, 1380f / ng - 6); }
                 if (g == group) b.AddToClassList("ex-group-on");
             }
             var nums = U.El(_frame, "ex-nums");
-            for (int i = group * 10; i < group * 10 + 10; i++)
+            for (int i = group * 10; i < Mathf.Min(_sheet.Count, group * 10 + 10); i++)
             {
                 int ii = i;
                 var b = U.Raw(nums, (i + 1).ToString(), () => { _cur = ii; Render(); SpeakCurrent(); }, "ex-num");
@@ -264,6 +322,7 @@ namespace PatenteArabo
             for (int i = 0; i < _sheet.Count; i++)
             {
                 var l = new Label((i + 1).ToString()); l.AddToClassList("ex-strip-cell");
+                if (_sheet.Count > 30) { l.style.width = Mathf.Min(40, 1380f / _sheet.Count - 2); l.style.fontSize = _sheet.Count > 50 ? 11 : 14; }
                 if (i == _cur) l.AddToClassList("ex-strip-on");
                 else if (_ans[i].HasValue) l.AddToClassList("ex-strip-answered");
                 strip.Add(l);
@@ -330,7 +389,7 @@ namespace PatenteArabo
             var f = U.El(_frame, "ex-footer");
             var tbox = U.Col(f, "ex-timer-box");
             var tl = new Label("TEMPO A DISPOSIZIONE"); tl.AddToClassList("ex-timer-label"); tbox.Add(tl);
-            _timer = new Label("20 : 00"); _timer.AddToClassList("ex-timer"); tbox.Add(_timer);
+            _timer = new Label(_mode.Minutes.ToString("00") + " : 00"); _timer.AddToClassList("ex-timer"); tbox.Add(_timer);
             Tick(0);
 
             var fields = U.Col(f, "ex-fields");
@@ -342,7 +401,7 @@ namespace PatenteArabo
             var mid = U.Col(f, "ex-mid");
             U.Raw(mid, "Aiuto", () => App.I.Dialog("Aiuto", string.Join("\n\n", InstrPages.Select(p => string.Join("\n", p.Skip(1)))) +
                 (Lang.Code != "it" ? "\n\n" + Lang.T("instr1") + "\n" + Lang.T("instr3") : ""), ("OK", null, "btn-primary")), "ex-help");
-            var ab = new Label("Abilitaz. Richiesta: B"); ab.AddToClassList("ex-abil"); mid.Add(ab);
+            var ab = new Label("Abilitaz. Richiesta: " + _mode.Abil); ab.AddToClassList("ex-abil"); mid.Add(ab);
 
             if (!questionNav) return;
             var navs = U.El(f, "ex-navs");
@@ -443,13 +502,13 @@ namespace PatenteArabo
                 if (_ans[i].HasValue) Srs.Record(_sheet[i].id, ok, false);
                 else Srs.Record(_sheet[i].id, false, false);
             }
-            Srs.ExamDone(errors);
-            Gamify.ExamFinished(errors);
-            ExamHistory.Add(_sheet, _ans, errors, 20 * 60 - Mathf.Max(0, _timeLeft));
-            Challenge.Submit(true);
-            var sheet = _sheet; var ans = _ans;
-            float used = 20 * 60 - Mathf.Max(0, _timeLeft);
-            App.I.Go(() => new ExamResultPage(sheet, ans, timeUp, used), false);
+            Srs.ExamDone(errors, _mode.MaxErrors);
+            Gamify.ExamFinished(Course.IsB ? errors : errors <= _mode.MaxErrors ? Mathf.Min(errors, 1) : 99);
+            ExamHistory.Add(_sheet, _ans, errors, Total - Mathf.Max(0, _timeLeft), _mode.MaxErrors);
+            if (Course.IsB) Challenge.Submit(true);
+            var sheet = _sheet; var ans = _ans; var mode = _mode;
+            float used = Total - Mathf.Max(0, _timeLeft);
+            App.I.Go(() => new ExamResultPage(sheet, ans, timeUp, used, mode.MaxErrors), false);
         }
     }
 
@@ -460,15 +519,16 @@ namespace PatenteArabo
         readonly bool?[] _ans;
         readonly bool _timeUp;
         readonly float _used;
+        readonly int _maxErrors;
 
-        public ExamResultPage(List<Stmt> sheet, bool?[] ans, bool timeUp, float used)
-        { _sheet = sheet; _ans = ans; _timeUp = timeUp; _used = used; }
+        public ExamResultPage(List<Stmt> sheet, bool?[] ans, bool timeUp, float used, int maxErrors = 3)
+        { _sheet = sheet; _ans = ans; _timeUp = timeUp; _used = used; _maxErrors = maxErrors; }
 
         public override void Build(VisualElement root)
         {
             int errors = 0;
             for (int i = 0; i < _sheet.Count; i++) if (!(_ans[i].HasValue && _ans[i].Value == _sheet[i].True)) errors++;
-            bool pass = errors <= 3;
+            bool pass = errors <= _maxErrors;
             if (pass) Sfx.Right(); else Sfx.Wrong();
 
             Chrome.TopBar(root, Lang.T("result"), () => App.I.GoHome());
@@ -491,14 +551,14 @@ namespace PatenteArabo
             if (pass)
             {
                 Fx.Confetti();
-                if (!Premium.HasExams)
+                if (Course.IsPro ? !Premium.HasPro : !Premium.HasExams)
                 {
                     var up = U.Row(c, "card", "card-hl");
                     up.style.alignItems = Align.Center;
                     U.Icon(up, "premium", 64, U.Hex("F2C94C"));
                     var ut = U.T(up, Lang.T("passed_upsell"), "bold", "wraptext");
                     ut.style.flexShrink = 1; ut.style.flexGrow = 1; ut.style.marginLeft = 18; ut.style.marginRight = 18;
-                    U.B(up, Lang.T("go_premium"), () => App.I.Go(() => new PaywallPage(null, Premium.AddExams)), "btn-gold", "btn-small");
+                    U.B(up, Lang.T("go_premium"), () => App.I.Go(() => Course.IsPro ? (Page)new ProPaywallPage() : new PaywallPage(null, Premium.AddExams)), "btn-gold", "btn-small");
                 }
             }
             if (errors > 0) U.T(c, Lang.T("your_errors"), "h2").style.marginTop = 20;
