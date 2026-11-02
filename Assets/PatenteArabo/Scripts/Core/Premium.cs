@@ -350,6 +350,6 @@ namespace PatenteArabo
 
         public const string StoreUrl = "https://play.google.com/store/apps/details?id=com.memo.patentemondo";
         public const string PrivacyUrl = "https://memo32milano-ops.github.io/patente-italiana/privacy.html"; // GitHub Pages (docs/privacy.html)
-        public const string SupportMail = ""; // put your support e-mail here to show "Contact us" in Settings
+        public const string SupportMail = "memo32milano@gmail.com"; // public contact e-mail (same as Play listing)
     }
 }

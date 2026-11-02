@@ -185,6 +185,14 @@ namespace PatenteArabo
             {
                 var more = U.B(row, "...", () => App.I.Dialog(e.Name, Lang.T("report_text"),
                     (Lang.T("cancel"), null, ""),
+                    (Lang.T("report"), () =>
+                    {
+                        Challenge.Block(e.PlayerId);
+                        Application.OpenURL("mailto:" + NativeUtil.SupportMail
+                            + "?subject=" + UnityEngine.Networking.UnityWebRequest.EscapeURL(Brand.Name + " - report " + e.PlayerId)
+                            + "&body=" + UnityEngine.Networking.UnityWebRequest.EscapeURL("Player: " + e.Name + "\nID: " + e.PlayerId + "\n\n"));
+                        App.I.Rebuild();
+                    }, ""),
                     (Lang.T("block"), () => { Challenge.Block(e.PlayerId); App.I.Rebuild(); }, "btn-red")), "btn-ghost", "btn-small");
                 more.style.minWidth = 80;
             }
