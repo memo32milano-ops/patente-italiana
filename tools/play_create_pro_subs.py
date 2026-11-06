@@ -19,6 +19,7 @@ def prices(eur):
     units, nanos = int(eur), int(round((eur - int(eur)) * 1e9))
     r = m.convertRegionPrices(packageName=pkg, body={'price': {'currencyCode': 'EUR', 'units': str(units), 'nanos': nanos}}).execute()
     conv = r['convertedRegionPrices']
+    global RV; RV = r.get('regionVersion', {}).get('version', '2022/02')
     out = []
     for code in regions:
         if code not in conv: continue
@@ -41,13 +42,15 @@ for pid, period, eur, trial in (('pro_monthly', 'P1M', 3.99, True), ('pro_yearly
     except HttpError as e:
         if e.resp.status != 404: raise
     rc, other = prices(eur)
+    print('regions version', RV)
     bpid = 'monthly' if period == 'P1M' else 'yearly'
     bp = {'basePlanId': bpid, 'autoRenewingBasePlanType': copy.deepcopy(bp0['autoRenewingBasePlanType']), 'regionalConfigs': rc}
     bp['autoRenewingBasePlanType']['billingPeriodDuration'] = period
+    bp['autoRenewingBasePlanType'].pop('legacyCompatibleSubscriptionOfferId', None)
     if 'otherRegionsConfig' in bp0 and other:
         bp['otherRegionsConfig'] = {'usdPrice': other['usdPrice'], 'eurPrice': other['eurPrice'], 'newSubscriberAvailability': True}
     body = {'packageName': pkg, 'productId': pid, 'listings': listings(), 'basePlans': [bp], 'taxAndComplianceSettings': tpl.get('taxAndComplianceSettings')}
-    S.create(packageName=pkg, productId=pid, body=body, regionsVersion_version='2022/02').execute()
+    S.create(packageName=pkg, productId=pid, body=body, regionsVersion_version=RV).execute()
     S.basePlans().activate(packageName=pkg, productId=pid, basePlanId=bpid, body={}).execute()
     print('created + activated', pid, len(rc), 'regions')
     if trial:
@@ -57,7 +60,7 @@ for pid, period, eur, trial in (('pro_monthly', 'P1M', 3.99, True), ('pro_yearly
               'targeting': {'acquisitionRule': {'scope': {'thisSubscription': {}}}},
               'regionalConfigs': [{'regionCode': r['regionCode'], 'newSubscriberAvailability': True} for r in rc]}
         if 'otherRegionsConfig' in bp: ob['otherRegionsConfig'] = {'otherRegionsNewSubscriberAvailability': True}
-        S.basePlans().offers().create(packageName=pkg, productId=pid, basePlanId=bpid, offerId='free-trial-3d', body=ob, regionsVersion_version='2022/02').execute()
+        S.basePlans().offers().create(packageName=pkg, productId=pid, basePlanId=bpid, offerId='free-trial-3d', body=ob, regionsVersion_version=RV).execute()
         S.basePlans().offers().activate(packageName=pkg, productId=pid, basePlanId=bpid, offerId='free-trial-3d', body={}).execute()
         print('trial offer active')
 for pid in ('pro_monthly', 'pro_yearly'):
