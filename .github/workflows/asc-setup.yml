@@ -1,0 +1,13 @@
+name: App Store Connect setup (products + subscriptions)
+on: { workflow_dispatch: {} }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install pyjwt cryptography requests
+      - env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: python3 tools/asc_setup.py

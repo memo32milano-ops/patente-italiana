@@ -23,7 +23,7 @@ namespace PatenteArabo.EditorTools
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.iOS, BundleId);
             PlayerSettings.iOS.targetOSVersionString = "15.5";          // StoreKit 2 + Google ML Kit
             PlayerSettings.iOS.appleEnableAutomaticSigning = false;     // signing is done by xcodebuild on the Mac runner
-            PlayerSettings.iOS.targetDevice = iOSTargetDevice.iPhoneAndiPad;
+            PlayerSettings.iOS.targetDevice = iOSTargetDevice.iPhoneOnly;   // iPhone only: no iPad screenshots needed (runs on iPad in compatibility mode)
             PlayerSettings.iOS.requiresFullScreen = true;
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.iOS, ScriptingImplementation.IL2CPP);
             PlayerSettings.SetArchitecture(NamedBuildTarget.iOS, 1);      // arm64

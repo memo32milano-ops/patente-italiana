@@ -10,7 +10,7 @@ CSS = """
 @font-face{font-family:A;src:url(Amiri-Regular.ttf)}
 @font-face{font-family:A;src:url(Amiri-Bold.ttf);font-weight:700}
 *{box-sizing:border-box;margin:0;padding:0}
-body{width:1080px;height:1920px;font-family:P,A,'Noto Sans CJK SC',sans-serif;color:#eaf0f8;
+body{width:1080px;height:100vh;font-family:P,A,'Noto Sans CJK SC',sans-serif;color:#eaf0f8;
  background:radial-gradient(1200px 900px at 50% -10%,#1d4f9a 0%,#0c1421 60%);overflow:hidden;position:relative}
 .flag{position:absolute;top:0;left:0;right:0;height:14px;display:flex}
 .flag i{flex:1}.flag i:nth-child(1){background:#009246}.flag i:nth-child(2){background:#fff}.flag i:nth-child(3){background:#ce2b37}
@@ -84,6 +84,17 @@ rows = ''.join(f"<div class='card' style='margin:14px 30px;padding:24px 30px'><d
 S['5_chapters'] = page("Teoria e <b>25 capitoli</b> ufficiali", "Tutte le 6.327 affermazioni del Ministero", f"""
 <div class='bar'><div class='ib'>‹</div><div class='t'>Capitoli</div><div class='ib'>📖</div></div>{rows}""")
 
+modes = [("Patente C / CE","40 domande · 40 minuti · max 4 errori"),("C per chi ha la C1","20 domande · 20 minuti · max 2 errori"),("CQC completa","70 domande · 90 minuti · max 7 errori"),("Estensione CQC","30 domande · 40 minuti · max 3 errori")]
+mrows = ''.join(f"<div class='card{' hl' if i==0 else ''}' style='padding:26px 32px;margin:16px 30px'><div style='font-size:38px;font-weight:700'>{a}</div><div class='muted' style='font-size:30px;margin-top:6px'>{b}</div></div>" for i,(a,b) in enumerate(modes))
+pills = ''.join(f"<span class='chip' style='{'border-color:#2f80ed;background:#17325c;font-weight:700' if i==1 else ''}'>{x}</span>" for i,x in enumerate(["B","C/CE","CQC Merci","CQC Persone"]))
+S['6_pro'] = page("Camion e <b>CQC</b>", "Patente C/CE, CQC Merci e CQC Persone", f"""
+<div class='bar'><div class='t'>Patente C / CE (camion)</div></div>
+<div style='padding:20px 20px 0;text-align:center'>{pills}</div>
+<div class='card' style='margin-top:20px'><div style='font-size:34px;line-height:1.4'><b>Il cronotachigrafo</b> registra i tempi di guida e di riposo del conducente</div>
+<div class='ar' style='font-size:36px;margin-top:10px'>جهاز التاكوغراف يسجّل أوقات القيادة والراحة للسائق</div></div>
+{mrows}
+<div class='card' style='display:flex;justify-content:space-between;align-items:center'><div style='font-size:36px;font-weight:700'>📖 Glossario tecnico</div><div class='muted' style='font-size:30px'>210 termini</div></div>""")
+
 FG = f"""<html><head><style>{CSS}
 body{{width:1024px;height:500px;background:linear-gradient(115deg,#0c1421 0%,#14305e 55%,#1d4f9a 100%)}}</style></head><body>{FLAG}
 <div style='position:absolute;left:60px;top:80px;width:600px'>
@@ -98,9 +109,11 @@ async def main():
         b = await p.chromium.launch()
         for name, html in list(S.items()) + [('feature', FG)]:
             open(f'{D}/{name}.html','w').write(html)
-            w,h = (1024,500) if name=='feature' else (1080,1920)
-            pg = await b.new_page(viewport={'width':w,'height':h})
+            ios = os.environ.get('IOS') == '1'
+            if ios and name == 'feature': continue
+            w,h = (1024,500) if name=='feature' else ((1080,2340) if ios else (1080,1920))
+            pg = await b.new_page(viewport={'width':w,'height':h}, device_scale_factor=(1290/1080 if ios else 1))
             await pg.goto(f'file://{D}/{name}.html'); await pg.wait_for_timeout(600)
-            await pg.screenshot(path=f'{D}/{name}.png')
+            await pg.screenshot(path=f'{D}/{name}{"_ios" if ios else ""}.png')
         await b.close()
 asyncio.run(main())
