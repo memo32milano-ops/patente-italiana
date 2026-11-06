@@ -1,0 +1,20 @@
+name: Play store graphics
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths: [ 'store/icon512.png', 'store/feature.jpg', '.github/workflows/play-graphics.yml' ]
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check key
+        id: k
+        env: { PLAY_JSON: '${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}' }
+        run: if [ -z "$PLAY_JSON" ]; then echo "::warning::Secret PLAY_SERVICE_ACCOUNT_JSON is missing - nothing uploaded"; echo ok=0 >> $GITHUB_OUTPUT; else echo ok=1 >> $GITHUB_OUTPUT; fi
+      - if: steps.k.outputs.ok == '1'
+        run: pip install google-api-python-client google-auth
+      - if: steps.k.outputs.ok == '1'
+        env: { PLAY_JSON: '${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}', PACKAGE: com.memo.patentemondo }
+        run: python3 tools/play_upload_graphics.py store/icon512.png store/feature.jpg
