@@ -89,7 +89,7 @@ body{{width:1024px;height:500px;background:linear-gradient(115deg,#0c1421 0%,#14
 <div style='position:absolute;left:60px;top:80px;width:600px'>
 <div style='font-size:76px;font-weight:700;line-height:1.05;color:#fff'>Patente<br>Italiana</div>
 <div style='font-size:34px;color:#ffd24a;font-weight:600;margin-top:18px'>Quiz patente B in 50 lingue</div>
-<div style='font-size:26px;color:#a8bad4;margin-top:14px'>Simulazione d'esame · Spiegazioni<br>Guida 3D · Nessuna pubblicità</div></div>
+<div style='font-size:26px;color:#a8bad4;margin-top:14px'>Simulazione d'esame · Spiegazioni<br>Guida 3D · Ripasso degli errori</div></div>
 <img src='data:image/png;base64,{icon}' style='position:absolute;right:70px;top:70px;width:360px;height:360px;border-radius:80px;box-shadow:0 20px 80px rgba(0,0,0,.55)'>
 </body></html>"""
 
