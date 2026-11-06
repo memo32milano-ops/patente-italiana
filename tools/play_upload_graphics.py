@@ -23,6 +23,6 @@ for lang in langs:
         edits.images().upload(packageName=pkg, editId=eid, language=lang, imageType=kind,
                               media_body=MediaFileUpload(path, mimetype=mime)).execute()
     print('ok', lang)
-edits.validate(packageName=pkg, editId=eid).execute()
-res = edits.commit(packageName=pkg, editId=eid).execute()
-print('committed edit', res.get('id'), '- changes sent to Google Play')
+# this app uses managed review: the edit is saved, then 'Send changes for review' is pressed in Play Console
+res = edits.commit(packageName=pkg, editId=eid, changesNotSentForReview=True).execute()
+print('committed edit', res.get('id'), '- saved in Play Console, ready to send for review')
