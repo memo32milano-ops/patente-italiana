@@ -1,0 +1,10 @@
+name: Play listing update
+on: { workflow_dispatch: {} }
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install google-api-python-client google-auth
+      - env: { PLAY_JSON: '${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}' }
+        run: python3 tools/play_update_listing.py
