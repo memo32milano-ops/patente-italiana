@@ -83,6 +83,9 @@ namespace PatenteArabo
             foot.style.justifyContent = Justify.Center;
             U.B(foot, Lang.T("restore"), Premium.Restore, "btn-ghost", "btn-small");
             U.B(foot, Lang.T("manage_subs"), Premium.ManageSubscriptions, "btn-ghost", "btn-small");
+            // App Store rule 3.1.2: subscriptions show the terms of use and the privacy policy
+            U.B(foot, "Terms of Use (EULA)", () => Application.OpenURL(NativeUtil.TermsUrl), "btn-ghost", "btn-small");
+            U.B(foot, Lang.T("privacy"), () => Application.OpenURL(NativeUtil.PrivacyUrl), "btn-ghost", "btn-small");
             U.T(c, Lang.T("pro_note"), "small", "muted", "wraptext").style.marginTop = 10;
         }
 

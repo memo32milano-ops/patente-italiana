@@ -23,7 +23,7 @@ namespace PatenteArabo.EditorTools
             };
         }
 
-        static string Errors(BuildReport r)
+        internal static string Errors(BuildReport r)
         {
             var sb = new System.Text.StringBuilder();
             foreach (var st in r.steps) foreach (var m in st.messages)
@@ -35,7 +35,7 @@ namespace PatenteArabo.EditorTools
         static void EnsureUgsDefine()
         {
             bool has = System.AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name == "Unity.Services.Leaderboards");
-            foreach (var t in new[] { NamedBuildTarget.Android, NamedBuildTarget.Standalone })
+            foreach (var t in new[] { NamedBuildTarget.Android, NamedBuildTarget.iOS, NamedBuildTarget.Standalone })
             {
                 var defs = PlayerSettings.GetScriptingDefineSymbols(t).Split(';').Where(d => d.Length > 0).ToList();
                 bool on = defs.Contains("PA_UGS");
@@ -248,7 +248,7 @@ namespace PatenteArabo.EditorTools
         }
 
         // ------------------------------------------------------------------ cloud build (GitHub Actions / GameCI)
-        static string Arg(string name)
+        internal static string Arg(string name)
         {
             var a = System.Environment.GetCommandLineArgs();
             for (int i = 0; i < a.Length - 1; i++) if (a[i] == name) return a[i + 1];
@@ -257,7 +257,7 @@ namespace PatenteArabo.EditorTools
 
         /// <summary>Creates a URP asset when the project has none (fresh project in the cloud), by reflection
         /// so this file also compiles where URP is missing.</summary>
-        static void EnsureUrp()
+        internal static void EnsureUrp()
         {
             if (UnityEngine.Rendering.GraphicsSettings.defaultRenderPipeline != null) return;
             var assetT = System.Type.GetType("UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset, Unity.RenderPipelines.Universal.Runtime");
@@ -275,7 +275,7 @@ namespace PatenteArabo.EditorTools
             Debug.Log("[Patente] URP asset created");
         }
 
-        static string[] EnsureScene()
+        internal static string[] EnsureScene()
         {
             var scenes = EditorBuildSettings.scenes.Where(s => s.enabled && File.Exists(s.path)).Select(s => s.path).ToArray();
             if (scenes.Length > 0) return scenes;

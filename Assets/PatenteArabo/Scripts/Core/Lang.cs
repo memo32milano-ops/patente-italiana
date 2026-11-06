@@ -121,6 +121,13 @@ namespace PatenteArabo
                     iso = def.Call<string>("getLanguage");
             }
             catch { }
+#elif UNITY_IOS && !UNITY_EDITOR
+            try
+            {
+                iso = IosNative.Locale();                       // e.g. "pt-BR", "zh-Hans-IT"
+                if (!string.IsNullOrEmpty(iso)) iso = iso.Split('-')[0];
+            }
+            catch { }
 #endif
             if (!string.IsNullOrEmpty(iso))
             {
@@ -164,6 +171,16 @@ namespace PatenteArabo
         /// <summary>Interface text for key in the current language (falls back to English, then the key).</summary>
         public static string T(string key)
         {
+#if UNITY_IOS
+            // the same texts serve both stores: on iPhone every "Google Play" becomes "App Store"
+            return Fix(Raw(key));
+        }
+
+        static string Fix(string t) => t != null && t.Contains("Google Play") ? t.Replace("Google Play", "App Store") : t;
+
+        static string Raw(string key)
+        {
+#endif
             if (_ui == null) _ui = Load(Code);
             if (_en == null) _en = Load("en");
             if (_ui.TryGetValue(key, out var v) && !string.IsNullOrEmpty(v)) return v;

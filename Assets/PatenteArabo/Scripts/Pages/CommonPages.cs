@@ -222,6 +222,9 @@ namespace PatenteArabo
             foot.style.justifyContent = Justify.Center;
             U.B(foot, Lang.T("restore"), Premium.Restore, "btn-ghost", "btn-small");
             U.B(foot, Lang.T("manage_subs"), Premium.ManageSubscriptions, "btn-ghost", "btn-small");
+            // App Store rule 3.1.2: subscriptions show the terms of use and the privacy policy
+            U.B(foot, "Terms of Use (EULA)", () => Application.OpenURL(NativeUtil.TermsUrl), "btn-ghost", "btn-small");
+            U.B(foot, Lang.T("privacy"), () => Application.OpenURL(NativeUtil.PrivacyUrl), "btn-ghost", "btn-small");
             U.T(c, Lang.T("premium_note"), "small", "muted", "wraptext").style.marginTop = 10;
         }
 
@@ -343,7 +346,9 @@ namespace PatenteArabo
             Row("share", Lang.T("share_app"), null, () => NativeUtil.Share(Lang.T("share_text") + " " + NativeUtil.StoreUrl));
             if (!string.IsNullOrEmpty(NativeUtil.SupportMail))
                 Row("mail", Lang.T("contact"), NativeUtil.SupportMail, () => Application.OpenURL("mailto:" + NativeUtil.SupportMail + "?subject=" + Brand.Name));
+#if !UNITY_IOS
             Row("chat", "Parli Italiano", Lang.T("parli_sub"), () => Application.OpenURL("https://play.google.com/store/search?q=Parli%20Italiano&c=apps"));
+#endif
             var ver = U.It(_c, Brand.Name + " v" + Application.version + " · " + Listato.All.Count + " · " + Listato.Version, "small", "muted");
             ver.style.marginTop = 30;
             ver.style.unityTextAlign = TextAnchor.MiddleCenter;

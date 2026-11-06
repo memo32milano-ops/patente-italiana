@@ -286,6 +286,12 @@ namespace PatenteArabo
                     }));
             }
             catch (Exception e) { Debug.LogWarning(e.Message); done?.Invoke(null); }
+#elif UNITY_IOS && !UNITY_EDITOR
+            IosNative.PickPhoto(path =>
+            {
+                if (string.IsNullOrEmpty(path) || !File.Exists(path)) { done?.Invoke(null); return; }
+                done?.Invoke(File.ReadAllBytes(path));
+            });
 #else
             // editor: make a coloured test photo
             var t = new Texture2D(96, 96);

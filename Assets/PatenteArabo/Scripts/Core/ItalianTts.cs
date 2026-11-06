@@ -64,6 +64,8 @@ namespace PatenteArabo
                 }
             }
             catch (Exception e) { Debug.LogWarning("TTS: " + e.Message); onDone?.Invoke(); }
+#elif UNITY_IOS && !UNITY_EDITOR
+            IosNative.Speak(text, Rate, _ => onDone?.Invoke());
 #else
             Debug.Log("[TTS] " + text);
             Toast.Show(Lang.T("tts_phone_only"));
@@ -75,6 +77,8 @@ namespace PatenteArabo
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
             try { using (var native = new AndroidJavaClass("com.memo.patente.Native")) native.CallStatic("stop"); } catch { }
+#elif UNITY_IOS && !UNITY_EDITOR
+            IosNative.Stop();
 #endif
         }
     }
@@ -93,6 +97,8 @@ namespace PatenteArabo
                     native.CallStatic("translate", source, text, target, new NativeCallback(done));
             }
             catch (Exception e) { Debug.LogWarning("MT: " + e.Message); done?.Invoke(null); }
+#elif UNITY_IOS && !UNITY_EDITOR
+            IosNative.Translate(source, text, target, done);
 #else
             done?.Invoke(null);
 #endif

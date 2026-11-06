@@ -1,0 +1,105 @@
+# iPhone build of Patente Italiana: Unity exports the Xcode project on Linux (GameCI),
+# then a macOS runner installs the pods, signs with the App Store Connect API key and uploads to TestFlight.
+# Secrets: UNITY_LICENSE, UNITY_EMAIL, UNITY_PASSWORD, APPLE_TEAM_ID, ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8
+name: Build iOS
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload:
+        description: 'Upload to TestFlight'
+        type: boolean
+        default: true
+
+concurrency:
+  group: ios-build
+  cancel-in-progress: true
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: jlumbroso/free-disk-space@v1.3.1
+        with: { android: true, dotnet: true, haskell: true, large-packages: false }
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-iOS-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: Library-iOS-
+      - name: Check secrets
+        env:
+          HAS_LICENSE: ${{ secrets.UNITY_LICENSE != '' }}
+        run: |
+          if [ "$HAS_LICENSE" != "true" ]; then echo "::error::Missing UNITY_LICENSE / UNITY_EMAIL / UNITY_PASSWORD secrets"; exit 1; fi
+      - name: Export Xcode project
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: iOS
+          buildName: PatenteItaliana
+          buildMethod: PatenteArabo.EditorTools.IosBuild.CloudBuildIos
+          versioning: None
+      - name: Pack
+        run: tar -czf xcode.tgz -C build/iOS .
+      - uses: actions/upload-artifact@v4
+        with: { name: xcode-project, path: xcode.tgz, retention-days: 7 }
+
+  archive:
+    needs: export
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { name: xcode-project }
+      - name: Unpack
+        run: |
+          mkdir proj && tar -xzf xcode.tgz -C proj
+          cd proj && ls
+          # game-ci puts the project in a subfolder named after buildName
+          if [ ! -f Unity-iPhone.xcodeproj/project.pbxproj ]; then d=$(dirname $(find . -name project.pbxproj -path "*Unity-iPhone.xcodeproj*" | head -1)); echo "PROJ=$PWD/$(dirname $d)" >> $GITHUB_ENV; else echo "PROJ=$PWD" >> $GITHUB_ENV; fi
+      - name: Pods
+        run: cd "$PROJ" && pod install --repo-update
+      - name: API key
+        env: { ASC_KEY_P8: '${{ secrets.ASC_KEY_P8 }}' }
+        run: |
+          mkdir -p ~/private_keys
+          printf '%s' "$ASC_KEY_P8" > ~/private_keys/AuthKey.p8
+      - name: Archive
+        env:
+          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+          KID: ${{ secrets.ASC_KEY_ID }}
+          ISS: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          cd "$PROJ"
+          xcodebuild -workspace Unity-iPhone.xcworkspace -scheme Unity-iPhone -configuration Release \
+            -archivePath $RUNNER_TEMP/app.xcarchive -destination 'generic/platform=iOS' \
+            DEVELOPMENT_TEAM=$TEAM CODE_SIGN_STYLE=Automatic \
+            -allowProvisioningUpdates -authenticationKeyPath ~/private_keys/AuthKey.p8 \
+            -authenticationKeyID $KID -authenticationKeyIssuerID $ISS \
+            archive | tail -200
+      - name: Export and upload to TestFlight
+        if: ${{ inputs.upload }}
+        env:
+          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+          KID: ${{ secrets.ASC_KEY_ID }}
+          ISS: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          cat > $RUNNER_TEMP/export.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>$TEAM</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>manageAppVersionAndBuildNumber</key><false/>
+          </dict></plist>
+          EOF
+          xcodebuild -exportArchive -archivePath $RUNNER_TEMP/app.xcarchive -exportPath $RUNNER_TEMP/out \
+            -exportOptionsPlist $RUNNER_TEMP/export.plist -allowProvisioningUpdates \
+            -authenticationKeyPath ~/private_keys/AuthKey.p8 -authenticationKeyID $KID -authenticationKeyIssuerID $ISS

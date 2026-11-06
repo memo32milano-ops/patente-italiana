@@ -102,6 +102,9 @@ namespace PatenteArabo
                 }
             }
             catch (Exception e) { Debug.LogWarning("Billing: " + e.Message); }
+#elif UNITY_IOS && !UNITY_EDITOR
+            var all = new List<string>(InApp); all.AddRange(Subs);
+            IosNative.StoreInit(string.Join(",", all), OnEvent);
 #endif
         }
 
@@ -196,6 +199,8 @@ namespace PatenteArabo
                     billing.CallStatic("buy", player.GetStatic<AndroidJavaObject>("currentActivity"), id);
             }
             catch (Exception e) { Debug.LogWarning(e.Message); }
+#elif UNITY_IOS && !UNITY_EDITOR
+            IosNative.StoreBuy(id);
 #else
             // editor: simulate a successful purchase so the flow can be tested
             Grant(id, true, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), "");
@@ -207,12 +212,18 @@ namespace PatenteArabo
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
             try { using (var billing = new AndroidJavaClass("com.memo.patente.Billing")) billing.CallStatic("restore"); } catch { }
+#elif UNITY_IOS && !UNITY_EDITOR
+            IosNative.StoreRestore();
 #endif
             Toast.Show(Lang.T("restored"));
         }
 
         public static void ManageSubscriptions() =>
+#if UNITY_IOS
+            Application.OpenURL("https://apps.apple.com/account/subscriptions");
+#else
             Application.OpenURL("https://play.google.com/store/account/subscriptions?package=" + Application.identifier);
+#endif
 
         // ---------- free-plan counters (per day) ----------
         static string Today => DateTime.Now.ToString("yyyyMMdd");
@@ -288,6 +299,8 @@ namespace PatenteArabo
                 }
             }
             catch (Exception e) { Debug.LogWarning("Reminder: " + e.Message); }
+#elif UNITY_IOS && !UNITY_EDITOR
+            IosNative.Reminder(on, hour, Brand.Name, Lang.T("reminder_text"));
 #endif
         }
 
@@ -348,6 +361,8 @@ namespace PatenteArabo
                     n.CallStatic("share", player.GetStatic<AndroidJavaObject>("currentActivity"), text);
             }
             catch { }
+#elif UNITY_IOS && !UNITY_EDITOR
+            IosNative.Share(text);
 #else
             GUIUtility.systemCopyBuffer = text;
             Toast.Show(text);
@@ -364,10 +379,20 @@ namespace PatenteArabo
                     n.CallStatic("openTtsSettings", player.GetStatic<AndroidJavaObject>("currentActivity"));
             }
             catch { }
+#elif UNITY_IOS && !UNITY_EDITOR
+            IosNative.OpenSettings();
 #endif
         }
 
+#if UNITY_IOS
+        // App Store id: filled in when the app is created in App Store Connect (until then the search link works)
+        public const string AppStoreId = "";
+        public static string StoreUrl => string.IsNullOrEmpty(AppStoreId) ? "https://apps.apple.com/search?term=Patente%20Italiana" : "https://apps.apple.com/app/id" + AppStoreId;
+        public const string TermsUrl = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/";
+#else
         public const string StoreUrl = "https://play.google.com/store/apps/details?id=com.memo.patentemondo";
+        public const string TermsUrl = "https://memo32milano-ops.github.io/patente-italiana/privacy";
+#endif
         public const string PrivacyUrl = "https://memo32milano-ops.github.io/patente-italiana/privacy.html"; // GitHub Pages (docs/privacy.html)
         public const string SupportMail = "memo32milano@gmail.com"; // public contact e-mail (same as Play listing)
     }
