@@ -10,7 +10,7 @@ out = {'details': e.details().get(packageName=pkg, editId=eid).execute(), 'listi
 for l in e.listings().list(packageName=pkg, editId=eid).execute().get('listings', []):
     out['listings'][l['language']] = l
     imgs = {}
-    for t in ('phoneScreenshots', 'sevenInchScreenshots', 'tenInchScreenshots', 'featureGraphic', 'icon', 'promoGraphic', 'tvBanner'):
+    for t in ('phoneScreenshots', 'sevenInchScreenshots', 'tenInchScreenshots', 'featureGraphic', 'icon', 'tvBanner'):
         r = e.images().list(packageName=pkg, editId=eid, language=l['language'], imageType=t).execute().get('images', [])
         if r: imgs[t] = [{'url': i['url'], 'sha1': i.get('sha1')} for i in r]
     out['images'][l['language']] = imgs
