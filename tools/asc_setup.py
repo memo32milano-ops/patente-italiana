@@ -10,10 +10,20 @@ BUNDLE = 'com.memo.patentemondo'
 API = 'https://api.appstoreconnect.apple.com'
 
 
+def _env(a, b):
+    return os.environ.get(a) or os.environ.get(b)
+
+
+def _key():
+    raw = _env('ASC_KEY_P8', 'APP_STORE_CONNECT_PRIVATE_KEY').strip().strip('"').replace('\\n', '\n')
+    if raw.startswith('@file:'): raw = open(os.path.expanduser(raw[6:])).read()
+    return raw
+
+
 def token():
     now = int(time.time())
-    return jwt.encode({'iss': os.environ['ASC_ISSUER_ID'], 'iat': now, 'exp': now + 1100, 'aud': 'appstoreconnect-v1'},
-                      os.environ['ASC_KEY_P8'], algorithm='ES256', headers={'kid': os.environ['ASC_KEY_ID'], 'typ': 'JWT'})
+    return jwt.encode({'iss': _env('ASC_ISSUER_ID', 'APP_STORE_CONNECT_ISSUER_ID'), 'iat': now, 'exp': now + 1100, 'aud': 'appstoreconnect-v1'},
+                      _key(), algorithm='ES256', headers={'kid': _env('ASC_KEY_ID', 'APP_STORE_CONNECT_KEY_IDENTIFIER'), 'typ': 'JWT'})
 
 
 def call(method, path, body=None, params=None):
