@@ -386,7 +386,7 @@ namespace PatenteArabo
 
 #if UNITY_IOS
         // App Store id: filled in when the app is created in App Store Connect (until then the search link works)
-        public const string AppStoreId = "";
+        public const string AppStoreId = "6831966088";
         public static string StoreUrl => string.IsNullOrEmpty(AppStoreId) ? "https://apps.apple.com/search?term=Patente%20Italiana" : "https://apps.apple.com/app/id" + AppStoreId;
         public const string TermsUrl = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/";
 #else

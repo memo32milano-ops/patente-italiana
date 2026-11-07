@@ -69,6 +69,22 @@ namespace PatenteArabo.EditorTools
             EditorApplication.Exit(code);
         }
 
+        /// <summary>Export on the PC (no exit): Builds/iOS/PatenteItaliana. Called by IosPcExport.</summary>
+        public static string ExportForPc()
+        {
+            PatenteSetup.SetupAll();
+            Settings();
+            if (string.IsNullOrEmpty(System.Environment.GetEnvironmentVariable("GITHUB_RUN_NUMBER")))
+                PlayerSettings.iOS.buildNumber = System.DateTime.UtcNow.ToString("yyMMddHH");
+            var scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray();
+            if (scenes.Length == 0) scenes = PatenteSetup.EnsureScene();
+            string path = "Builds/iOS/PatenteItaliana";
+            if (Directory.Exists(path)) Directory.Delete(path, true);
+            Directory.CreateDirectory(path);
+            var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes = scenes, locationPathName = path, target = BuildTarget.iOS, options = BuildOptions.None });
+            return report.summary.result + " errors=" + report.summary.totalErrors + "\n" + PatenteSetup.Errors(report);
+        }
+
         [PostProcessBuild(100)]
         public static void OnPostprocess(BuildTarget target, string path)
         {
