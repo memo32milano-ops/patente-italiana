@@ -1,6 +1,6 @@
 # iPhone build of Patente Italiana: Unity exports the Xcode project on Linux (GameCI),
 # then a macOS runner installs the pods, signs with the App Store Connect API key and uploads to TestFlight.
-# Secrets: UNITY_LICENSE, UNITY_EMAIL, UNITY_PASSWORD, APPLE_TEAM_ID, ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8
+# Secrets: UNITY_LICENSE, UNITY_EMAIL, UNITY_PASSWORD, ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8 (team 2LVABXTZQN)
 name: Build iOS
 
 on:
@@ -16,6 +16,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  asc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install pyjwt cryptography requests
+      - env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: python3 tools/asc_setup.py
+
   export:
     runs-on: ubuntu-latest
     timeout-minutes: 120
@@ -59,9 +70,9 @@ jobs:
       - name: Unpack
         run: |
           mkdir proj && tar -xzf xcode.tgz -C proj
-          cd proj && ls
-          # game-ci puts the project in a subfolder named after buildName
-          if [ ! -f Unity-iPhone.xcodeproj/project.pbxproj ]; then d=$(dirname $(find . -name project.pbxproj -path "*Unity-iPhone.xcodeproj*" | head -1)); echo "PROJ=$PWD/$(dirname $d)" >> $GITHUB_ENV; else echo "PROJ=$PWD" >> $GITHUB_ENV; fi
+          X=$(find "$PWD/proj" -maxdepth 4 -type d -name 'Unity-iPhone.xcodeproj' | head -1)
+          echo "PROJ=$(dirname "$X")" >> $GITHUB_ENV
+          ls "$(dirname "$X")"
       - name: Pods
         run: cd "$PROJ" && pod install --repo-update
       - name: API key
@@ -71,7 +82,7 @@ jobs:
           printf '%s' "$ASC_KEY_P8" > ~/private_keys/AuthKey.p8
       - name: Archive
         env:
-          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+          TEAM: 2LVABXTZQN
           KID: ${{ secrets.ASC_KEY_ID }}
           ISS: ${{ secrets.ASC_ISSUER_ID }}
         run: |
@@ -81,11 +92,12 @@ jobs:
             DEVELOPMENT_TEAM=$TEAM CODE_SIGN_STYLE=Automatic \
             -allowProvisioningUpdates -authenticationKeyPath ~/private_keys/AuthKey.p8 \
             -authenticationKeyID $KID -authenticationKeyIssuerID $ISS \
-            archive | tail -200
+            archive 2>&1 | tee $RUNNER_TEMP/archive.log | grep -E "error:|BUILD|ARCHIVE" | tail -150
+          test ${PIPESTATUS[0]} -eq 0
       - name: Export and upload to TestFlight
         if: ${{ inputs.upload }}
         env:
-          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+          TEAM: 2LVABXTZQN
           KID: ${{ secrets.ASC_KEY_ID }}
           ISS: ${{ secrets.ASC_ISSUER_ID }}
         run: |
