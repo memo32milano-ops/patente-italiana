@@ -36,13 +36,32 @@ workflows:
         script: |
           python3 tools/cm_profile.py
           cd "$PROJ" && xcode-project use-profiles --project Unity-iPhone.xcodeproj
+      - name: iOS version fixes (UnityRuntime minimum iOS, build number)
+        script: |
+          cd "$PROJ"
+          F=$(find . -path "*UnityRuntime.framework/Info.plist" | head -1)
+          APPMIN=$(grep -m1 -o "IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*" Unity-iPhone.xcodeproj/project.pbxproj | awk '{print $3}')
+          echo "UnityRuntime plist: $F  app target: $APPMIN"
+          if [ -n "$F" ]; then
+            FMIN=$(/usr/libexec/PlistBuddy -c "Print :MinimumOSVersion" "$F" 2>/dev/null || true)
+            echo "UnityRuntime MinimumOSVersion: '$FMIN'"
+            NEW=$(python3 -c "import sys;v=[x for x in sys.argv[1:] if x];print(max(v,key=lambda s:[int(p) for p in s.split('.')]))" "$APPMIN" "$FMIN")
+            echo "using minimum iOS $NEW"
+            sed -i '' -E "s/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]+/IPHONEOS_DEPLOYMENT_TARGET = $NEW/g" Unity-iPhone.xcodeproj/project.pbxproj
+            /usr/libexec/PlistBuddy -c "Set :MinimumOSVersion $NEW" "$F" 2>/dev/null || /usr/libexec/PlistBuddy -c "Add :MinimumOSVersion string $NEW" "$F"
+            sed -i '' -E "s/platform :ios, '[0-9.]+'/platform :ios, '$NEW'/; s/'IPHONEOS_DEPLOYMENT_TARGET'\] = '[0-9.]+'/'IPHONEOS_DEPLOYMENT_TARGET'] = '$NEW'/" Podfile
+            grep -n "platform :ios" Podfile
+          fi
+          BN=$((300 + ${BUILD_NUMBER:-1}))
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BN" Info.plist
+          echo "CFBundleVersion $BN"
       - name: Pods
         script: cd "$PROJ" && pod install --repo-update
       - name: Build IPA
         script: |
           cd "$PROJ"
           xcode-project build-ipa --workspace Unity-iPhone.xcworkspace --scheme Unity-iPhone --config Release \
-            --archive-xcargs "ARCHS=arm64 DEVELOPMENT_TEAM=$TEAM_ID CURRENT_PROJECT_VERSION=$((200 + ${BUILD_NUMBER:-1}))"
+            --archive-xcargs "ARCHS=arm64 DEVELOPMENT_TEAM=$TEAM_ID CURRENT_PROJECT_VERSION=$((300 + ${BUILD_NUMBER:-1}))"
     artifacts:
       - xc/**/build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
