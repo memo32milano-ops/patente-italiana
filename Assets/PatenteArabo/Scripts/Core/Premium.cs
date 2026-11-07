@@ -14,7 +14,12 @@ namespace PatenteArabo
         public const string Lifetime = "premium_lifetime";     // everything, forever
         public const string Pass3M = "pass_3_months";          // everything for 90 days (one-time, not renewing)
         // subscription
+#if UNITY_IOS
+        // App Store product ids are unique in the whole developer account: subscriptions get the app prefix there
+        public const string Monthly = "pi_premium_monthly";
+#else
         public const string Monthly = "premium_monthly";       // monthly with free trial (set the trial in Play Console)
+#endif
         // future add-on packs (other official lists)
         public const string PackAM = "pack_am_a";              // licences AM / A1 / A2 / A
         public const string PackPro = "pack_superiori_cqc";    // C / D / CQC
@@ -28,8 +33,13 @@ namespace PatenteArabo
         public static readonly string[] AddOns = { AddExams, AddDrive, AddListen, AddGold };
         public static readonly string[] InApp = { Lifetime, Pass3M, AddDrive, AddListen, AddExams, AddGold, PackAM, PackPro };
         // professional licences (C/CE, CQC goods, CQC passengers): separate subscription, not included in the B premium
+#if UNITY_IOS
+        public const string ProMonthly = "pi_pro_monthly";
+        public const string ProYearly = "pi_pro_yearly";
+#else
         public const string ProMonthly = "pro_monthly";        // monthly with 3-day free trial
         public const string ProYearly = "pro_yearly";          // yearly
+#endif
         public static readonly string[] Subs = { Monthly, ProMonthly, ProYearly };
 
         // free plan
