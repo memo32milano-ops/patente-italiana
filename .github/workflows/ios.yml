@@ -37,8 +37,9 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: Library
-          key: Library-iOS-${{ matrix.kind }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-          restore-keys: Library-iOS-
+          # fresh cache line: the previous Library cache made the editor die on start (exit 137 right after loading)
+          key: LibraryV2-iOS-${{ matrix.kind }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: LibraryV2-iOS-${{ matrix.kind }}-
       - name: Check secrets
         env:
           HAS_LICENSE: ${{ secrets.UNITY_LICENSE != '' }}
