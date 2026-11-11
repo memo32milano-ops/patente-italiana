@@ -30,7 +30,8 @@ namespace PatenteArabo
         public const string AddExams = "addon_exams";          // unlimited exam simulations
         public const string AddGold = "addon_gold";            // gold profile in the challenge + streak shield
 
-        public static readonly string[] AddOns = { AddExams, AddDrive, AddListen, AddGold };
+        /// <summary>Add-ons on sale. The gold profile is part of the online challenge, so it is sold only where the challenge works.</summary>
+        public static string[] AddOns => Challenge.Available ? new[] { AddExams, AddDrive, AddListen, AddGold } : new[] { AddExams, AddDrive, AddListen };
         public static readonly string[] InApp = { Lifetime, Pass3M, AddDrive, AddListen, AddExams, AddGold, PackAM, PackPro };
         // professional licences (C/CE, CQC goods, CQC passengers): separate subscription, not included in the B premium
 #if UNITY_IOS

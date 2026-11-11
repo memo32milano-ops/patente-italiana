@@ -91,7 +91,7 @@ jobs:
           xcrun simctl status_bar "$UDID" override --time "9:41" --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
           xcrun simctl install "$UDID" "$APP"
           mkdir -p store/ios/raw
-          for s in home:it:b study:ar:b exam:ar:b langs:it:b chapters:it:b home:it:c glossary:ar:c exam:it:cqcm paywall:it:b propaywall:it:c; do
+          for s in home:it:b study:ar:b exam:ar:b chapters:it:b study:en:c home:it:c glossary:ar:c exam:it:cqcm paywall:it:b propaywall:it:c; do
             IFS=: read -r page lang course <<< "$s"
             xcrun simctl terminate "$UDID" com.memo.patentemondo || true
             SIMCTL_CHILD_PA_SHOT=$page SIMCTL_CHILD_PA_LANG=$lang SIMCTL_CHILD_PA_COURSE=$course xcrun simctl launch "$UDID" com.memo.patentemondo

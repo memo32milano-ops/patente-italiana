@@ -195,6 +195,7 @@ namespace PatenteArabo
             var feats = U.Col(c, "card");
             foreach (var k in new[] { "pf_chapters", "pf_exams", "pf_drive", "pf_listen", "pf_gold", "pf_review", "pf_offline", "pf_future" })
             {
+                if (k == "pf_gold" && !Challenge.Available) continue;   // the challenge is not in this build
                 var r = U.Row(feats);
                 r.style.marginBottom = 8;
                 U.Icon(r, "check", 40, U.Hex("6EDC96"));

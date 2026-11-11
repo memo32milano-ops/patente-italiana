@@ -214,7 +214,8 @@ def main():
     # ---------------- in-app purchases + subscriptions: review screenshot, notes
     pay_b = os.path.join(ROOT, 'store/ios/review/paywall.png')
     pay_pro = os.path.join(ROOT, 'store/ios/review/propaywall.png')
-    iaps = pages(f'/v1/apps/{app}/inAppPurchasesV2')
+    # addon_gold belongs to the online challenge, which this build does not include: not sent to review
+    iaps = [i for i in pages(f'/v1/apps/{app}/inAppPurchasesV2') if i['attributes']['productId'] != 'addon_gold']
     for i in iaps:
         iid = i['id']
         call('PATCH', f'/v2/inAppPurchases/{iid}', {'data': {'type': 'inAppPurchases', 'id': iid, 'attributes': {
