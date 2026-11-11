@@ -52,7 +52,7 @@ workflows:
             sed -i '' -E "s/platform :ios, '[0-9.]+'/platform :ios, '$NEW'/; s/'IPHONEOS_DEPLOYMENT_TARGET'\] = '[0-9.]+'/'IPHONEOS_DEPLOYMENT_TARGET'] = '$NEW'/" Podfile
             grep -n "platform :ios" Podfile
           fi
-          BN=$((300 + ${BUILD_NUMBER:-1}))
+          BN=$(date -u +%y%m%d%H%M)   # always higher than the previous upload
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BN" Info.plist
           echo "CFBundleVersion $BN"
       - name: Pods
@@ -61,7 +61,7 @@ workflows:
         script: |
           cd "$PROJ"
           xcode-project build-ipa --workspace Unity-iPhone.xcworkspace --scheme Unity-iPhone --config Release \
-            --archive-xcargs "ARCHS=arm64 DEVELOPMENT_TEAM=$TEAM_ID CURRENT_PROJECT_VERSION=$((300 + ${BUILD_NUMBER:-1}))"
+            --archive-xcargs "ARCHS=arm64 DEVELOPMENT_TEAM=$TEAM_ID"
     artifacts:
       - xc/**/build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
@@ -70,3 +70,78 @@ workflows:
         auth: integration
         submit_to_testflight: false
         submit_to_app_store: false
+
+  # One tap: builds, uploads, fills the App Store page (texts, screenshots, purchases) and sends it to review.
+  ios-store:
+    name: iOS → App Store review (build, page, submit)
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: DawlatTilawa
+    environment:
+      xcode: latest
+      cocoapods: default
+      vars:
+        TEAM_ID: 2LVABXTZQN
+        BUNDLE_ID: com.memo.patentemondo
+        XCODE_URL: https://github.com/memo32milano-ops/patente-italiana/releases/download/ios-xcode-latest/xcode.tgz
+      ios_signing:
+        provisioning_profiles:
+        - parli_italiano_app_store
+        certificates:
+        - apple_distribution_2LVABXTZQN
+    scripts:
+    - name: Get Unity Xcode project
+      script: |
+        curl -fL --retry 3 -o xcode.tgz "$XCODE_URL"
+        mkdir -p xc && tar -xzf xcode.tgz -C xc
+        X=$(find "$PWD/xc" -maxdepth 4 -type d -name 'Unity-iPhone.xcodeproj' | head -1)
+        echo "PROJ=$(dirname "$X")" >> $CM_ENV
+        ls "$(dirname "$X")"
+    - name: In-app purchases and subscriptions (App Store Connect)
+      script: |
+        pip3 install --break-system-packages pyjwt cryptography requests >/dev/null 2>&1 || pip3 install pyjwt cryptography requests
+        python3 tools/asc_setup.py || echo "products step had errors (see log)"
+    - name: Signing (certificate + App Store profile)
+      script: |
+        python3 tools/cm_profile.py
+        cd "$PROJ" && xcode-project use-profiles --project Unity-iPhone.xcodeproj
+    - name: iOS version fixes (UnityRuntime minimum iOS, build number)
+      script: |
+        cd "$PROJ"
+        F=$(find . -path "*UnityRuntime.framework/Info.plist" | head -1)
+        APPMIN=$(grep -m1 -o "IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*" Unity-iPhone.xcodeproj/project.pbxproj | awk '{print $3}')
+        echo "UnityRuntime plist: $F  app target: $APPMIN"
+        if [ -n "$F" ]; then
+          FMIN=$(/usr/libexec/PlistBuddy -c "Print :MinimumOSVersion" "$F" 2>/dev/null || true)
+          echo "UnityRuntime MinimumOSVersion: '$FMIN'"
+          NEW=$(python3 -c "import sys;v=[x for x in sys.argv[1:] if x];print(max(v,key=lambda s:[int(p) for p in s.split('.')]))" "$APPMIN" "$FMIN")
+          echo "using minimum iOS $NEW"
+          sed -i '' -E "s/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]+/IPHONEOS_DEPLOYMENT_TARGET = $NEW/g" Unity-iPhone.xcodeproj/project.pbxproj
+          /usr/libexec/PlistBuddy -c "Set :MinimumOSVersion $NEW" "$F" 2>/dev/null || /usr/libexec/PlistBuddy -c "Add :MinimumOSVersion string $NEW" "$F"
+          sed -i '' -E "s/platform :ios, '[0-9.]+'/platform :ios, '$NEW'/; s/'IPHONEOS_DEPLOYMENT_TARGET'\] = '[0-9.]+'/'IPHONEOS_DEPLOYMENT_TARGET'] = '$NEW'/" Podfile
+          grep -n "platform :ios" Podfile
+        fi
+        BN=$(date -u +%y%m%d%H%M)   # always higher than the previous upload
+        /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BN" Info.plist
+        echo "CFBundleVersion $BN"
+    - name: Pods
+      script: cd "$PROJ" && pod install --repo-update
+    - name: Build IPA
+      script: |
+        cd "$PROJ"
+        xcode-project build-ipa --workspace Unity-iPhone.xcworkspace --scheme Unity-iPhone --config Release \
+          --archive-xcargs "ARCHS=arm64 DEVELOPMENT_TEAM=$TEAM_ID"
+    - name: Upload to App Store Connect
+      script: |
+        cd "$PROJ"
+        IPA=$(ls build/ios/ipa/*.ipa | head -1)
+        BN=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" Info.plist)
+        echo "BUILD_VERSION=$BN" >> $CM_ENV
+        app-store-connect publish --path "$IPA"
+    - name: App Store page + review submission
+      script: |
+        python3 tools/asc_store.py --build=$BUILD_VERSION
+    artifacts:
+    - xc/**/build/ios/ipa/*.ipa
+    - /tmp/xcodebuild_logs/*.log
