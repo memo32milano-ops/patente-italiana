@@ -33,12 +33,7 @@ jobs:
           sudo fallocate -l 12G /mnt/swapfile && sudo chmod 600 /mnt/swapfile && sudo mkswap /mnt/swapfile && sudo swapon /mnt/swapfile
           free -h
       - uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        with:
-          path: Library
-          # fresh cache line: the previous Library cache made the editor die on start (exit 137 right after loading)
-          key: LibraryV2-iOS-${{ matrix.kind }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-          restore-keys: LibraryV2-iOS-${{ matrix.kind }}-
+      # no Library cache: a restored Library made the editor die at start (exit 137) several times
       - name: Check secrets
         env:
           HAS_LICENSE: ${{ secrets.UNITY_LICENSE != '' }}
