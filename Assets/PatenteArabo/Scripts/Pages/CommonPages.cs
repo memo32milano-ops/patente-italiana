@@ -456,7 +456,11 @@ namespace PatenteArabo
             U.T(c, Lang.T("privacy_title"), "h2").style.marginTop = 24;
             U.T(c, Lang.T("privacy_short"), "ex-text", "muted");
             U.T(c, Lang.T("credits"), "h2").style.marginTop = 24;
+#if UNITY_IOS
+            U.It(c, "3D: Kenney.nl (CC0) · Machine translation: Google ML Kit (on device) · Speech: Apple AVSpeechSynthesizer · Fonts: Poppins, Noto Sans (OFL)", "ex-text", "muted");
+#else
             U.It(c, "3D: Kenney.nl (CC0) · Machine translation: Google ML Kit (on device) · Speech: Android Text-to-Speech", "ex-text", "muted");
+#endif
         }
 
         static void Link(VisualElement parent, string text, string url)

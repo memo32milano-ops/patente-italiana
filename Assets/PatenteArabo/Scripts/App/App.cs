@@ -60,7 +60,9 @@ namespace PatenteArabo
             if (_bgCam != null) { _bgCam.clearFlags = CameraClearFlags.SolidColor; _bgCam.backgroundColor = U.Hex("0C1421"); }
 
             _doc = gameObject.AddComponent<UIDocument>();
-            _doc.panelSettings = Resources.Load<PanelSettings>("PatenteArabo/UI/Panel");
+            var panel = Resources.Load<PanelSettings>("PatenteArabo/UI/Panel");
+            FontFallback.Apply(panel);
+            _doc.panelSettings = panel;
             _root = _doc.rootVisualElement;
             ApplyDisplay();
             var uss = Resources.Load<StyleSheet>("PatenteArabo/UI/App");

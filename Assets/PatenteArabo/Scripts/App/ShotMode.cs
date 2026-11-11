@@ -28,6 +28,12 @@ namespace PatenteArabo
                     App.I.Go(() => { var p = new ExamPage(new ExamOptions { Translation = Lang.Code != "it", Name = "ROSSI MARIO", Mode = Course.DefaultMode }); p.ShotQuestions(); return p; });
                     break;
                 case "langs": App.I.Go(() => new LanguagePage(false)); break;
+                case "langs2":   // same list scrolled to the end (font check for the last scripts)
+                    App.I.Go(() => new LanguagePage(false));
+                    var doc = App.I.GetComponent<UnityEngine.UIElements.UIDocument>();
+                    doc.rootVisualElement.schedule.Execute(() =>
+                        doc.rootVisualElement.Query<UnityEngine.UIElements.ScrollView>().ForEach(sv => sv.scrollOffset = new Vector2(0, 100000))).StartingIn(2500);
+                    break;
                 case "chapters": App.I.Go(() => new ChaptersPage()); break;
                 case "glossary": App.I.Go(() => new GlossaryPage()); break;
                 case "progress": App.I.Go(() => new ProgressPage()); break;
