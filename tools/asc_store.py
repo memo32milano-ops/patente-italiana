@@ -261,6 +261,20 @@ def main():
             if os.path.exists(shot) and not has_data(call('GET', f'/v1/subscriptions/{sid}/appStoreReviewScreenshot', ok404=True, quiet=True)):
                 upload_file('/v1/subscriptionAppStoreReviewScreenshots', lambda n, sz: {'data': {'type': 'subscriptionAppStoreReviewScreenshots',
                             'attributes': {'fileName': n, 'fileSize': sz}, 'relationships': {'subscription': rel('subscriptions', sid)}}}, shot)
+    # every subscription needs prices; the monthly plans promise a 3-day free trial in the app, so it must exist on the store
+    for sub in subs:
+        sid = sub['id']; pid = sub['attributes']['productId']
+        prices = pages(f'/v1/subscriptions/{sid}/prices', {'include': 'territory'})
+        terrs = sorted({(p.get('relationships', {}).get('territory', {}).get('data') or {}).get('id') for p in prices} - {None})
+        offers = pages(f'/v1/subscriptions/{sid}/introductoryOffers')
+        if 'monthly' in pid and not offers and terrs:
+            for terr in terrs:
+                call('POST', '/v1/subscriptionIntroductoryOffers', {'data': {'type': 'subscriptionIntroductoryOffers', 'attributes': {
+                    'duration': 'THREE_DAYS', 'offerMode': 'FREE_TRIAL', 'numberOfPeriods': 1},
+                    'relationships': {'subscription': rel('subscriptions', sid), 'territory': rel('territories', terr)}}}, quiet=True)
+            offers = pages(f'/v1/subscriptions/{sid}/introductoryOffers')
+        print('subscription', pid, 'prices', len(terrs), 'territories, free-trial offers', len(offers))
+        if not terrs: PROBLEMS.append(f'{pid}: no prices')
     print('purchases', len(iaps), 'subscriptions', len(subs), [s['attributes']['productId'] + ':' + s['attributes'].get('state', '') for s in subs])
     print('iap states', [i['attributes']['productId'] + ':' + i['attributes'].get('state', '') for i in iaps])
 
