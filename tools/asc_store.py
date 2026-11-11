@@ -73,6 +73,14 @@ def pages(path, params=None):
     return out
 
 
+def has_data(r):
+    """An uploaded, processed file (the API answers 200 with data null when there is none)."""
+    d = (r or {}).get('data')
+    if not d: return False
+    st = ((d.get('attributes') or {}).get('assetDeliveryState') or {}).get('state')
+    return st != 'FAILED'
+
+
 def rel(t, i): return {'data': {'type': t, 'id': i}}
 
 
@@ -114,14 +122,32 @@ def main():
          'relationships': {'primaryCategory': rel('appCategories', 'EDUCATION'), 'secondaryCategory': rel('appCategories', 'REFERENCE')}}})
     ard = call('GET', f"/v1/appInfos/{info['id']}/ageRatingDeclaration")
     if ard and ard.get('data'):
-        a = ard['data']['attributes']; new = {}
-        for k, v in a.items():
-            if isinstance(v, bool): new[k] = False
-            elif isinstance(v, str) or v is None:
-                if k in ('kidsAgeBand', 'ageRatingOverride', 'ageRatingOverrideV2', 'koreaAgeRatingOverride', 'developerAgeRatingInfoUrl'): continue
-                new[k] = 'NONE'
-        r = call('PATCH', f"/v1/ageRatingDeclarations/{ard['data']['id']}", {'data': {'type': 'ageRatingDeclarations', 'id': ard['data']['id'], 'attributes': new}})
-        print('age rating', 'ok' if r else 'see errors', sorted(new))
+        # 2025 questionnaire: frequency questions take 'NONE', yes/no questions take false; learn the rest from Apple's errors
+        STR = {'alcoholTobaccoOrDrugUseOrReferences', 'contests', 'gamblingSimulated', 'gunsOrOtherWeapons', 'horrorOrFearThemes',
+               'matureOrSuggestiveThemes', 'medicalOrTreatmentInformation', 'profanityOrCrudeHumor', 'sexualContentGraphicAndNudity',
+               'sexualContentOrNudity', 'violenceCartoonOrFantasy', 'violenceRealistic', 'violenceRealisticProlongedGraphicOrSadistic'}
+        SKIP = {'kidsAgeBand', 'ageRatingOverride', 'ageRatingOverrideV2', 'koreaAgeRatingOverride', 'developerAgeRatingInfoUrl', 'gracRatingClassificationNumber'}
+        new = {}
+        for k, v in ard['data']['attributes'].items():
+            if k in SKIP: continue
+            new[k] = 'NONE' if k in STR or (isinstance(v, str) and v) else False
+        url = f"/v1/ageRatingDeclarations/{ard['data']['id']}"
+        for attempt in range(5):
+            body = json.dumps({'data': {'type': 'ageRatingDeclarations', 'id': ard['data']['id'], 'attributes': new}})
+            res = requests.patch(API + url, data=body, headers={'Authorization': 'Bearer ' + token(), 'Content-Type': 'application/json'})
+            if res.ok: break
+            errs = res.json().get('errors', [])
+            fixed = False
+            for e in errs:
+                ptr = (e.get('source') or {}).get('pointer', '').split('/')[-1]; det = e.get('detail', '')
+                if ptr in new:
+                    if 'Expected a BOOLEAN' in det: new[ptr] = False
+                    elif 'Expected a STRING' in det: new[ptr] = 'NONE'
+                    else: new.pop(ptr)
+                    fixed = True
+            if not fixed: break
+        print('age rating', 'ok' if res.ok else 'FAILED ' + res.text[:400], new)
+        if not res.ok: PROBLEMS.append('age rating: ' + res.text[:300])
     have = {l['attributes']['locale']: l for l in pages(f"/v1/appInfos/{info['id']}/appInfoLocalizations")}
     for loc, m in META.items():
         attrs = {'name': m['name'], 'privacyPolicyUrl': PRIVACY}
@@ -220,7 +246,7 @@ def main():
         iid = i['id']
         call('PATCH', f'/v2/inAppPurchases/{iid}', {'data': {'type': 'inAppPurchases', 'id': iid, 'attributes': {
              'reviewNote': 'Shown on the Premium screen (home > Premium button, or Settings > Premium). Unlocks licence B content as described.'}}})
-        if os.path.exists(pay_b) and not call('GET', f'/v2/inAppPurchases/{iid}/appStoreReviewScreenshot', ok404=True, quiet=True):
+        if os.path.exists(pay_b) and not has_data(call('GET', f'/v2/inAppPurchases/{iid}/appStoreReviewScreenshot', ok404=True, quiet=True)):
             upload_file('/v1/inAppPurchaseAppStoreReviewScreenshots', lambda n, sz: {'data': {'type': 'inAppPurchaseAppStoreReviewScreenshots',
                         'attributes': {'fileName': n, 'fileSize': sz}, 'relationships': {'inAppPurchaseV2': rel('inAppPurchases', iid)}}}, pay_b)
     subs = []
@@ -232,7 +258,7 @@ def main():
                  'reviewNote': ('Professional licences screen: home > "C/CE" in the course row > PRO button.' if pro else
                                 'Premium screen: home > Premium button.') + ' Auto-renewing; 3-day free trial for new subscribers on the monthly plans.'}}})
             shot = pay_pro if pro else pay_b
-            if os.path.exists(shot) and not call('GET', f'/v1/subscriptions/{sid}/appStoreReviewScreenshot', ok404=True, quiet=True):
+            if os.path.exists(shot) and not has_data(call('GET', f'/v1/subscriptions/{sid}/appStoreReviewScreenshot', ok404=True, quiet=True)):
                 upload_file('/v1/subscriptionAppStoreReviewScreenshots', lambda n, sz: {'data': {'type': 'subscriptionAppStoreReviewScreenshots',
                             'attributes': {'fileName': n, 'fileSize': sz}, 'relationships': {'subscription': rel('subscriptions', sid)}}}, shot)
     print('purchases', len(iaps), 'subscriptions', len(subs), [s['attributes']['productId'] + ':' + s['attributes'].get('state', '') for s in subs])

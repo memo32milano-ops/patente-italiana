@@ -5,6 +5,11 @@ name: Build iOS (Unity export for Codemagic)
 permissions: { contents: write }
 on:
   workflow_dispatch:
+    inputs:
+      device_only:
+        description: 'Only the device export (no simulator build, no screenshots)'
+        type: boolean
+        default: false
 
 concurrency:
   group: ios-build
@@ -18,13 +23,7 @@ jobs:
       fail-fast: false
       max-parallel: 1   # one Unity Personal licence: two editors at the same time kill each other (exit 137)
       matrix:
-        include:
-          - kind: device
-            asset: xcode.tgz
-            params: ''
-          - kind: simulator
-            asset: xcode-sim.tgz
-            params: '-paSimulator'
+        include: ${{ fromJSON(inputs.device_only && '[{"kind":"device","asset":"xcode.tgz","params":""}]' || '[{"kind":"device","asset":"xcode.tgz","params":""},{"kind":"simulator","asset":"xcode-sim.tgz","params":"-paSimulator"}]') }}
     steps:
       - uses: jlumbroso/free-disk-space@v1.3.1
         with: { android: true, dotnet: true, haskell: true, large-packages: false }
@@ -70,6 +69,7 @@ jobs:
   # Smoke test + real App Store screenshots: runs the simulator build on an iPhone simulator (free macOS runner, public repo)
   shots:
     needs: export
+    if: ${{ !inputs.device_only }}
     runs-on: macos-15
     timeout-minutes: 60
     steps:

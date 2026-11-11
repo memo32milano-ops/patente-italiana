@@ -34,13 +34,9 @@ namespace PatenteArabo
         public static string[] AddOns => Challenge.Available ? new[] { AddExams, AddDrive, AddListen, AddGold } : new[] { AddExams, AddDrive, AddListen };
         public static readonly string[] InApp = { Lifetime, Pass3M, AddDrive, AddListen, AddExams, AddGold, PackAM, PackPro };
         // professional licences (C/CE, CQC goods, CQC passengers): separate subscription, not included in the B premium
-#if UNITY_IOS
-        public const string ProMonthly = "pi_pro_monthly";
-        public const string ProYearly = "pi_pro_yearly";
-#else
+        // same ids on Google Play and the App Store (these two are free in the Apple account)
         public const string ProMonthly = "pro_monthly";        // monthly with 3-day free trial
         public const string ProYearly = "pro_yearly";          // yearly
-#endif
         public static readonly string[] Subs = { Monthly, ProMonthly, ProYearly };
 
         // free plan

@@ -76,9 +76,9 @@ LOCALES = ('it', 'en-US', 'ar-SA')
 ONE_TIME = [('premium_lifetime', 'NON_CONSUMABLE', '9.99'), ('pass_3_months', 'NON_RENEWING_SUBSCRIPTION', '4.99'),
             ('addon_exams', 'NON_CONSUMABLE', '1.99'), ('addon_drive', 'NON_CONSUMABLE', '1.99'),
             ('addon_listen', 'NON_CONSUMABLE', '1.99'), ('addon_gold', 'NON_CONSUMABLE', '0.99')]
-# subscription ids must be unique in the whole Apple account (premium_monthly is already used by another app): prefix pi_
+# subscription ids must be unique in the whole Apple account: premium_monthly is used by another app, so that one gets the prefix pi_
 GROUPS = [('Premium patente B', [('pi_premium_monthly', 'ONE_MONTH', '2.99', True)]),
-          ('Patenti professionali', [('pi_pro_monthly', 'ONE_MONTH', '3.99', True), ('pi_pro_yearly', 'ONE_YEAR', '24.99', False)])]
+          ('Patenti professionali', [('pro_monthly', 'ONE_MONTH', '3.99', True), ('pro_yearly', 'ONE_YEAR', '24.99', False)])]
 for _a, _b in (('pi_premium_monthly', 'premium_monthly'), ('pi_pro_monthly', 'pro_monthly'), ('pi_pro_yearly', 'pro_yearly')):
     L[_a], D[_a] = L[_b], D[_b]
 
