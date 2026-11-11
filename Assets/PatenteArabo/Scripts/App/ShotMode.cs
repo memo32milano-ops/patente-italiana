@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace PatenteArabo
 {
@@ -30,9 +31,9 @@ namespace PatenteArabo
                 case "langs": App.I.Go(() => new LanguagePage(false)); break;
                 case "langs2":   // same list scrolled to the end (font check for the last scripts)
                     App.I.Go(() => new LanguagePage(false));
-                    var doc = App.I.GetComponent<UnityEngine.UIElements.UIDocument>();
+                    var doc = App.I.GetComponent<UIDocument>();
                     doc.rootVisualElement.schedule.Execute(() =>
-                        doc.rootVisualElement.Query<UnityEngine.UIElements.ScrollView>().ForEach(sv => sv.scrollOffset = new Vector2(0, 100000))).StartingIn(2500);
+                        doc.rootVisualElement.Query<ScrollView>().ForEach(sv => sv.scrollOffset = new Vector2(0, 100000))).StartingIn(2500);
                     break;
                 case "chapters": App.I.Go(() => new ChaptersPage()); break;
                 case "glossary": App.I.Go(() => new GlossaryPage()); break;
