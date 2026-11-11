@@ -146,6 +146,14 @@ namespace PatenteArabo
             if (opt.Translation) QuestionText.PrefetchAll(_sheet, (d, n) => { if (d == n && _view == View.Questions) Render(); }, () => _finished);
         }
 
+        /// <summary>Store screenshots: open directly on the question screen with a few answers given.</summary>
+        public void ShotQuestions()
+        {
+            _view = View.Questions; _running = true; _cur = Mathf.Min(11, _sheet.Count - 1);
+            for (int i = 0; i < _cur && i < _ans.Length; i++) _ans[i] = _sheet[i].True;
+            _timeLeft = Total * 0.72f;
+        }
+
         public override bool OnBack()
         {
             if (_finished) return false;

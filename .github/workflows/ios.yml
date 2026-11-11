@@ -14,6 +14,16 @@ jobs:
   export:
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - kind: device
+            asset: xcode.tgz
+            params: ''
+          - kind: simulator
+            asset: xcode-sim.tgz
+            params: '-paSimulator'
     steps:
       - uses: jlumbroso/free-disk-space@v1.3.1
         with: { android: true, dotnet: true, haskell: true, large-packages: false }
@@ -21,7 +31,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: Library
-          key: Library-iOS-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          key: Library-iOS-${{ matrix.kind }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: Library-iOS-
       - name: Check secrets
         env:
@@ -39,12 +49,61 @@ jobs:
           buildName: PatenteItaliana
           buildMethod: PatenteArabo.EditorTools.IosBuild.CloudBuildIos
           versioning: None
+          customParameters: ${{ matrix.params }}
       - name: Pack
-        run: tar -czf xcode.tgz -C build/iOS .
+        run: tar -czf ${{ matrix.asset }} -C build/iOS .
       - name: Publish for Codemagic (release ios-xcode-latest)
         env: { GH_TOKEN: '${{ github.token }}' }
         run: |
           gh release view ios-xcode-latest -R ${{ github.repository }} >/dev/null 2>&1 || \
             gh release create ios-xcode-latest -R ${{ github.repository }} --title "iOS Xcode project (for Codemagic)" --notes "Exported by Unity; Codemagic signs it and uploads to TestFlight." --prerelease
-          gh release upload ios-xcode-latest xcode.tgz -R ${{ github.repository }} --clobber
+          gh release upload ios-xcode-latest ${{ matrix.asset }} -R ${{ github.repository }} --clobber
 
+
+  # Smoke test + real App Store screenshots: runs the simulator build on an iPhone simulator (free macOS runner, public repo)
+  shots:
+    needs: export
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Simulator Xcode project
+        run: |
+          curl -fL --retry 3 -o sim.tgz https://github.com/${{ github.repository }}/releases/download/ios-xcode-latest/xcode-sim.tgz
+          mkdir sim && tar -xzf sim.tgz -C sim
+          X=$(find "$PWD/sim" -maxdepth 4 -type d -name 'Unity-iPhone.xcodeproj' | head -1)
+          echo "SIMPROJ=$(dirname "$X")" >> $GITHUB_ENV
+      - name: Build for simulator
+        run: |
+          cd "$SIMPROJ"
+          set -o pipefail
+          xcodebuild -project Unity-iPhone.xcodeproj -scheme Unity-iPhone -configuration Release \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath $RUNNER_TEMP/dd \
+            ARCHS=arm64 ONLY_ACTIVE_ARCH=NO CODE_SIGNING_ALLOWED=NO build 2>&1 | tee $RUNNER_TEMP/simbuild.log | grep -E "error:|BUILD" | tail -60
+      - name: Screenshots
+        run: |
+          set -x
+          APP=$(find $RUNNER_TEMP/dd/Build/Products -maxdepth 2 -name '*.app' | head -1)
+          DT=$(xcrun simctl list devicetypes | grep -Eo 'com.apple.CoreSimulator.SimDeviceType.iPhone-1[6-9]-Pro-Max' | sort | tail -1)
+          RT=$(xcrun simctl list runtimes | grep -Eo 'com.apple.CoreSimulator.SimRuntime.iOS-[0-9-]+' | sort -V | tail -1)
+          UDID=$(xcrun simctl create shots "$DT" "$RT")
+          xcrun simctl boot "$UDID"; xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl status_bar "$UDID" override --time "9:41" --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
+          xcrun simctl install "$UDID" "$APP"
+          mkdir -p store/ios/raw
+          for s in home:it:b study:ar:b exam:ar:b langs:it:b chapters:it:b home:it:c glossary:ar:c exam:it:cqcm; do
+            IFS=: read -r page lang course <<< "$s"
+            xcrun simctl terminate "$UDID" com.memo.patentemondo || true
+            SIMCTL_CHILD_PA_SHOT=$page SIMCTL_CHILD_PA_LANG=$lang SIMCTL_CHILD_PA_COURSE=$course xcrun simctl launch "$UDID" com.memo.patentemondo
+            sleep 25
+            xcrun simctl io "$UDID" screenshot "store/ios/raw/${page}_${lang}_${course}.png"
+          done
+          xcrun simctl spawn "$UDID" log show --last 5m --predicate 'process == "PatenteItaliana"' 2>/dev/null | grep -iE "exception|error|crash" | tail -40 || true
+          ls -la store/ios/raw
+      - name: Save screenshots to the repo (branch shots)
+        if: always()
+        run: |
+          mkdir -p out && cp -r store/ios/raw out/ 2>/dev/null || true
+          cp $RUNNER_TEMP/simbuild.log out/ 2>/dev/null || true
+          cd out && git init -q && git checkout -q -b shots && git add -A && git -c user.name=ci -c user.email=ci@local commit -qm shots
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" shots

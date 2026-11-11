@@ -67,8 +67,11 @@ namespace PatenteArabo
             }, Profile.Avatar < 0 ? "btn-primary" : "");
             if (Profile.Photo != null) U.IB(pr, "trash", Lang.T("remove_photo"), () => { Profile.DeletePhoto(); App.I.Rebuild(); }, "btn-ghost");
 
-            U.T(c, Lang.T("challenge"), "h2").style.marginTop = 26;
+            var chHead = U.T(c, Lang.T("challenge"), "h2");
+            chHead.style.marginTop = 26;
             var join = U.Row(c, "setting-row");
+            // the online challenge needs the Unity Gaming Services build; without it nothing "coming soon" is shown
+            if (!Challenge.Available) { chHead.style.display = DisplayStyle.None; join.style.display = DisplayStyle.None; }
             U.Icon(join, "star", 44, U.Hex("F59E0B"));
             var jt = U.T(join, Lang.T("join_challenge"), "bold", "wraptext");
             jt.style.flexGrow = 1; jt.style.flexShrink = 1; jt.style.marginLeft = 20; jt.style.marginRight = 20;

@@ -168,7 +168,8 @@ namespace PatenteArabo
             if (Course.IsB)
             {
                 GlossCard.Make(grid, "drive", "drive", Lang.T("drive"), Lang.T("drive_sub"), () => App.I.Go(() => new DrivePage()), badge: "3D");
-                GlossCard.Make(grid, "challenge", "star", Lang.T("challenge"), Lang.T("challenge_sub"), () => App.I.Go(() => new LeaderboardPage()), badge: "TOP");
+                if (Challenge.Available)
+                    GlossCard.Make(grid, "challenge", "star", Lang.T("challenge"), Lang.T("challenge_sub"), () => App.I.Go(() => new LeaderboardPage()), badge: "TOP");
                 GlossCard.Make(grid, "signs", "image", Lang.T("signs"), Lang.T("signs_sub"), () => App.I.Go(() => new SignsPage()));
             }
             else

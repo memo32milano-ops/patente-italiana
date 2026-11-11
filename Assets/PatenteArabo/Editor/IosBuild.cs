@@ -27,6 +27,10 @@ namespace PatenteArabo.EditorTools
             PlayerSettings.iOS.requiresFullScreen = true;
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.iOS, ScriptingImplementation.IL2CPP);
             PlayerSettings.SetArchitecture(NamedBuildTarget.iOS, 1);      // arm64
+            // -paSimulator: build for the iOS simulator (store screenshots / smoke test), otherwise for devices
+            bool sim = System.Environment.GetCommandLineArgs().Contains("-paSimulator");
+            PlayerSettings.iOS.sdkVersion = sim ? iOSSdkVersion.SimulatorSDK : iOSSdkVersion.DeviceSDK;
+            if (sim) PlayerSettings.iOS.simulatorSdkArchitecture = AppleMobileArchitectureSimulator.ARM64;
             var run = System.Environment.GetEnvironmentVariable("GITHUB_RUN_NUMBER");
             if (int.TryParse(run, out int n)) PlayerSettings.iOS.buildNumber = n.ToString();
 
@@ -128,8 +132,9 @@ namespace PatenteArabo.EditorTools
             if (root.values.ContainsKey("UIApplicationExitsOnSuspend")) root.values.Remove("UIApplicationExitsOnSuspend");
             plist.WriteToFile(plistPath);
 
-            // ---- CocoaPods: Google ML Kit on-device translation (pod install runs on the Mac runner)
-            File.WriteAllText(Path.Combine(path, "Podfile"),
+            // ---- CocoaPods: Google ML Kit on-device translation (pod install runs on the Mac runner); none for the simulator
+            bool simBuild = PlayerSettings.iOS.sdkVersion == iOSSdkVersion.SimulatorSDK;
+            File.WriteAllText(Path.Combine(path, "Podfile"), simBuild ? "platform :ios, '15.5'\ntarget 'UnityFramework' do\nend\ntarget 'Unity-iPhone' do\nend\n" :
 @"platform :ios, '15.5'
 install! 'cocoapods', :deterministic_uuids => false
 

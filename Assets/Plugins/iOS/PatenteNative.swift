@@ -8,7 +8,9 @@ import AVFoundation
 import StoreKit
 import UserNotifications
 import PhotosUI
+#if canImport(MLKitTranslate)
 import MLKitTranslate
+#endif
 
 public typealias PACallback = @convention(c) (Int32, UnsafePointer<CChar>?) -> Void
 private var paCallback: PACallback?
@@ -76,6 +78,7 @@ public func pa_voice_available() -> Bool {
 }
 
 // ------------------------------------------------------------------ on-device translation (Google ML Kit, free, offline after the model download)
+#if canImport(MLKitTranslate)
 private var translators: [String: Translator] = [:]
 
 @_cdecl("pa_translate")
@@ -93,6 +96,11 @@ public func pa_translate(_ source: UnsafePointer<CChar>?, _ text: UnsafePointer<
         }
     }
 }
+#else
+// simulator screenshot builds have no ML Kit (it ships for devices only)
+@_cdecl("pa_translate")
+public func pa_translate(_ source: UnsafePointer<CChar>?, _ text: UnsafePointer<CChar>?, _ target: UnsafePointer<CChar>?, _ id: Int32) { send(id, nil) }
+#endif
 
 // ------------------------------------------------------------------ share / settings
 @_cdecl("pa_share")

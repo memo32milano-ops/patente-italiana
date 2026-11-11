@@ -80,6 +80,7 @@ namespace PatenteArabo
 
             if (!Lang.Chosen) Go(() => new LanguagePage(true), false);
             else Go(() => new HomePage(), false);
+            ShotMode.Run();
         }
 
         void ApplySafeArea()
