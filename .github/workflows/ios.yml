@@ -27,6 +27,11 @@ jobs:
     steps:
       - uses: jlumbroso/free-disk-space@v1.3.1
         with: { android: true, dotnet: true, haskell: true, large-packages: false }
+      - name: Extra swap (IL2CPP needs more memory than the runner has)
+        run: |
+          sudo swapoff -a || true
+          sudo fallocate -l 12G /mnt/swapfile && sudo chmod 600 /mnt/swapfile && sudo mkswap /mnt/swapfile && sudo swapon /mnt/swapfile
+          free -h
       - uses: actions/checkout@v4
       - uses: actions/cache@v4
         with:
