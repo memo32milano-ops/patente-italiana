@@ -84,7 +84,7 @@ namespace PatenteArabo
             Lang.TranslateInterface(() => Rebuild());
 
             if (!Lang.Chosen) Go(() => new LanguagePage(true), false);
-            else Go(() => new HomePage(), false);
+            else Go(() => new SplashPage(), false);
             ShotMode.Run();
         }
 
