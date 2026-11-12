@@ -465,5 +465,15 @@
 "splash_2": "Estás a pocos pasos de tu carnet. ¡Sigue así!",
 "splash_3": "Cada pregunta de hoy es un error menos en el examen.",
 "splash_4": "Unos minutos al día y el examen se vuelve fácil.",
-"splash_5": "¡Bienvenido de nuevo! Tu carnet te espera."
+"splash_5": "¡Bienvenido de nuevo! Tu carnet te espera.",
+"promo_title": "Desbloquea todo el carné B",
+"promo_title_pro": "Desbloquea todo el curso con PRO",
+"promo_sub": "Los 25 capítulos, exámenes ilimitados, conducción 3D y audio",
+"promo_sub_pro": "Todas las preguntas, exámenes ilimitados y glosario técnico",
+"promo_trial": "Pruébalo gratis 3 días y luego decides tú.",
+"see_plans": "Ver planes",
+"not_now": "Ahora no",
+"promo_card_title": "¡Lo estás haciendo genial!",
+"promo_card_body": "Ya llevas un {0} % de preparación. Con Premium llegas antes al examen: los 25 capítulos, simulacros ilimitados, repaso de tus errores y conducción 3D sin límites.",
+"promo_card_body_pro": "Ya llevas un {0} % de preparación. Con PRO tienes todas las preguntas del curso, simulacros ilimitados con las reglas oficiales y el glosario técnico."
 }

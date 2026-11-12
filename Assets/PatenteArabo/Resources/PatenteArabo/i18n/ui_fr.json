@@ -465,5 +465,15 @@
 "splash_2": "Vous n'êtes plus qu'à quelques pas de votre permis. Continuez comme ça !",
 "splash_3": "Chaque question d'aujourd'hui, c'est une erreur de moins à l'examen.",
 "splash_4": "Quelques minutes par jour, et l'examen devient facile.",
-"splash_5": "Bon retour ! Votre permis vous attend."
+"splash_5": "Bon retour ! Votre permis vous attend.",
+"promo_title": "Débloquez tout le permis B",
+"promo_title_pro": "Débloquez tout le cours avec PRO",
+"promo_sub": "Les 25 chapitres, examens illimités, conduite 3D et audio",
+"promo_sub_pro": "Toutes les questions, examens illimités et glossaire technique",
+"promo_trial": "Essayez gratuitement pendant 3 jours, puis c'est vous qui décidez.",
+"see_plans": "Voir les offres",
+"not_now": "Pas maintenant",
+"promo_card_title": "Vous vous débrouillez très bien !",
+"promo_card_body": "Votre préparation atteint déjà {0} %. Avec Premium, vous arrivez plus vite à l'examen : les 25 chapitres, simulations illimitées, révision de vos erreurs et conduite 3D sans limite.",
+"promo_card_body_pro": "Votre préparation atteint déjà {0} %. Avec PRO, vous avez toutes les questions du cours, des simulations illimitées selon les règles officielles et le glossaire technique."
 }

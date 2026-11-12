@@ -465,5 +465,15 @@
 "splash_2": "Oled oma juhiloast vaid mõne sammu kaugusel. Jätka samamoodi!",
 "splash_3": "Iga tänane küsimus on üks viga eksamil vähem.",
 "splash_4": "Paar minutit päevas ja eksam muutub lihtsaks.",
-"splash_5": "Tere tulemast tagasi! Sinu juhiluba ootab sind."
+"splash_5": "Tere tulemast tagasi! Sinu juhiluba ootab sind.",
+"promo_title": "Ava kogu B-kategooria kursus",
+"promo_title_pro": "Ava kogu kursus PRO-ga",
+"promo_sub": "Kõik 25 peatükki, piiramatult eksameid, 3D-sõit ja heli",
+"promo_sub_pro": "Kõik küsimused, piiramatult eksameid ja tehniline sõnastik",
+"promo_trial": "Proovi 3 päeva tasuta, siis otsusta ise.",
+"see_plans": "Vaata pakette",
+"not_now": "Mitte praegu",
+"promo_card_title": "Sul läheb suurepäraselt!",
+"promo_card_body": "Sinu eksamivalmidus on juba {0}%. Premiumiga jõuad eksamini kiiremini: kõik 25 peatükki, piiramatult proovieksameid, vigade kordamine ja piiramatu 3D-sõit.",
+"promo_card_body_pro": "Sinu eksamivalmidus on juba {0}%. PRO-ga saad kõik kursuse küsimused, piiramatult proovieksameid ametlike reeglite järgi ja tehnilise sõnastiku."
 }

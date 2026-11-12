@@ -465,5 +465,15 @@
 "splash_2": "Ets a pocs passos del teu carnet. Continua així!",
 "splash_3": "Cada pregunta d'avui és un error menys a l'examen.",
 "splash_4": "Uns quants minuts al dia i l'examen es torna fàcil.",
-"splash_5": "Benvingut de nou! El teu carnet t'espera."
+"splash_5": "Benvingut de nou! El teu carnet t'espera.",
+"promo_title": "Desbloqueja tot el permís B",
+"promo_title_pro": "Desbloqueja tot el curs amb PRO",
+"promo_sub": "Els 25 capítols, exàmens il·limitats, conducció 3D i àudio",
+"promo_sub_pro": "Totes les preguntes, exàmens il·limitats i glossari tècnic",
+"promo_trial": "Prova-ho gratis 3 dies i després decideix tu.",
+"see_plans": "Veure els plans",
+"not_now": "Ara no",
+"promo_card_title": "Ho estàs fent molt bé!",
+"promo_card_body": "Ja tens un {0}% de preparació. Amb Premium arribes abans a l'examen: els 25 capítols, simulacions il·limitades, repàs dels errors i conducció 3D sense límits.",
+"promo_card_body_pro": "Ja tens un {0}% de preparació. Amb PRO tens totes les preguntes del curs, simulacions il·limitades amb les regles oficials i el glossari tècnic."
 }

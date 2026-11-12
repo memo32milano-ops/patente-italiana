@@ -465,5 +465,15 @@
 "splash_2": "Du bist nur noch wenige Schritte von deinem Führerschein entfernt. Weiter so!",
 "splash_3": "Jede Frage heute ist ein Fehler weniger in der Prüfung.",
 "splash_4": "Ein paar Minuten am Tag, und die Prüfung wird leicht.",
-"splash_5": "Willkommen zurück! Dein Führerschein wartet auf dich."
+"splash_5": "Willkommen zurück! Dein Führerschein wartet auf dich.",
+"promo_title": "Schalte den ganzen Führerschein B frei",
+"promo_title_pro": "Schalte den ganzen Kurs mit PRO frei",
+"promo_sub": "Alle 25 Kapitel, unbegrenzte Prüfungen, 3D-Fahren und Audio",
+"promo_sub_pro": "Alle Fragen, unbegrenzte Prüfungen und Fachglossar",
+"promo_trial": "Teste 3 Tage kostenlos, dann entscheidest du.",
+"see_plans": "Pläne ansehen",
+"not_now": "Nicht jetzt",
+"promo_card_title": "Du machst das super!",
+"promo_card_body": "Du bist schon zu {0} % bereit. Mit Premium kommst du schneller zur Prüfung: alle 25 Kapitel, unbegrenzte Simulationen, Wiederholung deiner Fehler und 3D-Fahren ohne Limit.",
+"promo_card_body_pro": "Du bist schon zu {0} % bereit. Mit PRO bekommst du alle Fragen des Kurses, unbegrenzte Simulationen nach den offiziellen Regeln und das Fachglossar."
 }

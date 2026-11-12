@@ -465,5 +465,15 @@
 "splash_2": "Olet vain muutaman askeleen päässä ajokortistasi. Jatka samaan malliin!",
 "splash_3": "Jokainen tämän päivän kysymys on yksi virhe vähemmän kokeessa.",
 "splash_4": "Muutama minuutti päivässä, ja koe muuttuu helpoksi.",
-"splash_5": "Tervetuloa takaisin! Ajokorttisi odottaa sinua."
+"splash_5": "Tervetuloa takaisin! Ajokorttisi odottaa sinua.",
+"promo_title": "Avaa koko B-ajokorttikurssi",
+"promo_title_pro": "Avaa koko kurssi PRO:lla",
+"promo_sub": "Kaikki 25 lukua, rajattomasti kokeita, 3D-ajo ja ääni",
+"promo_sub_pro": "Kaikki kysymykset, rajattomasti kokeita ja tekninen sanasto",
+"promo_trial": "Kokeile 3 päivää ilmaiseksi ja päätä sitten itse.",
+"see_plans": "Katso tilaukset",
+"not_now": "Ei nyt",
+"promo_card_title": "Hienosti menee!",
+"promo_card_body": "Koevalmiutesi on jo {0} %. Premiumilla pääset kokeeseen nopeammin: kaikki 25 lukua, rajattomasti harjoituskokeita, virheiden kertaus ja rajaton 3D-ajo.",
+"promo_card_body_pro": "Koevalmiutesi on jo {0} %. PRO:lla saat kaikki kurssin kysymykset, rajattomasti harjoituskokeita virallisin säännöin ja teknisen sanaston."
 }

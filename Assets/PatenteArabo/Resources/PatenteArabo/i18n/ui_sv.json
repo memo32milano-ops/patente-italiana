@@ -465,5 +465,15 @@
 "splash_2": "Du är bara några steg från ditt körkort. Fortsätt så!",
 "splash_3": "Varje fråga i dag är ett fel mindre på provet.",
 "splash_4": "Några minuter om dagen och provet blir lätt.",
-"splash_5": "Välkommen tillbaka! Ditt körkort väntar på dig."
+"splash_5": "Välkommen tillbaka! Ditt körkort väntar på dig.",
+"promo_title": "Lås upp hela B-körkortskursen",
+"promo_title_pro": "Lås upp hela kursen med PRO",
+"promo_sub": "Alla 25 kapitel, obegränsade prov, 3D-körning och ljud",
+"promo_sub_pro": "Alla frågor, obegränsade prov och teknisk ordlista",
+"promo_trial": "Prova gratis i 3 dagar, sedan bestämmer du.",
+"see_plans": "Visa abonnemang",
+"not_now": "Inte nu",
+"promo_card_title": "Du gör det jättebra!",
+"promo_card_body": "Du är redan {0} % redo. Med Premium når du provet snabbare: alla 25 kapitel, obegränsade provsimuleringar, repetition av dina fel och obegränsad 3D-körning.",
+"promo_card_body_pro": "Du är redan {0} % redo. Med PRO får du alla kursens frågor, obegränsade provsimuleringar enligt de officiella reglerna och den tekniska ordlistan."
 }
