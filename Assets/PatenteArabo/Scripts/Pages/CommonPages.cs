@@ -192,13 +192,14 @@ namespace PatenteArabo
             U.T(head, Lang.T("premium_headline"), "title", "wraptext").style.unityTextAlign = TextAnchor.MiddleCenter;
             if (!string.IsNullOrEmpty(_reason)) U.T(head, _reason, "gold", "bold", "wraptext").style.unityTextAlign = TextAnchor.MiddleCenter;
 
-            var feats = U.Col(c, "card");
+            // benefits in two columns: the plans and prices stay on the first screen
+            var feats = U.Row(c, "card", "wrap");
             foreach (var k in new[] { "pf_chapters", "pf_exams", "pf_drive", "pf_listen", "pf_gold", "pf_review", "pf_offline", "pf_future" })
             {
                 if (k == "pf_gold" && !Challenge.Available) continue;   // the challenge is not in this build
                 var r = U.Row(feats);
-                r.style.marginBottom = 8;
-                U.Icon(r, "check", 40, U.Hex("6EDC96"));
+                r.style.marginBottom = 6; r.style.width = Length.Percent(50);
+                U.Icon(r, "check", 34, U.Hex("6EDC96"));
                 var l = U.T(r, Lang.T(k), "ex-text");
                 l.style.marginLeft = 14; l.style.marginRight = 14; l.style.flexShrink = 1;
             }

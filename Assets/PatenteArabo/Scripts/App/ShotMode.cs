@@ -39,6 +39,8 @@ namespace PatenteArabo
                 case "glossary": App.I.Go(() => new GlossaryPage()); break;
                 case "progress": App.I.Go(() => new ProgressPage()); break;
                 case "paywall": App.I.Go(() => new PaywallPage()); break;
+                case "profile": App.I.Go(() => new ProfilePage()); break;
+                case "settings": App.I.Go(() => new SettingsPage()); break;
                 case "propaywall": App.I.Go(() => new ProPaywallPage()); break;
                 default: App.I.GoHome(); break;
             }

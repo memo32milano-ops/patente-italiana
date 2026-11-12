@@ -64,12 +64,13 @@ namespace PatenteArabo
             U.T(head, Lang.T("pro_headline"), "title", "wraptext").style.unityTextAlign = TextAnchor.MiddleCenter;
             if (!string.IsNullOrEmpty(_reason)) U.T(head, _reason, "gold", "bold", "wraptext").style.unityTextAlign = TextAnchor.MiddleCenter;
 
-            var feats = U.Col(c, "card");
+            // benefits in two columns: the plans and prices stay on the first screen
+            var feats = U.Row(c, "card", "wrap");
             foreach (var k in new[] { "prof_lists", "prof_exams", "prof_translate", "prof_glossary", "prof_review", "prof_offline" })
             {
                 var r = U.Row(feats);
-                r.style.marginBottom = 8;
-                U.Icon(r, "check", 40, U.Hex("6EDC96"));
+                r.style.marginBottom = 6; r.style.width = Length.Percent(50);
+                U.Icon(r, "check", 34, U.Hex("6EDC96"));
                 var l = U.T(r, Lang.T(k), "ex-text");
                 l.style.marginLeft = 14; l.style.marginRight = 14; l.style.flexShrink = 1;
             }
