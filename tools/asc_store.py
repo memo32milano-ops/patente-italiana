@@ -54,7 +54,7 @@ def call(method, path, body=None, params=None, ok404=False, quiet=False):
         if r.status_code in (429, 500, 502, 503): time.sleep(4 * (attempt + 1)); continue
         if r.status_code == 404 and ok404: return None
         if r.status_code >= 400:
-            msg = f'{method} {path} -> {r.status_code} {r.text[:700]}'
+            msg = f'{method} {path} -> {r.status_code} {r.text[:6000]}'
             if not quiet: print('ERROR', msg)
             PROBLEMS.append(msg)
             return None
@@ -303,6 +303,12 @@ def main():
         call('POST', '/v1/inAppPurchaseSubmissions', {'data': {'type': 'inAppPurchaseSubmissions', 'relationships': {'inAppPurchaseV2': rel('inAppPurchases', i['id'])}}}, quiet=True)
     for sub in subs:
         call('POST', '/v1/subscriptionSubmissions', {'data': {'type': 'subscriptionSubmissions', 'relationships': {'subscription': rel('subscriptions', sub['id'])}}}, quiet=True)
+    for s_ in pages(f'/v1/apps/{app}/reviewSubmissions', {'filter[platform]': 'IOS'}):
+        print('reviewSubmission', s_['id'], s_['attributes'].get('state'), s_['attributes'].get('submittedDate'))
+        for it in pages(f"/v1/reviewSubmissions/{s_['id']}/items"):
+            print('   item', it['id'], it['attributes'].get('state'), list((it.get('relationships') or {}).keys())[:0])
+    vinfo = call('GET', f'/v1/appStoreVersions/{vid}') or {}
+    print('version state', (vinfo.get('data') or {}).get('attributes', {}).get('appStoreState'), (vinfo.get('data') or {}).get('attributes', {}).get('appVersionState'))
     open_subs = [s for s in pages(f'/v1/apps/{app}/reviewSubmissions', {'filter[platform]': 'IOS'}) if s['attributes']['state'] in ('READY_FOR_REVIEW', 'UNRESOLVED_ISSUES')]
     rs = open_subs[0] if open_subs else (call('POST', '/v1/reviewSubmissions', {'data': {'type': 'reviewSubmissions', 'attributes': {'platform': 'IOS'},
                                                                                     'relationships': {'app': rel('apps', app)}}}) or {}).get('data')
@@ -318,4 +324,4 @@ if __name__ == '__main__':
         main()
     finally:
         print('\n==== problems ({}) ===='.format(len(PROBLEMS)))
-        for p in PROBLEMS: print('-', p[:500])
+        for p in PROBLEMS: print('-', p[:6000])
