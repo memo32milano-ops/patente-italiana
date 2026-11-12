@@ -68,6 +68,7 @@ namespace PatenteArabo
             plans.style.justifyContent = Justify.Center;
             Plan(plans, Lang.T("plan_monthly"), Premium.Price(Premium.ProMonthly, "€3,99") + Lang.T("per_month"), Premium.SubLine(Premium.ProMonthly, false, "€3,99"), Premium.ProMonthly, false);
             Plan(plans, Lang.T("plan_yearly"), Premium.Price(Premium.ProYearly, "€24,99") + Lang.T("per_year"), Lang.T("pro_yearly_sub") + "\n" + Premium.SubLine(Premium.ProYearly, true, "€24,99"), Premium.ProYearly, true);
+            PaywallPage.Legal(c, Lang.T("pro_note"));
 
             // benefits in two columns: the plans and prices stay on the first screen
             var feats = U.Row(c, "card", "wrap");
@@ -87,7 +88,6 @@ namespace PatenteArabo
             // App Store rule 3.1.2: subscriptions show the terms of use and the privacy policy
             U.B(foot, Lang.T("terms_eula"), () => Application.OpenURL(NativeUtil.TermsUrl), "btn-ghost", "btn-small");
             U.B(foot, Lang.T("privacy"), () => Application.OpenURL(NativeUtil.PrivacyUrl), "btn-ghost", "btn-small");
-            U.T(c, Lang.T("pro_note"), "small", "muted", "wraptext").style.marginTop = 10;
         }
 
         static void Plan(VisualElement parent, string title, string price, string sub, string id, bool best)

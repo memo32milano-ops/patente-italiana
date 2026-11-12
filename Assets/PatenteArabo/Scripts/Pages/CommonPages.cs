@@ -197,6 +197,7 @@ namespace PatenteArabo
             Plan(plans, Lang.T("plan_monthly"), Premium.Price(Premium.Monthly, "€2,99") + Lang.T("per_month"), Premium.SubLine(Premium.Monthly, false, "€2,99"), Premium.Monthly, false);
             Plan(plans, Lang.T("plan_pass"), Premium.Price(Premium.Pass3M, "€4,99"), Lang.T("plan_pass_sub"), Premium.Pass3M, false);
             Plan(plans, Lang.T("plan_lifetime"), Premium.Price(Premium.Lifetime, "€9,99"), Lang.T("plan_lifetime_sub"), Premium.Lifetime, true);
+            Legal(c, Lang.T("premium_note"));
 
             // benefits in two columns: the plans and prices stay on the first screen
             var feats = U.Row(c, "card", "wrap");
@@ -227,7 +228,17 @@ namespace PatenteArabo
             // App Store rule 3.1.2: subscriptions show the terms of use and the privacy policy
             U.B(foot, Lang.T("terms_eula"), () => Application.OpenURL(NativeUtil.TermsUrl), "btn-ghost", "btn-small");
             U.B(foot, Lang.T("privacy"), () => Application.OpenURL(NativeUtil.PrivacyUrl), "btn-ghost", "btn-small");
-            U.T(c, Lang.T("premium_note"), "small", "muted", "wraptext").style.marginTop = 10;
+        }
+
+        /// <summary>App Store 3.1.2: right under the plans, the renewal terms and working links to the Terms of Use (EULA) and the Privacy Policy.</summary>
+        public static void Legal(VisualElement c, string note)
+        {
+            U.T(c, note, "small", "muted", "wraptext").style.unityTextAlign = TextAnchor.MiddleCenter;
+            var row = U.Row(c, "wrap");
+            row.style.justifyContent = Justify.Center; row.style.marginTop = 4; row.style.marginBottom = 8;
+            U.IB(row, "info", Lang.T("terms_eula"), () => Application.OpenURL(NativeUtil.TermsUrl), "btn-small");
+            U.IB(row, "privacy", Lang.T("privacy"), () => Application.OpenURL(NativeUtil.PrivacyUrl), "btn-small");
+            U.IB(row, "download", Lang.T("restore"), Premium.Restore, "btn-small");
         }
 
         static void Plan(VisualElement parent, string title, string price, string sub, string id, bool best)
