@@ -1,0 +1,26 @@
+# Publishes the AAB of a "Build Android" run on Google Play (release notes, real screenshots, sent for review).
+name: Play release
+on:
+  workflow_dispatch:
+    inputs:
+      run_id: { description: 'Run id of the Build Android run with the AAB', required: true }
+      track: { description: 'Track (production / beta / alpha / internal)', default: 'production' }
+permissions: { actions: read, contents: read }
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: PatenteItaliana-aab
+          path: aab
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ github.token }}
+      - run: pip install google-api-python-client google-auth
+      - env:
+          PLAY_JSON: '${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}'
+          TRACK: ${{ inputs.track }}
+        run: |
+          AAB=$(find aab -name '*.aab' | head -1); echo "AAB=$AAB"; ls -la aab
+          AAB="$AAB" VERSION_NAME=$(sed -n 's/^  bundleVersion: //p' ProjectSettings/ProjectSettings.asset) python3 tools/play_release.py

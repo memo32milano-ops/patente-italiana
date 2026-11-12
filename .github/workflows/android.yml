@@ -83,7 +83,7 @@ jobs:
           androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
           androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
           androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
-          androidTargetSdkVersion: AndroidApiLevel35
+          androidTargetSdkVersion: AndroidApiLevel36
           buildMethod: PatenteArabo.EditorTools.PatenteSetup.CloudBuild
           versioning: None
 

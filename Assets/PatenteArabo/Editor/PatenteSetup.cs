@@ -308,7 +308,7 @@ namespace PatenteArabo.EditorTools
                 PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
                 PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64 | AndroidArchitecture.ARMv7;
                 PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel23;
-                PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)35;
+                PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)36;   // Google Play: API 36 required for updates from 31 Aug 2026
                 var ks = Arg("-androidKeystoreName");
                 if (!string.IsNullOrEmpty(ks) && File.Exists(ks) && !string.IsNullOrEmpty(Arg("-androidKeystorePass")))
                 {
