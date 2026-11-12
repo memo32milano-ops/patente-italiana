@@ -10,7 +10,7 @@ from googleapiclient.http import MediaFileUpload
 from googleapiclient.errors import HttpError
 
 pkg = os.environ.get('PACKAGE', 'com.memo.patentemondo')
-track = os.environ.get('TRACK', 'production')
+tracks = [t.strip() for t in os.environ.get('TRACK', 'production').split(',') if t.strip()]
 aab = os.environ['AAB']
 creds = service_account.Credentials.from_service_account_info(json.loads(os.environ['PLAY_JSON']), scopes=['https://www.googleapis.com/auth/androidpublisher'])
 e = build('androidpublisher', 'v3', credentials=creds, cache_discovery=False).edits()
@@ -30,10 +30,11 @@ notes = [
 ]
 listed = {l['language'] for l in e.listings().list(packageName=pkg, editId=eid).execute().get('listings', [])}
 notes = [n for n in notes if n['language'] in listed or n['language'] == default_lang] or notes[:1]
-e.tracks().update(packageName=pkg, editId=eid, track=track, body={
-    'track': track,
-    'releases': [{'name': os.environ.get('VERSION_NAME', '1.2.0') + ' (' + str(vc) + ')', 'versionCodes': [str(vc)], 'status': 'completed', 'releaseNotes': notes}]}).execute()
-print('track', track, 'release with', len(notes), 'notes')
+for track in tracks:
+    e.tracks().update(packageName=pkg, editId=eid, track=track, body={
+        'track': track,
+        'releases': [{'name': os.environ.get('VERSION_NAME', '1.2.0') + ' (' + str(vc) + ')', 'versionCodes': [str(vc)], 'status': 'completed', 'releaseNotes': notes}]}).execute()
+print('tracks', tracks, 'release with', len(notes), 'notes')
 
 shots = sorted(glob.glob('store/play/shots/*.jpg'))
 if shots:

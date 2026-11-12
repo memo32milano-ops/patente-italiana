@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       run_id: { description: 'Run id of the Build Android run with the AAB', required: true }
-      track: { description: 'Track (production / beta / alpha / internal)', default: 'production' }
+      track: { description: 'Tracks, comma separated (internal = testers get it in minutes, production = everyone after review)', default: 'internal,production' }
 permissions: { actions: read, contents: read }
 jobs:
   release:
