@@ -1,0 +1,105 @@
+# iPhone release without Codemagic: GitHub's free macOS runners sign the Unity Xcode project (exported by ios.yml),
+# upload it to App Store Connect and send it to review with the store page (tools/asc_store.py).
+# Secret: ASC_KEY_P8 = content of AuthKey_85Z32QPP5D.p8 (App Store Connect API key, role App Manager).
+# The distribution certificate's private key is made once and kept in the repo ENCRYPTED with that secret.
+name: iOS App Store release
+
+permissions: { contents: write }
+on:
+  workflow_dispatch:
+    inputs:
+      submit: { description: 'Send to App Review after the upload', type: boolean, default: true }
+
+concurrency: { group: ios-store, cancel-in-progress: false }
+
+env:
+  APP_STORE_CONNECT_ISSUER_ID: f006bddd-6898-407b-9bea-5ec64d732a1e
+  APP_STORE_CONNECT_KEY_IDENTIFIER: 85Z32QPP5D
+  ASC_ISSUER_ID: f006bddd-6898-407b-9bea-5ec64d732a1e
+  ASC_KEY_ID: 85Z32QPP5D
+  TEAM_ID: 2LVABXTZQN
+  BUNDLE_ID: com.memo.patentemondo
+
+jobs:
+  release:
+    runs-on: macos-26
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the Apple key secret
+        env: { K: '${{ secrets.ASC_KEY_P8 }}' }
+        run: |
+          if [ -z "$K" ]; then echo "::error::Add the secret ASC_KEY_P8 (Settings > Secrets and variables > Actions > New repository secret) with the content of AuthKey_85Z32QPP5D.p8"; exit 1; fi
+      - name: Xcode 26
+        run: |
+          ls -d /Applications/Xcode*.app
+          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          [ -z "$X" ] && X=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
+          sudo xcode-select -s "$X/Contents/Developer"; xcodebuild -version
+      - name: Tools
+        run: pip3 install --break-system-packages codemagic-cli-tools pyjwt cryptography requests >/dev/null
+      - name: Unity Xcode project
+        run: |
+          curl -fL --retry 3 -o xcode.tgz https://github.com/${{ github.repository }}/releases/download/ios-xcode-latest/xcode.tgz
+          mkdir -p xc && tar -xzf xcode.tgz -C xc
+          X=$(find "$PWD/xc" -maxdepth 4 -type d -name 'Unity-iPhone.xcodeproj' | head -1)
+          echo "PROJ=$(dirname "$X")" >> $GITHUB_ENV
+      - name: Certificate key (made once, stored encrypted)
+        env: { K: '${{ secrets.ASC_KEY_P8 }}' }
+        run: |
+          PASS=$(printf '%s' "$K" | shasum -a 256 | cut -d' ' -f1)
+          F=store/ios/signing/cert_key.pem.enc
+          if [ -f "$F" ]; then
+            openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in "$F" -out "$RUNNER_TEMP/cert_key.pem" -pass pass:"$PASS"
+          else
+            mkdir -p store/ios/signing
+            openssl genrsa -out "$RUNNER_TEMP/cert_key.pem" 2048
+            openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -in "$RUNNER_TEMP/cert_key.pem" -out "$F" -pass pass:"$PASS"
+            git config user.name ci; git config user.email ci@local
+            git add "$F"; git commit -m "iOS signing: encrypted certificate key (made by the release workflow)"; git push
+          fi
+      - name: In-app purchases and subscriptions
+        env: { ASC_KEY_P8: '${{ secrets.ASC_KEY_P8 }}' }
+        run: python3 tools/asc_setup.py || echo "products step had errors (see log)"
+      - name: Signing (certificate + App Store profile)
+        env: { APP_STORE_CONNECT_PRIVATE_KEY: '${{ secrets.ASC_KEY_P8 }}' }
+        run: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --certificate-key=@file:$RUNNER_TEMP/cert_key.pem --create
+          keychain add-certificates
+          cd "$PROJ" && xcode-project use-profiles --project Unity-iPhone.xcodeproj
+      - name: iOS version fixes (UnityRuntime minimum iOS, build number)
+        run: |
+          cd "$PROJ"
+          F=$(find . -path "*UnityRuntime.framework/Info.plist" | head -1)
+          APPMIN=$(grep -m1 -o "IPHONEOS_DEPLOYMENT_TARGET = [0-9.]*" Unity-iPhone.xcodeproj/project.pbxproj | awk '{print $3}')
+          if [ -n "$F" ]; then
+            FMIN=$(/usr/libexec/PlistBuddy -c "Print :MinimumOSVersion" "$F" 2>/dev/null || true)
+            NEW=$(python3 -c "import sys;v=[x for x in sys.argv[1:] if x];print(max(v,key=lambda s:[int(p) for p in s.split('.')]))" "$APPMIN" "$FMIN")
+            echo "minimum iOS $NEW"
+            sed -i '' -E "s/IPHONEOS_DEPLOYMENT_TARGET = [0-9.]+/IPHONEOS_DEPLOYMENT_TARGET = $NEW/g" Unity-iPhone.xcodeproj/project.pbxproj
+            /usr/libexec/PlistBuddy -c "Set :MinimumOSVersion $NEW" "$F" 2>/dev/null || /usr/libexec/PlistBuddy -c "Add :MinimumOSVersion string $NEW" "$F"
+            sed -i '' -E "s/platform :ios, '[0-9.]+'/platform :ios, '$NEW'/; s/'IPHONEOS_DEPLOYMENT_TARGET'\] = '[0-9.]+'/'IPHONEOS_DEPLOYMENT_TARGET'] = '$NEW'/" Podfile
+          fi
+          BN=$(date -u +%y%m%d%H%M)
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BN" Info.plist
+          echo "BUILD_VERSION=$BN" >> $GITHUB_ENV
+      - name: Pods
+        run: cd "$PROJ" && pod install --repo-update
+      - name: Build IPA
+        run: |
+          cd "$PROJ"
+          xcode-project build-ipa --workspace Unity-iPhone.xcworkspace --scheme Unity-iPhone --config Release \
+            --archive-xcargs "ARCHS=arm64 DEVELOPMENT_TEAM=$TEAM_ID"
+      - name: Upload to App Store Connect
+        env: { APP_STORE_CONNECT_PRIVATE_KEY: '${{ secrets.ASC_KEY_P8 }}' }
+        run: |
+          cd "$PROJ"
+          IPA=$(ls build/ios/ipa/*.ipa | head -1)
+          app-store-connect publish --path "$IPA"
+      - name: App Store page + review submission
+        env: { ASC_KEY_P8: '${{ secrets.ASC_KEY_P8 }}' }
+        run: python3 tools/asc_store.py --build=$BUILD_VERSION ${{ inputs.submit && '' || '--no-submit' }}
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with: { name: xcodebuild-logs, path: /tmp/xcodebuild_logs, if-no-files-found: ignore }
