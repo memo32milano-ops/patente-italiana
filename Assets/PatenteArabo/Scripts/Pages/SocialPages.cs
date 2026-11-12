@@ -212,6 +212,7 @@ namespace PatenteArabo
             Chrome.TopBar(root, Lang.T("signs"));
             var tabs = new ScrollView(ScrollViewMode.Horizontal);
             tabs.style.flexShrink = 0; tabs.style.height = 110;
+            tabs.horizontalScrollerVisibility = ScrollerVisibility.Hidden; tabs.verticalScrollerVisibility = ScrollerVisibility.Hidden;
             root.Add(tabs);
             var tr = U.RowLtr(tabs.contentContainer);
             foreach (var ch in Listato.Chapters)

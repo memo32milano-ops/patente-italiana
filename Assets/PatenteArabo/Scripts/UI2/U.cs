@@ -138,6 +138,7 @@ namespace PatenteArabo
             var s = new ScrollView(ScrollViewMode.Vertical);
             s.style.flexGrow = 1;
             s.horizontalScrollerVisibility = ScrollerVisibility.Hidden;
+            s.verticalScrollerVisibility = ScrollerVisibility.Hidden;   // phone app: no desktop scrollbar on the side (scrolling stays by touch)
             s.touchScrollBehavior = ScrollView.TouchScrollBehavior.Elastic;
             s.scrollDecelerationRate = 0.135f;
             foreach (var c in classes) if (!string.IsNullOrEmpty(c)) s.AddToClassList(c);
