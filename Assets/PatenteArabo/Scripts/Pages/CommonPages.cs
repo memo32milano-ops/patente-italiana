@@ -189,8 +189,14 @@ namespace PatenteArabo
 
             var head = U.Col(c, "center");
             U.Icon(head, "premium", 110, U.Hex("F2C94C"));
-            U.T(head, Lang.T("premium_headline"), "title", "wraptext").style.unityTextAlign = TextAnchor.MiddleCenter;
+            { var hl = U.T(head, Lang.T("premium_headline"), "title", "wraptext"); hl.style.unityTextAlign = TextAnchor.MiddleCenter; hl.style.fontSize = 46; }
             if (!string.IsNullOrEmpty(_reason)) U.T(head, _reason, "gold", "bold", "wraptext").style.unityTextAlign = TextAnchor.MiddleCenter;
+
+            var plans = U.Row(c, "wrap");
+            plans.style.justifyContent = Justify.Center;
+            Plan(plans, Lang.T("plan_monthly"), Premium.Price(Premium.Monthly, "€2,99") + Lang.T("per_month"), Premium.SubLine(Premium.Monthly, false, "€2,99"), Premium.Monthly, false);
+            Plan(plans, Lang.T("plan_pass"), Premium.Price(Premium.Pass3M, "€4,99"), Lang.T("plan_pass_sub"), Premium.Pass3M, false);
+            Plan(plans, Lang.T("plan_lifetime"), Premium.Price(Premium.Lifetime, "€9,99"), Lang.T("plan_lifetime_sub"), Premium.Lifetime, true);
 
             // benefits in two columns: the plans and prices stay on the first screen
             var feats = U.Row(c, "card", "wrap");
@@ -203,12 +209,6 @@ namespace PatenteArabo
                 var l = U.T(r, Lang.T(k), "ex-text");
                 l.style.marginLeft = 14; l.style.marginRight = 14; l.style.flexShrink = 1;
             }
-
-            var plans = U.Row(c, "wrap");
-            plans.style.justifyContent = Justify.Center;
-            Plan(plans, Lang.T("plan_monthly"), Premium.Price(Premium.Monthly, "€2,99") + Lang.T("per_month"), Premium.SubLine(Premium.Monthly, false, "€2,99"), Premium.Monthly, false);
-            Plan(plans, Lang.T("plan_pass"), Premium.Price(Premium.Pass3M, "€4,99"), Lang.T("plan_pass_sub"), Premium.Pass3M, false);
-            Plan(plans, Lang.T("plan_lifetime"), Premium.Price(Premium.Lifetime, "€9,99"), Lang.T("plan_lifetime_sub"), Premium.Lifetime, true);
 
             // single add-ons: the one the user just hit first
             U.T(c, Lang.T("addons_title"), "h2").style.marginTop = 26;

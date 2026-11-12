@@ -677,6 +677,7 @@ namespace PatenteArabo
         // ---------------- questions ----------------
         void Ask(Scenario s)
         {
+            if (ShotMode.Active && ShotMode.Name == "driveview") { Resolve(s); return; }   // screenshot of the street without the question card
             if (!Premium.CanDriveQuestion)
             {
                 Time.timeScale = 0f;

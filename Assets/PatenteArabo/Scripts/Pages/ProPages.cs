@@ -61,8 +61,13 @@ namespace PatenteArabo
 
             var head = U.Col(c, "center");
             U.Icon(head, "drive", 110, U.Hex("F2C94C"));
-            U.T(head, Lang.T("pro_headline"), "title", "wraptext").style.unityTextAlign = TextAnchor.MiddleCenter;
+            { var hl = U.T(head, Lang.T("pro_headline"), "title", "wraptext"); hl.style.unityTextAlign = TextAnchor.MiddleCenter; hl.style.fontSize = 46; }
             if (!string.IsNullOrEmpty(_reason)) U.T(head, _reason, "gold", "bold", "wraptext").style.unityTextAlign = TextAnchor.MiddleCenter;
+
+            var plans = U.Row(c, "wrap");
+            plans.style.justifyContent = Justify.Center;
+            Plan(plans, Lang.T("plan_monthly"), Premium.Price(Premium.ProMonthly, "€3,99") + Lang.T("per_month"), Premium.SubLine(Premium.ProMonthly, false, "€3,99"), Premium.ProMonthly, false);
+            Plan(plans, Lang.T("plan_yearly"), Premium.Price(Premium.ProYearly, "€24,99") + Lang.T("per_year"), Lang.T("pro_yearly_sub") + "\n" + Premium.SubLine(Premium.ProYearly, true, "€24,99"), Premium.ProYearly, true);
 
             // benefits in two columns: the plans and prices stay on the first screen
             var feats = U.Row(c, "card", "wrap");
@@ -74,11 +79,6 @@ namespace PatenteArabo
                 var l = U.T(r, Lang.T(k), "ex-text");
                 l.style.marginLeft = 14; l.style.marginRight = 14; l.style.flexShrink = 1;
             }
-
-            var plans = U.Row(c, "wrap");
-            plans.style.justifyContent = Justify.Center;
-            Plan(plans, Lang.T("plan_monthly"), Premium.Price(Premium.ProMonthly, "€3,99") + Lang.T("per_month"), Premium.SubLine(Premium.ProMonthly, false, "€3,99"), Premium.ProMonthly, false);
-            Plan(plans, Lang.T("plan_yearly"), Premium.Price(Premium.ProYearly, "€24,99") + Lang.T("per_year"), Lang.T("pro_yearly_sub") + "\n" + Premium.SubLine(Premium.ProYearly, true, "€24,99"), Premium.ProYearly, true);
 
             var foot = U.Row(c, "wrap");
             foot.style.justifyContent = Justify.Center;

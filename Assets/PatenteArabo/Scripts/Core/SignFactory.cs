@@ -375,6 +375,21 @@ namespace PatenteArabo
                 {'9', new[]{".###.","#...#","#...#",".####","....#","....#",".###."}},
             };
 
+            static readonly System.Collections.Generic.Dictionary<char, float[][]> Strokes = new System.Collections.Generic.Dictionary<char, float[][]>
+            {
+                {'0', new[] { new float[] { 1,0, 3,0, 4,1, 4,6, 3,7, 1,7, 0,6, 0,1, 1,0 } }},
+                {'1', new[] { new float[] { 0.8f,1.6f, 2.4f,0, 2.4f,7 } }},
+                {'2', new[] { new float[] { 0,1.2f, 1,0, 3,0, 4,1, 4,2.6f, 0,7, 4,7 } }},
+                {'3', new[] { new float[] { 0,0.7f, 1,0, 3,0, 4,1, 4,2.6f, 3,3.5f, 1.6f,3.5f }, new float[] { 3,3.5f, 4,4.4f, 4,6, 3,7, 1,7, 0,6.3f } }},
+                {'4', new[] { new float[] { 3,7, 3,0, 0,5, 4.2f,5 } }},
+                {'5', new[] { new float[] { 4,0, 0.4f,0, 0,3.4f, 3,3.1f, 4,4.1f, 4,6, 3,7, 1,7, 0,6.3f } }},
+                {'6', new[] { new float[] { 3.6f,0.3f, 1.2f,0, 0,1.3f, 0,6, 1,7, 3,7, 4,6, 4,4.4f, 3,3.4f, 1,3.4f, 0,4.4f } }},
+                {'7', new[] { new float[] { 0,0, 4,0, 1.4f,7 } }},
+                {'8', new[] { new float[] { 1,0, 3,0, 4,1, 4,2.5f, 3,3.5f, 1,3.5f, 0,2.5f, 0,1, 1,0 }, new float[] { 1,3.5f, 3,3.5f, 4,4.5f, 4,6, 3,7, 1,7, 0,6, 0,4.5f, 1,3.5f } }},
+                {'9', new[] { new float[] { 0.4f,6.7f, 2.8f,7, 4,5.7f, 4,1, 3,0, 1,0, 0,1, 0,2.6f, 1,3.6f, 3,3.6f, 4,2.6f } }},
+                {'%', new[] { new float[] { 4,0, 0,7 }, new float[] { 0.7f,0.9f, 1.2f,0.9f }, new float[] { 2.9f,6.1f, 3.4f,6.1f } }},
+            };
+
             public void Text(string s, float cx, float cy, float cell, Color col)
             {
                 float gap = cell * 0.9f;
@@ -383,6 +398,20 @@ namespace PatenteArabo
                 float y0 = cy - 3.5f * cell;
                 foreach (var ch in s)
                 {
+                    // digits and % with smooth strokes (signs like the real ones); other letters from the block font
+                    if (Strokes.TryGetValue(ch, out var paths))
+                    {
+                        float sw = cell * 1.25f;
+                        foreach (var path in paths)
+                        {
+                            for (int q = 0; q + 3 < path.Length; q += 2)
+                                Line(x + path[q] * 1.25f * cell, y0 + path[q + 1] * cell, x + path[q + 2] * 1.25f * cell, y0 + path[q + 3] * cell, sw, col);
+                            for (int q = 0; q + 1 < path.Length; q += 2)
+                                Circle(x + path[q] * 1.25f * cell, y0 + path[q + 1] * cell, sw / 2f, col);
+                        }
+                        x += 5 * cell + gap;
+                        continue;
+                    }
                     if (Glyphs.TryGetValue(ch, out var g))
                         for (int r = 0; r < 7; r++)
                         for (int k = 0; k < 5; k++)
