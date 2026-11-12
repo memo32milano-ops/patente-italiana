@@ -96,7 +96,11 @@ namespace PatenteArabo
             card.style.width = 470; card.style.alignItems = Align.Center;
             if (best) U.T(card, Lang.T("best_value"), "gold", "bold");
             U.T(card, title, "h2").style.unityTextAlign = TextAnchor.MiddleCenter;
-            U.It(card, price, "title");
+            // price big, the period ("/mese") small next to it, so it always fits the card
+            int cut = price.IndexOf(" /", System.StringComparison.Ordinal);
+            var pr = U.Row(card); pr.style.alignItems = Align.FlexEnd; pr.style.justifyContent = Justify.Center;
+            U.It(pr, cut > 0 ? price.Substring(0, cut) : price, "title");
+            if (cut > 0) { var per = U.T(pr, price.Substring(cut + 1), "h2", "muted"); per.style.marginBottom = 8; per.style.marginLeft = 6; }
             U.T(card, sub, "muted", "wraptext").style.unityTextAlign = TextAnchor.MiddleCenter;
             if (Premium.Owns(id)) { U.T(card, Lang.T("owned"), "gold", "bold"); return; }
             var b = U.B(card, Lang.T("buy"), () => Premium.Buy(id), best ? "btn-gold" : "btn-primary");
