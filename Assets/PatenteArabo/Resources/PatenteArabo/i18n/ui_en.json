@@ -460,5 +460,10 @@
 "no_voice_title": "The Italian voice is missing",
 "no_voice_android": "To hear the questions, install the Italian voice: phone Settings > Text-to-speech > Google engine > Install voice data > Italian.",
 "no_voice_ios": "To hear the questions, download an Italian voice: Settings > Accessibility > Spoken Content > Voices > Italian.",
-"install_voice_sub_ios": "How to download the Italian voice on iPhone"
+"install_voice_sub_ios": "How to download the Italian voice on iPhone",
+"splash_1": "You chose the right place to get your licence.",
+"splash_2": "You are only a few steps away from your licence. Keep going!",
+"splash_3": "Every question today is one less mistake at the exam.",
+"splash_4": "A few minutes a day and the exam becomes easy.",
+"splash_5": "Welcome back! Your licence is waiting for you."
 }

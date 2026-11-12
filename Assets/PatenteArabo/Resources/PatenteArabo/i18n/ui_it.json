@@ -460,5 +460,10 @@
 "no_voice_title": "Manca la voce italiana",
 "no_voice_android": "Per ascoltare le domande installa la voce italiana: Impostazioni del telefono > Sintesi vocale (Text-to-speech) > motore Google > Installa dati vocali > Italiano.",
 "no_voice_ios": "Per ascoltare le domande scarica una voce italiana: Impostazioni > Accessibilità > Contenuto letto ad alta voce > Voci > Italiano.",
-"install_voice_sub_ios": "Come scaricare la voce italiana sull'iPhone"
+"install_voice_sub_ios": "Come scaricare la voce italiana sull'iPhone",
+"splash_1": "Hai scelto il posto giusto per prendere la patente.",
+"splash_2": "Sei a pochi passi dalla tua patente. Continua così!",
+"splash_3": "Ogni domanda di oggi è un errore in meno all'esame.",
+"splash_4": "Pochi minuti al giorno e l'esame diventa facile.",
+"splash_5": "Bentornato! La tua patente ti aspetta."
 }
