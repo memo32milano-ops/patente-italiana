@@ -99,7 +99,7 @@ jobs:
           app-store-connect publish --path "$IPA"
       - name: App Store page + review submission
         env: { ASC_KEY_P8: '${{ secrets.ASC_KEY_P8 }}' }
-        run: python3 tools/asc_store.py --build=$BUILD_VERSION ${{ inputs.submit && '' || '--no-submit' }}
+        run: python3 tools/asc_store.py --build=$BUILD_VERSION ${{ !inputs.submit && '--no-submit' || '' }}
       - uses: actions/upload-artifact@v4
         if: failure()
         with: { name: xcodebuild-logs, path: /tmp/xcodebuild_logs, if-no-files-found: ignore }
