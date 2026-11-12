@@ -64,6 +64,32 @@ namespace PatenteArabo
                     c.Rect(m - 9, 74, m + 9, 132, Black);
                     c.Circle(m, 150, 10, Black);
                     break;
+                case "dosso":   // speed bump ahead
+                    DangerBase(c);
+                    c.Circle(m - 24, 156, 22, Black);
+                    c.Circle(m + 24, 156, 22, Black);
+                    c.Rect(m - 62, 156, m + 62, 166, White);
+                    c.Rect(m - 62, 152, m + 62, 160, Black);
+                    break;
+                case "curva_pericolosa":   // dangerous bend to the right
+                    DangerBase(c);
+                    c.Line(m - 16, 160, m - 16, 124, 16, Black);
+                    Arrow(c, m - 16, 128, m + 24, 84, 16, Black);
+                    break;
+                case "strada_sdrucciolevole":   // slippery road
+                    DangerBase(c);
+                    Car(c, m, 98, Black);
+                    foreach (var sx in new[] { -16f, 16f })
+                    {
+                        c.Line(m + sx - 8, 138, m + sx + 6, 148, 6, Black);
+                        c.Line(m + sx + 6, 148, m + sx - 6, 160, 6, Black);
+                    }
+                    break;
+                case "discesa_pericolosa":   // steep descent
+                    DangerBase(c);
+                    c.Poly(new[] { new Vector2(m - 58, 160), new Vector2(m + 58, 160), new Vector2(m - 58, 104) }, Black);
+                    c.Text("10%", m + 22, 120, 5.5f, Black);
+                    break;
                 case "pericolo_pedoni":
                     DangerBase(c);
                     Pedestrian(c, m, 116, 0.72f, Black);

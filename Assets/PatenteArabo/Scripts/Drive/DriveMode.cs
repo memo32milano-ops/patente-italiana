@@ -107,6 +107,11 @@ namespace PatenteArabo
             {"speed_extra", (Biome.Country, "sc_speed_road")},
             {"railway", (Biome.Country, "sc_rail")},
             {"highway", (Biome.Highway, "sc_highway")},
+            {"bump", (Biome.City, "sc_bump")},
+            {"curve", (Biome.Country, "sc_curve")},
+            {"slippery", (Biome.Country, "sc_slippery")},
+            {"no_overtake", (Biome.Country, "sc_overtake")},
+            {"descent", (Biome.Country, "sc_descent")},
         };
 
         /// <summary>Official statements that match each road situation.</summary>
@@ -125,6 +130,11 @@ namespace PatenteArabo
                 case "roundabout": l = Listato.Find(new[] { "rotatori" }, null); break;
                 case "speed_extra": l = Listato.Find(new[] { "extraurban" }, new[] { 11 }); break;
                 case "highway": l = Listato.Find(new[] { "autostrad" }, new[] { 11, 17 }); break;
+                case "bump": l = Listato.Find(new[] { "dosso", "dossi", "rallentator" }, null); break;
+                case "curve": l = Listato.Find(new[] { "curva pericolosa", "curve pericolose", "doppia curva" }, null); break;
+                case "slippery": l = Listato.Find(new[] { "sdrucciolevole", "aquaplaning", "fondo bagnato", "strada bagnata" }, null); break;
+                case "no_overtake": l = Listato.Find(new[] { "sorpass" }, null); break;
+                case "descent": l = Listato.Find(new[] { "discesa pericolosa", "forte pendenza", "in discesa" }, null); break;
                 default: l = new List<Stmt>(); break;
             }
             if (l.Count == 0) l = Listato.Chapter(11);
@@ -135,8 +145,8 @@ namespace PatenteArabo
         // Order that keeps biomes grouped (city → country → highway → back).
         static readonly string[] Route =
         {
-            "speed_urban", "red_light", "pedestrian", "stop_sign", "yellow_light",
-            "give_way", "railway", "roundabout", "speed_extra", "highway"
+            "speed_urban", "red_light", "pedestrian", "bump", "stop_sign", "yellow_light",
+            "give_way", "curve", "railway", "slippery", "roundabout", "no_overtake", "descent", "speed_extra", "highway"
         };
 
         public void Begin(VisualElement uiRoot)
@@ -174,10 +184,12 @@ namespace PatenteArabo
             _world = new GameObject("World").transform;
             _world.SetParent(transform);
 
-            _car = Build.Car(_world, new Vector3(LaneX, 0, 0), Theme.Hex("C0182B"), "PlayerCar", "hatchback-sports").transform;
+            _car = Build.Car(_world, new Vector3(LaneX, 0, 0), Theme.Hex("3C9638"), "PlayerCar", "sedan").transform;
+            PaintGreen(_car);
+            _cathedral = Build.Cathedral(_world).transform;
 
             _deck.AddRange(Route);
-            for (int i = 0; i < 2; i++) ScheduleNext();
+            for (int i = 0; i < 4; i++) ScheduleNext();
             _road = new RoadBuilder(_world, BiomeAt, Reserved);
             _road.Update(_carZ);
             SnapCamera();
@@ -239,15 +251,15 @@ namespace PatenteArabo
             _routeIdx++;
             var info = Types[type];
             float last = _scen.Count > 0 ? _scen[_scen.Count - 1].Z0 : 40f;
-            float gap = info.biome == Biome.Highway ? 220f : 110f;   // ~10 s between questions
+            float gap = info.biome == Biome.Highway ? 150f : 70f;   // about 5-7 s of driving between questions
             if (_scen.Count > 0 && _scen[_scen.Count - 1].Biome != info.biome) gap += 50f; // room for the landscape to change
             if (_scen.Count > 0) gap = Mathf.Max(gap, _scen[_scen.Count - 1].Tail + 80f);
             var s = new Scenario
             {
                 Type = type, Biome = info.biome, LabelAr = Lang.T(info.key),
-                Z0 = Mathf.Max(last + gap, _carZ + 370f)
+                Z0 = Mathf.Max(last + gap, _road != null ? _road.BuiltTo + 20f : 0f)   // beyond the road already built (crossroads need free space)
             };
-            if (_scen.Count == 0) s.Z0 = 150f;
+            if (_scen.Count == 0) s.Z0 = 110f;
             Setup(s);
             _scen.Add(s);
         }
@@ -310,6 +322,29 @@ namespace PatenteArabo
                     s.Freeze = true;
                     s.TriggerZ = s.Z0 - 32f;
                     break;
+                case "bump":
+                {
+                    Build.SignPost(t, new Vector3(4.9f, 0, -2f), "dosso", 1.1f);
+                    // the speed hump itself, yellow and black
+                    for (int k = 0; k < 8; k++)
+                        Build.Box(t, new Vector3(-3.5f + k, 0.06f, 8f), new Vector3(1f, 0.12f, 1.4f), Theme.Hex(k % 2 == 0 ? "F2C94C" : "1F2328"), 0.2f);
+                    s.Freeze = true;
+                    s.TriggerZ = s.Z0 - 14f;
+                    break;
+                }
+                case "curve":
+                case "slippery":
+                case "descent":
+                case "no_overtake":
+                {
+                    string sign = s.Type == "curve" ? "curva_pericolosa" : s.Type == "slippery" ? "strada_sdrucciolevole" : s.Type == "descent" ? "discesa_pericolosa" : "divieto_sorpasso";
+                    Build.SignPost(t, new Vector3(4.9f, 0, 0f), sign, 1.15f);
+                    if (s.Type == "no_overtake")   // a slow truck ahead, the reason for the question
+                        Build.Car(t, new Vector3(LaneX, 0, 26f), Theme.Hex("E5E7EB"), "SlowTruck", "truck");
+                    s.Freeze = true;
+                    s.TriggerZ = s.Z0 - 14f;
+                    break;
+                }
                 case "speed_extra":
                     s.Freeze = true;
                     s.TriggerZ = s.Z0;
@@ -425,9 +460,38 @@ namespace PatenteArabo
         }
 
         // ---------------- per-frame ----------------
+        Transform _cathedral;
+        static Material _green;
+
+        /// <summary>The learner's car: the Kenney sedan with its body swatch repainted green.</summary>
+        static void PaintGreen(Transform car)
+        {
+            var tex = Resources.Load<Texture2D>("PatenteArabo/Models/Cars/Textures/colormap_green");
+            if (tex == null) return;
+            Material green = _green;
+            foreach (var r in car.GetComponentsInChildren<Renderer>())
+            {
+                var mats = r.sharedMaterials;
+                for (int i = 0; i < mats.Length; i++)
+                {
+                    if (mats[i] == null || !mats[i].HasProperty("_BaseMap") || mats[i].GetTexture("_BaseMap") == null) continue;
+                    if (green == null) { green = _green = new Material(mats[i]); green.SetTexture("_BaseMap", tex); green.mainTexture = tex; }
+                    mats[i] = green;
+                }
+                r.sharedMaterials = mats;
+            }
+        }
+
         void Update()
         {
             if (_car == null) return;
+            if (_cathedral != null)
+            {
+                // the cathedral stays at the end of the street while driving in town (like a landmark on the horizon)
+                bool town = BiomeAt(_carZ + 190f) == Biome.City && BiomeAt(_carZ) == Biome.City;
+                if (_cathedral.gameObject.activeSelf != town) _cathedral.gameObject.SetActive(town);
+                if (town) _cathedral.localPosition = new Vector3(0, 0, _carZ + 190f);
+            }
             float dt = Time.deltaTime;
             var s = Current;
             float target = CruiseSpeed(BiomeAt(_carZ));
@@ -494,7 +558,8 @@ namespace PatenteArabo
                     Destroy(_scen[i].Root);
                     _scen.RemoveAt(i);
                 }
-            if (_scen.Count(x => x.P != Scenario.Phase.Done) < 2) ScheduleNext();
+            int open = 0; foreach (var x in _scen) if (x.P != Scenario.Phase.Done) open++;
+            if (open < 4) ScheduleNext();   // keep several ahead so they come one after the other
 
             if (_speedText != null) _speedText.text = Mathf.RoundToInt(_speed * 3.6f).ToString();
         }
@@ -789,6 +854,7 @@ namespace PatenteArabo
             var warn = U.T(d, Lang.T("drive_safety"), "gold", "bold", "wraptext");
             warn.style.marginTop = 16; warn.style.unityTextAlign = TextAnchor.MiddleCenter;
             U.IB(d, "play", Lang.T("lets_drive"), () => { _intro.RemoveFromHierarchy(); _started = true; }, "btn-green").style.width = 520;
+            if (ShotMode.Active) { _intro.RemoveFromHierarchy(); _started = true; }   // store screenshots: drive straight away
         }
 
         void UpdateScore()

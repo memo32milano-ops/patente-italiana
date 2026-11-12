@@ -475,5 +475,10 @@
 "not_now": "Non ora",
 "promo_card_title": "Stai andando alla grande!",
 "promo_card_body": "Sei già pronto al {0}%. Con Premium arrivi all'esame più in fretta: tutti i 25 capitoli, simulazioni illimitate, ripasso degli errori e guida 3D senza limiti.",
-"promo_card_body_pro": "Sei già pronto al {0}%. Con PRO hai tutte le domande del corso, simulazioni illimitate con le regole ufficiali e il glossario tecnico."
+"promo_card_body_pro": "Sei già pronto al {0}%. Con PRO hai tutte le domande del corso, simulazioni illimitate con le regole ufficiali e il glossario tecnico.",
+"sc_bump": "Dosso",
+"sc_curve": "Curva pericolosa",
+"sc_slippery": "Strada sdrucciolevole",
+"sc_overtake": "Divieto di sorpasso",
+"sc_descent": "Discesa pericolosa"
 }

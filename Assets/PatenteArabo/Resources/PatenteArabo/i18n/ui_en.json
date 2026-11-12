@@ -475,5 +475,10 @@
 "not_now": "Not now",
 "promo_card_title": "You're doing great!",
 "promo_card_body": "You are already {0}% ready. With Premium you get to the exam faster: all 25 chapters, unlimited simulations, review of your mistakes and unlimited 3D driving.",
-"promo_card_body_pro": "You are already {0}% ready. With PRO you get every question of the course, unlimited simulations with the official rules and the technical glossary."
+"promo_card_body_pro": "You are already {0}% ready. With PRO you get every question of the course, unlimited simulations with the official rules and the technical glossary.",
+"sc_bump": "Speed bump",
+"sc_curve": "Dangerous bend",
+"sc_slippery": "Slippery road",
+"sc_overtake": "No overtaking",
+"sc_descent": "Steep descent"
 }

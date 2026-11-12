@@ -243,9 +243,205 @@ namespace PatenteArabo
             Prim(PrimitiveType.Sphere, g.transform, new Vector3(0, 1.72f, 0), new Vector3(0.27f, 0.3f, 0.27f), Mats.Lit(new Color(0.78f, 0.6f, 0.45f)), "Head");
             return g;
         }
+
+        // ---------------- low-poly props (faceted meshes made once, shared by every copy) ----------------
+        static Mesh _blob, _cone;
+
+        /// <summary>Faceted, slightly irregular sphere (flat shading): tree crowns, bushes, clouds.</summary>
+        public static Mesh Blob
+        {
+            get
+            {
+                if (_blob != null) return _blob;
+                // icosahedron subdivided once = 80 flat faces
+                float t = (1f + Mathf.Sqrt(5f)) / 2f;
+                var v = new List<Vector3> {
+                    new Vector3(-1, t, 0), new Vector3(1, t, 0), new Vector3(-1, -t, 0), new Vector3(1, -t, 0),
+                    new Vector3(0, -1, t), new Vector3(0, 1, t), new Vector3(0, -1, -t), new Vector3(0, 1, -t),
+                    new Vector3(t, 0, -1), new Vector3(t, 0, 1), new Vector3(-t, 0, -1), new Vector3(-t, 0, 1) };
+                int[] f = { 0,11,5, 0,5,1, 0,1,7, 0,7,10, 0,10,11, 1,5,9, 5,11,4, 11,10,2, 10,7,6, 7,1,8,
+                            3,9,4, 3,4,2, 3,2,6, 3,6,8, 3,8,9, 4,9,5, 2,4,11, 6,2,10, 8,6,7, 9,8,1 };
+                var tris = new List<int>();
+                var mid = new Dictionary<long, int>();
+                int Mid(int a, int b)
+                {
+                    long key = a < b ? ((long)a << 32) | (uint)b : ((long)b << 32) | (uint)a;
+                    if (mid.TryGetValue(key, out int m)) return m;
+                    v.Add((v[a] + v[b]) * 0.5f); mid[key] = v.Count - 1; return v.Count - 1;
+                }
+                for (int k = 0; k < f.Length; k += 3)
+                {
+                    int a = f[k], b = f[k + 1], c = f[k + 2], ab = Mid(a, b), bc = Mid(b, c), ca = Mid(c, a);
+                    tris.AddRange(new[] { a, ab, ca, b, bc, ab, c, ca, bc, ab, bc, ca });
+                }
+                var rnd = new System.Random(11);
+                for (int k = 0; k < v.Count; k++) v[k] = v[k].normalized * (0.5f * (0.88f + 0.24f * (float)rnd.NextDouble()));
+                _blob = Flat(v, tris, "Blob");
+                return _blob;
+            }
+        }
+
+        /// <summary>Six-sided cone (spires, pinnacles).</summary>
+        public static Mesh Cone
+        {
+            get
+            {
+                if (_cone != null) return _cone;
+                var v = new List<Vector3> { new Vector3(0, 1, 0) };
+                for (int k = 0; k < 6; k++) { float a = k * Mathf.PI / 3f; v.Add(new Vector3(Mathf.Cos(a) * 0.5f, 0, Mathf.Sin(a) * 0.5f)); }
+                var tris = new List<int>();
+                for (int k = 0; k < 6; k++) { int a = 1 + k, b = 1 + (k + 1) % 6; tris.AddRange(new[] { 0, b, a }); }
+                _cone = Flat(v, tris, "Cone");
+                return _cone;
+            }
+        }
+
+        static Mesh Flat(List<Vector3> v, List<int> tris, string name)
+        {
+            // one vertex per corner of each face = sharp low-poly facets
+            var verts = new Vector3[tris.Count];
+            var idx = new int[tris.Count];
+            for (int k = 0; k < tris.Count; k++) { verts[k] = v[tris[k]]; idx[k] = k; }
+            var m = new Mesh { name = name };
+            m.vertices = verts; m.triangles = idx;
+            m.RecalculateNormals(); m.RecalculateBounds();
+            return m;
+        }
+
+        public static GameObject MeshObj(Transform parent, Mesh mesh, Vector3 pos, Vector3 scale, Material mat, bool shadows = true, string name = "Mesh")
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = pos;
+            go.transform.localScale = scale;
+            go.AddComponent<MeshFilter>().sharedMesh = mesh;
+            var r = go.AddComponent<MeshRenderer>();
+            r.sharedMaterial = mat;
+            if (!shadows) r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            return go;
+        }
+
+        static readonly Color[] Leaves = { Theme.Hex("5FA548"), Theme.Hex("6DB352"), Theme.Hex("4E9440"), Theme.Hex("7ABF5A") };
+
+        public static void LowPolyTree(Transform parent, Vector3 basePos, float height, System.Random rnd)
+        {
+            float trunkH = height * 0.42f;
+            Prim(PrimitiveType.Cylinder, parent, basePos + new Vector3(0, trunkH / 2f, 0), new Vector3(0.28f, trunkH / 2f, 0.28f), Mats.Lit(Theme.Hex("7A5434"), 0.05f));
+            float cw = height * 0.62f;
+            var leaf = Mats.Lit(Leaves[rnd.Next(Leaves.Length)], 0.02f);
+            var crown = MeshObj(parent, Blob, basePos + new Vector3(0, trunkH + cw * 0.38f, 0), new Vector3(cw, cw * 0.95f, cw), leaf, true, "Crown");
+            crown.transform.localRotation = Quaternion.Euler(0, (float)rnd.NextDouble() * 360f, 0);
+        }
+
+        public static void LowPolyBush(Transform parent, Vector3 basePos, float size, System.Random rnd)
+        {
+            var o = MeshObj(parent, Blob, basePos + new Vector3(0, size * 0.35f, 0), new Vector3(size * 1.5f, size, size * 1.3f), Mats.Lit(Leaves[rnd.Next(Leaves.Length)], 0.02f), false, "Bush");
+            o.transform.localRotation = Quaternion.Euler(0, (float)rnd.NextDouble() * 360f, 0);
+        }
+
+        public static void Cloud(Transform parent, Vector3 pos, float size, System.Random rnd)
+        {
+            var white = Mats.Lit(new Color(0.97f, 0.98f, 1f), 0.0f);
+            for (int k = 0; k < 3; k++)
+            {
+                float s = size * (k == 1 ? 1f : 0.7f);
+                var o = MeshObj(parent, Blob, pos + new Vector3((k - 1) * size * 0.55f, k == 1 ? size * 0.12f : 0, 0), new Vector3(s, s * 0.45f, s * 0.6f), white, false, "Cloud");
+                o.transform.localRotation = Quaternion.Euler(0, (float)rnd.NextDouble() * 360f, 0);
+            }
+        }
+
+        /// <summary>Black cast-iron street lamp with a warm lantern.</summary>
+        public static void ClassicLamp(Transform parent, Vector3 basePos)
+        {
+            var iron = Mats.Lit(Theme.Hex("1E2226"), 0.45f);
+            Prim(PrimitiveType.Cylinder, parent, basePos + new Vector3(0, 0.25f, 0), new Vector3(0.32f, 0.25f, 0.32f), iron);
+            Prim(PrimitiveType.Cylinder, parent, basePos + new Vector3(0, 2.4f, 0), new Vector3(0.13f, 2.1f, 0.13f), iron);
+            Prim(PrimitiveType.Cube, parent, basePos + new Vector3(0, 4.75f, 0), new Vector3(0.42f, 0.55f, 0.42f), Mats.Unlit(Theme.Hex("FFE7A8")));
+            MeshObj(parent, Cone, basePos + new Vector3(0, 5.02f, 0), new Vector3(0.62f, 0.4f, 0.62f), iron, false, "LampCap");
+        }
+
+        /// <summary>A Duomo-like gothic cathedral (white marble facade, many spires) seen at the end of the street.</summary>
+        public static GameObject Cathedral(Transform parent)
+        {
+            var g = Group("Cathedral", parent, Vector3.zero);
+            var t = g.transform;
+            var marble = Mats.Lit(Theme.Hex("ECE6DA"), 0.1f);
+            var shade = Mats.Lit(Theme.Hex("D6CEBF"), 0.1f);
+            var dark = Mats.Lit(Theme.Hex("5D6470"), 0.3f);
+            var gold = Mats.Unlit(Theme.Hex("E8C35A"));
+            // nave behind and the facade
+            Prim(PrimitiveType.Cube, t, new Vector3(0, 9f, 14f), new Vector3(15f, 18f, 26f), shade);
+            Prim(PrimitiveType.Cube, t, new Vector3(0, 8f, 0), new Vector3(16f, 16f, 2f), marble);
+            // gable
+            var gable = MeshObj(t, Cone, new Vector3(0, 16f, 0), new Vector3(16f, 7f, 2f), marble, true, "Gable");
+            gable.transform.localRotation = Quaternion.Euler(0, 30, 0);
+            // tall windows and portals
+            for (int k = -2; k <= 2; k++)
+            {
+                Prim(PrimitiveType.Cube, t, new Vector3(k * 3f, 9.5f, -1.05f), new Vector3(1.1f, 5f, 0.1f), dark);
+                Prim(PrimitiveType.Cube, t, new Vector3(k * 3f, 2.2f, -1.05f), new Vector3(k == 0 ? 2.2f : 1.5f, k == 0 ? 4.4f : 3.4f, 0.1f), dark);
+            }
+            // pinnacles along the facade and the roof, a tall central spire with the golden statue
+            for (int k = -3; k <= 3; k++)
+            {
+                float x = k * 2.6f, hgt = k == 0 ? 0 : 3.5f + (3 - Mathf.Abs(k)) * 1.2f;
+                if (k == 0) continue;
+                Prim(PrimitiveType.Cube, t, new Vector3(x, 16f + hgt / 2f, -0.4f), new Vector3(0.6f, hgt, 0.6f), marble);
+                MeshObj(t, Cone, new Vector3(x, 16f + hgt, -0.4f), new Vector3(0.75f, 2.4f, 0.75f), marble, true, "Pinnacle");
+            }
+            for (int r = 0; r < 4; r++)
+            for (int side = -1; side <= 1; side += 2)
+            {
+                float z = 4f + r * 6f;
+                Prim(PrimitiveType.Cube, t, new Vector3(side * 7.2f, 20f, z), new Vector3(0.5f, 4f, 0.5f), marble);
+                MeshObj(t, Cone, new Vector3(side * 7.2f, 22f, z), new Vector3(0.65f, 2.2f, 0.65f), marble, true, "Pinnacle");
+            }
+            Prim(PrimitiveType.Cylinder, t, new Vector3(0, 24f, 14f), new Vector3(3.2f, 6f, 3.2f), marble);
+            MeshObj(t, Cone, new Vector3(0, 30f, 14f), new Vector3(3.4f, 14f, 3.4f), marble, true, "Spire");
+            Prim(PrimitiveType.Sphere, t, new Vector3(0, 44.6f, 14f), new Vector3(0.8f, 1.4f, 0.8f), gold);
+            return g;
+        }
+
+        /// <summary>Merges the static boxes of a road chunk into one mesh per material: hundreds of draw calls become a few.</summary>
+        public static void Combine(GameObject root)
+        {
+            var groups = new Dictionary<(Material, UnityEngine.Rendering.ShadowCastingMode), List<CombineInstance>>();
+            var used = new List<GameObject>();
+            var toLocal = root.transform.worldToLocalMatrix;
+            foreach (var mf in root.GetComponentsInChildren<MeshFilter>())
+            {
+                var mr = mf.GetComponent<MeshRenderer>();
+                var mesh = mf.sharedMesh;
+                if (mr == null || mesh == null || !mesh.isReadable || mr.sharedMaterials.Length != 1 || mf.transform.childCount > 0) continue;
+                var key = (mr.sharedMaterial, mr.shadowCastingMode);
+                if (!groups.TryGetValue(key, out var list)) groups[key] = list = new List<CombineInstance>();
+                list.Add(new CombineInstance { mesh = mesh, transform = toLocal * mf.transform.localToWorldMatrix });
+                used.Add(mf.gameObject);
+            }
+            foreach (var kv in groups)
+            {
+                var m = new Mesh { indexFormat = UnityEngine.Rendering.IndexFormat.UInt32, name = "Combined" };
+                m.CombineMeshes(kv.Value.ToArray(), true, true);
+                var go = new GameObject("Combined");
+                go.transform.SetParent(root.transform, false);
+                go.AddComponent<MeshFilter>().sharedMesh = m;
+                var r = go.AddComponent<MeshRenderer>();
+                r.sharedMaterial = kv.Key.Item1;
+                r.shadowCastingMode = kv.Key.Item2;
+                go.AddComponent<OwnedMesh>().Mesh = m;
+            }
+            foreach (var u in used) Object.Destroy(u);
+        }
     }
 
     /// <summary>Generates endless straight road chunks along +Z with biome-specific scenery.</summary>
+    /// <summary>Frees a mesh made at runtime together with its object (combined chunk meshes).</summary>
+    public class OwnedMesh : MonoBehaviour
+    {
+        public Mesh Mesh;
+        void OnDestroy() { if (Mesh != null) Destroy(Mesh); }
+    }
+
     public class RoadBuilder
     {
         public const float ChunkLen = 40f;
@@ -255,11 +451,12 @@ namespace PatenteArabo
         readonly System.Func<float, float, bool> _reserved;
         readonly LinkedList<(float z, GameObject go)> _chunks = new LinkedList<(float, GameObject)>();
         float _nextZ = -80f;
+        public float BuiltTo => _nextZ;
         readonly System.Random _rnd = new System.Random(7);
 
         static readonly Color[] Facades =
         {
-            Theme.Hex("E3B66B"), Theme.Hex("C8664A"), Theme.Hex("EAD9B8"), Theme.Hex("D9A3A0"), Theme.Hex("E8C468"), Theme.Hex("BF8F5F"), Theme.Hex("F0E2C8")
+            Theme.Hex("E7A3A8"), Theme.Hex("F1B98F"), Theme.Hex("F4D06F"), Theme.Hex("C9B3DD"), Theme.Hex("E9C79A"), Theme.Hex("F2DFC2"), Theme.Hex("DDA77B"), Theme.Hex("F3C6A5")
         };
 
         public RoadBuilder(Transform root, System.Func<float, Biome> biomeAt, System.Func<float, float, bool> reserved)
@@ -317,76 +514,110 @@ namespace PatenteArabo
                 case Biome.Country: Country(t, z0); break;
                 case Biome.Highway: Highway(t, z0); break;
             }
+            Build.Combine(g.gameObject);
             return g;
         }
 
         void City(Transform t, float z0)
         {
             float L = ChunkLen;
-            var walk = Theme.Hex("B9B4AA");
-            var curb = Theme.Hex("D8D4CC");
+            var walk = Theme.Hex("CFC8BC");
+            var curb = Theme.Hex("E6E1D8");
+            var trim = Theme.Hex("F5EEE1");      // white stone frames and cornices
+            var glass = Theme.Hex("263346");
+            var iron = Theme.Hex("1E2226");
+            var door = Theme.Hex("4A3426");
+            var roof = Theme.Hex("B35A3C");
             for (int side = -1; side <= 1; side += 2)
             {
-                // sidewalk in pieces so crossroads can cut through
+                // wide pavement in pieces so crossroads can cut through
                 for (float z = 0; z < L; z += 10f)
                 {
                     if (_reserved(z0 + z, z0 + z + 10f)) continue;
-                    Build.Box(t, new Vector3(side * (RoadHalf + 1.6f), 0.08f, z + 5f), new Vector3(3.2f, 0.18f, 10.02f), walk, 0.1f);
-                    Build.Box(t, new Vector3(side * (RoadHalf + 0.05f), 0.09f, z + 5f), new Vector3(0.15f, 0.2f, 10.02f), curb, 0.1f);
+                    Build.Box(t, new Vector3(side * (RoadHalf + 1.8f), 0.08f, z + 5f), new Vector3(3.6f, 0.18f, 10.02f), walk, 0.1f);
+                    Build.Box(t, new Vector3(side * (RoadHalf + 0.06f), 0.1f, z + 5f), new Vector3(0.18f, 0.22f, 10.02f), curb, 0.1f);
                 }
-                // buildings
+                // Milanese palazzi: stucco colours, stone frames, balconies with iron railings, arched doors, tiled roofs
                 float z1 = 0;
                 while (z1 < L)
                 {
-                    float w = R(7f, 12f);
+                    float w = R(9f, 13f);
                     if (z1 + w > L) w = L - z1;
-                    if (w < 3f) break;
+                    if (w < 4f) break;
                     if (!_reserved(z0 + z1 - 2f, z0 + z1 + w + 2f))
                     {
-                        float h = R(9f, 21f);
-                        float d = R(9f, 14f);
-                        float x = side * (RoadHalf + 3.2f + d / 2f + 0.4f);
+                        int floors = _rnd.Next(4, 7);
+                        float fh = 3.3f, gh = 4.2f;
+                        float h = gh + floors * fh - fh + 2.6f;
+                        float d = R(10f, 14f);
+                        float x = side * (RoadHalf + 3.6f + d / 2f + 0.3f);
+                        float zc = z1 + w / 2f;
                         var col = Facades[_rnd.Next(Facades.Length)];
-                        var bld = Build.Box(t, new Vector3(x, h / 2f, z1 + w / 2f), new Vector3(d, h, w - 0.4f), col, 0.05f);
-                        // roof cornice
-                        Build.Box(t, new Vector3(x, h + 0.2f, z1 + w / 2f), new Vector3(d + 0.4f, 0.4f, w), col * 0.8f, 0.05f);
-                        // windows facing the road
+                        bool shutters = _rnd.NextDouble() < 0.35;
+                        Build.Box(t, new Vector3(x, h / 2f, zc), new Vector3(d, h, w - 0.3f), col, 0.05f);
+                        // rusticated ground floor and stone bands between floors
+                        Build.Box(t, new Vector3(x, gh / 2f, zc), new Vector3(d + 0.16f, gh, w - 0.25f), col * 0.88f + trim * 0.12f, 0.05f);
+                        Build.Box(t, new Vector3(x, gh, zc), new Vector3(d + 0.3f, 0.3f, w - 0.1f), trim, 0.05f);
+                        Build.Box(t, new Vector3(x, h, zc), new Vector3(d + 0.7f, 0.55f, w + 0.2f), trim, 0.05f);
+                        // terracotta roof in two steps (reads as a pitched roof from the street)
+                        Build.Box(t, new Vector3(x, h + 0.75f, zc), new Vector3(d - 0.6f, 1.0f, w - 0.5f), roof, 0.05f);
+                        Build.Box(t, new Vector3(x, h + 1.5f, zc), new Vector3(d - 3.4f, 0.7f, w - 2.4f), roof * 0.9f, 0.05f);
                         float faceX = x - side * (d / 2f + 0.03f);
-                        var win = Theme.Hex("2E3B4E");
-                        var shutter = Theme.Hex("3E6B4A");
-                        for (float wy = 3.2f; wy < h - 1.5f; wy += 3.2f)
-                        for (float wz = 1.6f; wz < w - 1.2f; wz += 2.6f)
+                        // windows with white frames; a balcony on the first floor (piano nobile)
+                        int wn = Mathf.Max(2, Mathf.FloorToInt((w - 1.2f) / 2.6f));
+                        float step = (w - 1.2f) / wn;
+                        for (int f = 0; f < floors - 1; f++)
                         {
-                            Build.Box(t, new Vector3(faceX, wy, z1 + wz), new Vector3(0.06f, 1.5f, 0.9f), win, 0.8f);
-                            Build.Box(t, new Vector3(faceX, wy, z1 + wz - 0.62f), new Vector3(0.07f, 1.5f, 0.3f), shutter, 0.1f);
-                            Build.Box(t, new Vector3(faceX, wy, z1 + wz + 0.62f), new Vector3(0.07f, 1.5f, 0.3f), shutter, 0.1f);
+                            float wy = gh + 1.5f + f * fh;
+                            for (int k = 0; k < wn; k++)
+                            {
+                                float wz = z1 + 0.6f + step * (k + 0.5f);
+                                Build.Box(t, new Vector3(faceX, wy, wz), new Vector3(0.05f, 2.0f, 1.2f), trim, 0.1f);
+                                Build.Box(t, new Vector3(faceX - side * 0.03f, wy - 0.05f, wz), new Vector3(0.05f, 1.7f, 0.9f), glass, 0.85f);
+                                if (shutters)
+                                {
+                                    var sh = Theme.Hex("3D6B4E");
+                                    Build.Box(t, new Vector3(faceX - side * 0.05f, wy - 0.05f, wz - 0.65f), new Vector3(0.05f, 1.7f, 0.42f), sh, 0.1f);
+                                    Build.Box(t, new Vector3(faceX - side * 0.05f, wy - 0.05f, wz + 0.65f), new Vector3(0.05f, 1.7f, 0.42f), sh, 0.1f);
+                                }
+                                if (f == 0 || (f == 2 && k % 2 == 0))
+                                {
+                                    float by = wy - 1.05f;
+                                    Build.Box(t, new Vector3(faceX - side * 0.35f, by, wz), new Vector3(0.7f, 0.12f, 1.6f), trim, 0.1f);
+                                    Build.Box(t, new Vector3(faceX - side * 0.68f, by + 0.5f, wz), new Vector3(0.04f, 0.9f, 1.6f), iron, 0.4f);
+                                    Build.Box(t, new Vector3(faceX - side * 0.68f, by + 0.97f, wz), new Vector3(0.08f, 0.06f, 1.65f), iron, 0.4f);
+                                }
+                            }
                         }
-                        // ground floor shop
-                        Build.Box(t, new Vector3(faceX, 1.3f, z1 + w / 2f), new Vector3(0.06f, 2.2f, w * 0.6f), Theme.Hex("23303F"), 0.9f);
+                        // ground floor: arched doors and shop windows
+                        for (int k = 0; k < wn; k++)
+                        {
+                            float wz = z1 + 0.6f + step * (k + 0.5f);
+                            bool isDoor = k == wn / 2;
+                            Build.Box(t, new Vector3(faceX - side * 0.06f, 1.35f, wz), new Vector3(0.05f, 2.7f, 1.4f), isDoor ? door : glass, isDoor ? 0.2f : 0.85f);
+                            var arch = Build.Prim(PrimitiveType.Cylinder, t, new Vector3(faceX - side * 0.06f, 2.7f, wz), new Vector3(1.4f, 0.025f, 1.4f), Mats.Lit(isDoor ? door : glass, isDoor ? 0.2f : 0.85f));
+                            arch.transform.localRotation = Quaternion.Euler(0, 0, 90);
+                            Build.Box(t, new Vector3(faceX - side * 0.02f, 3.55f, wz), new Vector3(0.05f, 0.18f, 1.7f), trim, 0.1f);
+                        }
                     }
                     z1 += w;
                 }
-                // street lamps (Kenney) with a fallback to simple poles
+                // classic black street lamps
                 for (float z = 6f; z < L; z += 20f)
                 {
                     if (_reserved(z0 + z - 2, z0 + z + 2)) continue;
-                    float x = side * (RoadHalf + 0.6f);
-                    if (Models.Spawn("Roads", "light-curved", t, new Vector3(x, 0.17f, z), side > 0 ? -90f : 90f, 6.5f, true) == null)
-                    {
-                        Build.Prim(PrimitiveType.Cylinder, t, new Vector3(x, 2.5f, z), new Vector3(0.12f, 2.5f, 0.12f), Mats.Lit(Theme.Hex("2B2F36"), 0.5f));
-                        Build.Box(t, new Vector3(x - side * 0.6f, 5f, z), new Vector3(1.3f, 0.1f, 0.25f), Theme.Hex("2B2F36"), 0.5f);
-                    }
+                    Build.ClassicLamp(t, new Vector3(side * (RoadHalf + 0.7f), 0.17f, z));
                 }
-                // small trees and planters on the pavement
+                // low-poly trees on the pavement
                 for (float z = 16f; z < L; z += 20f)
                 {
                     if (_reserved(z0 + z - 3, z0 + z + 3)) continue;
-                    if (_rnd.NextDouble() < 0.55)
-                        Models.Spawn("Suburb", "tree-small", t, new Vector3(side * (RoadHalf + 2.4f), 0.17f, z), R(0, 360), 4.2f, true);
-                    else
-                        Models.Spawn("Suburb", "planter", t, new Vector3(side * (RoadHalf + 2.4f), 0.17f, z), 0, 1.4f);
+                    Build.LowPolyTree(t, new Vector3(side * (RoadHalf + 2.5f), 0.17f, z), R(3.8f, 5.2f), _rnd);
+                    if (_rnd.NextDouble() < 0.5) Build.LowPolyBush(t, new Vector3(side * (RoadHalf + 3.2f), 0.17f, z + 3f), R(0.7f, 1.0f), _rnd);
                 }
             }
+            // a low-poly cloud now and then
+            if (_rnd.NextDouble() < 0.6) Build.Cloud(t, new Vector3(R(-70f, 70f), R(38f, 60f), R(0, L)), R(8f, 14f), _rnd);
         }
 
         void Country(Transform t, float z0)
