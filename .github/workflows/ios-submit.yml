@@ -14,4 +14,4 @@ jobs:
           ASC_KEY_P8: '${{ secrets.ASC_KEY_P8 }}'
           ASC_ISSUER_ID: f006bddd-6898-407b-9bea-5ec64d732a1e
           ASC_KEY_ID: 85Z32QPP5D
-        run: python3 tools/asc_store.py --build=${{ inputs.build }}
+        run: if [ "${{ inputs.build }}" = status ]; then python3 tools/asc_status.py; else python3 tools/asc_store.py --build=${{ inputs.build }}; fi
