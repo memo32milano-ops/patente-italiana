@@ -299,10 +299,17 @@ def main():
         print('not submitting (--no-submit)'); return
 
     # ---------------- submission: purchases go with the first version
+    attach_failed = []
     for i in iaps:
-        call('POST', '/v1/inAppPurchaseSubmissions', {'data': {'type': 'inAppPurchaseSubmissions', 'relationships': {'inAppPurchaseV2': rel('inAppPurchases', i['id'])}}}, quiet=True)
+        if i['attributes'].get('state') in ('WAITING_FOR_REVIEW', 'IN_REVIEW', 'APPROVED'): continue
+        r_ = call('POST', '/v1/inAppPurchaseSubmissions', {'data': {'type': 'inAppPurchaseSubmissions', 'relationships': {'inAppPurchaseV2': rel('inAppPurchases', i['id'])}}}, quiet=True)
+        if r_ is None and 'already' not in (PROBLEMS[-1] if PROBLEMS else ''): attach_failed.append(i['attributes']['productId'])
     for sub in subs:
-        call('POST', '/v1/subscriptionSubmissions', {'data': {'type': 'subscriptionSubmissions', 'relationships': {'subscription': rel('subscriptions', sub['id'])}}}, quiet=True)
+        if sub['attributes'].get('state') in ('WAITING_FOR_REVIEW', 'IN_REVIEW', 'APPROVED'): continue
+        r_ = call('POST', '/v1/subscriptionSubmissions', {'data': {'type': 'subscriptionSubmissions', 'relationships': {'subscription': rel('subscriptions', sub['id'])}}}, quiet=True)
+        if r_ is None and 'already' not in (PROBLEMS[-1] if PROBLEMS else ''): attach_failed.append(sub['attributes']['productId'])
+    if attach_failed and '--force' not in ARGS:
+        print('NOT SUBMITTED: purchases not attached', attach_failed); return
     for s_ in pages(f'/v1/apps/{app}/reviewSubmissions', {'filter[platform]': 'IOS'}):
         print('reviewSubmission', s_['id'], s_['attributes'].get('state'), s_['attributes'].get('submittedDate'))
         for it in pages(f"/v1/reviewSubmissions/{s_['id']}/items"):
