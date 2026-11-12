@@ -57,7 +57,7 @@ namespace PatenteArabo
             AppUpdate.Check();
 
             _bgCam = Camera.main;
-            if (_bgCam != null) { _bgCam.clearFlags = CameraClearFlags.SolidColor; _bgCam.backgroundColor = U.Hex("0C1421"); }
+            if (_bgCam != null) { _bgCam.clearFlags = CameraClearFlags.SolidColor; _bgCam.backgroundColor = U.Hex("090E1C"); }
 
             _doc = gameObject.AddComponent<UIDocument>();
             var panel = Resources.Load<PanelSettings>("PatenteArabo/UI/Panel");
@@ -122,7 +122,7 @@ namespace PatenteArabo
         {
             _page?.OnHide();
             ItalianTts.Stop();
-            _overlayHost.Clear();
+            for (int i = _overlayHost.childCount - 1; i >= 0; i--) if (!(_overlayHost[i] is Label)) _overlayHost.RemoveAt(i);   // dialogs go, toasts stay
             _pageHost.Clear();
             _pageFactory = factory;
             _page = factory();
@@ -151,12 +151,21 @@ namespace PatenteArabo
         {
             if (BackPressed())
             {
-                if (_overlayHost.childCount > 0 && !(_overlayHost[_overlayHost.childCount - 1] is Label)) { _overlayHost.RemoveAt(_overlayHost.childCount - 1); }
+                int top = -1;
+                for (int i = _overlayHost.childCount - 1; i >= 0; i--) if (!(_overlayHost[i] is Label)) { top = i; break; }
+                if (top >= 0) _overlayHost.RemoveAt(top);
+                else if (_page is HomePage && _history.Count == 0)
+                {
+                    if (Time.unscaledTime - _lastBack < 2f) Application.Quit();
+                    else { _lastBack = Time.unscaledTime; Toast.Show(Lang.T("press_back_exit")); }
+                }
                 else Back();
             }
             _page?.Tick(Time.unscaledDeltaTime);
             if (Time.frameCount % 30 == 0) ApplySafeArea();
         }
+
+        float _lastBack = -10f;
 
         static bool BackPressed()
         {
@@ -181,7 +190,7 @@ namespace PatenteArabo
             if (!string.IsNullOrEmpty(body))
             {
                 var sc = U.Scroll(d);
-                sc.style.maxHeight = 640;
+                sc.style.maxHeight = Length.Percent(60);
                 U.T(sc, body, "ex-text");
             }
             var row = U.Row(d);
@@ -204,6 +213,7 @@ namespace PatenteArabo
         public static void Show(string text)
         {
             if (App.I == null || App.I.Overlay == null) return;
+            foreach (var old in App.I.Overlay.Query<Label>(className: "toast").ToList()) old.RemoveFromHierarchy();   // one toast at a time
             var l = new Label(text);
             l.AddToClassList("toast");
             l.pickingMode = PickingMode.Ignore;

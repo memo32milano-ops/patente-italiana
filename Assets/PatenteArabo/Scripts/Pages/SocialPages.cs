@@ -213,6 +213,7 @@ namespace PatenteArabo
             var tabs = new ScrollView(ScrollViewMode.Horizontal);
             tabs.style.flexShrink = 0; tabs.style.height = 110;
             tabs.horizontalScrollerVisibility = ScrollerVisibility.Hidden; tabs.verticalScrollerVisibility = ScrollerVisibility.Hidden;
+            tabs.touchScrollBehavior = ScrollView.TouchScrollBehavior.Elastic;
             root.Add(tabs);
             var tr = U.RowLtr(tabs.contentContainer);
             foreach (var ch in Listato.Chapters)

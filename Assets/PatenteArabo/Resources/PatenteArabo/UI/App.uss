@@ -233,3 +233,6 @@
 
 /* RTL: these rows set flex-direction after .row-rtl, so flip them explicitly */
 .row-rtl.setting-row, .row-rtl.lb-row, .row-rtl.brand-strip, .row-rtl.daily-hero, .row-rtl.exam-banner, .row-rtl.stat-chip, .row-rtl.home-head { flex-direction: row-reverse; }
+
+/* phone app: no desktop scrollbars anywhere (touch scrolling stays) */
+.unity-scroll-view__vertical-scroller, .unity-scroll-view__horizontal-scroller { display: none; }
