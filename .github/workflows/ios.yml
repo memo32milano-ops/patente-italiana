@@ -11,9 +11,10 @@ on:
         type: boolean
         default: false
 
+# one Unity Personal licence: Android and iOS editors never run at the same time (they kill each other, exit 137)
 concurrency:
-  group: ios-build
-  cancel-in-progress: true
+  group: unity-editor
+  cancel-in-progress: false
 
 jobs:
   export:
