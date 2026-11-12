@@ -91,7 +91,28 @@ namespace PatenteArabo
             Changed?.Invoke();
         }
 
-        public static string Price(string id, string fallback) => Prices.TryGetValue(id, out var p) && !string.IsNullOrEmpty(p) ? p : fallback;
+        /// <summary>Store price of a product. On a phone, before the store answered, "…" (never a made-up price in the wrong currency).</summary>
+        public static string Price(string id, string fallback)
+        {
+            if (Prices.TryGetValue(id, out var p) && !string.IsNullOrEmpty(p)) return p;
+#if UNITY_EDITOR
+            return fallback;
+#else
+            return "…";
+#endif
+        }
+
+        static readonly Dictionary<string, bool> Trials = new Dictionary<string, bool>();
+        /// <summary>True when the store says this user can still get the free trial of this subscription.</summary>
+        public static bool TrialFor(string id) => Trials.TryGetValue(id, out var t) && t;
+
+        /// <summary>Line under a subscription price: free trial (only if the store offers it to this user), then price and period, auto-renewal.</summary>
+        public static string SubLine(string id, bool yearly, string fallback)
+        {
+            string price = Price(id, fallback);
+            if (TrialFor(id)) return Lang.T(yearly ? "sub_trial_year" : "sub_trial_month", price);
+            return Lang.T(yearly ? "sub_line_year" : "sub_line_month", price);
+        }
 
         public static void Init()
         {
@@ -122,7 +143,7 @@ namespace PatenteArabo
         {
             if (string.IsNullOrEmpty(ev)) return;
             var parts = ev.Split('|');
-            bool endsBuy = true;
+            bool endsBuy = true, notify = true;   // notify = state changed, pages redraw
             switch (parts[0])
             {
                 case "price":
@@ -138,17 +159,36 @@ namespace PatenteArabo
                     _seenOwned.Add(parts[1]);
                     break;
                 }
+                case "trial":
+                    if (parts.Length >= 3) Trials[parts[1]] = parts[2] == "1";
+                    endsBuy = false;
+                    break;
+                case "revoked":   // refund / family sharing removed (App Store)
+                    if (parts.Length >= 2)
+                    {
+                        if (parts[1] == Pass3M) { PlayerPrefs.DeleteKey("pa_pass_paid"); PlayerPrefs.SetString("pa_pass_until", "0"); }
+                        else PlayerPrefs.DeleteKey("pa_own_" + parts[1]);
+                        PlayerPrefs.Save();
+                    }
+                    endsBuy = false;
+                    break;
                 case "pending":
                     Toast.Show(Lang.T("buy_pending"));
                     break;
                 case "ready":
-                    // only when Play really answered: anything not returned is no longer owned (expired, cancelled or refunded)
-                    if (parts.Length < 2 || parts[1] == "ok")
+                    // only when the store really answered: anything not returned is no longer owned (expired, cancelled or refunded)
+                    bool answered = parts.Length < 2 || parts[1] == "ok";
+                    if (answered)
                     {
                         foreach (var id in InApp) if (id != Pass3M && !_seenOwned.Contains(id)) PlayerPrefs.DeleteKey("pa_own_" + id);
                         foreach (var id in Subs) if (!_seenOwned.Contains(id)) PlayerPrefs.DeleteKey("pa_own_" + id);
                         if (!_seenOwned.Contains(Pass3M) && PlayerPrefs.GetInt("pa_pass_paid", 0) == 1)
                         { PlayerPrefs.DeleteKey("pa_pass_paid"); PlayerPrefs.SetString("pa_pass_until", "0"); }
+                    }
+                    if (_manualRestore)
+                    {
+                        _manualRestore = false;
+                        Toast.Show(Lang.T(!answered ? StoreUnavailableKey : _seenOwned.Count > 0 ? "restore_found" : "restore_none"));
                     }
                     _restoring = false;
                     _seenOwned.Clear();
@@ -156,14 +196,34 @@ namespace PatenteArabo
                     endsBuy = false;
                     break;
                 case "cancel":
+                    notify = false;
                     break;
                 case "error":
                     Debug.LogWarning("Billing: " + ev);
-                    if (_buying) Toast.Show(Lang.T("buy_error"));
+                    if (_buying) ShowStoreError(parts.Length > 1 ? parts[1] : "");
+                    notify = false;
                     break;
             }
             if (endsBuy) _buying = false;
-            Changed?.Invoke();
+            if (notify) Changed?.Invoke();
+        }
+
+        static bool _manualRestore;
+
+#if UNITY_IOS
+        const string StoreUnavailableKey = "buy_no_store_ios";
+#else
+        const string StoreUnavailableKey = "buy_no_store";
+#endif
+
+        /// <summary>Tells the buyer why the store sheet did not open (never a silent tap).</summary>
+        static void ShowStoreError(string kind)
+        {
+            string body = kind == "unavailable" ? Lang.T(StoreUnavailableKey)
+                        : kind == "noproduct" ? Lang.T("buy_no_product")
+                        : Lang.T("buy_error");
+            if (App.I != null) App.I.Dialog(Lang.T("buy_failed_title"), body, (Lang.T("ok"), null, "btn-primary"));
+            else Toast.Show(body);
         }
 
         /// <summary>Unlocks a product. The 3-month pass lasts 90 days from the purchase time given by Google Play
@@ -205,9 +265,11 @@ namespace PatenteArabo
                 using (var billing = new AndroidJavaClass("com.memo.patente.Billing"))
                     billing.CallStatic("buy", player.GetStatic<AndroidJavaObject>("currentActivity"), id);
             }
-            catch (Exception e) { Debug.LogWarning(e.Message); }
+            catch (Exception e) { Debug.LogWarning(e.Message); _buying = false; ShowStoreError("unavailable"); return; }
+            Toast.Show(Lang.T("buy_opening"));
 #elif UNITY_IOS && !UNITY_EDITOR
             IosNative.StoreBuy(id);
+            Toast.Show(Lang.T("buy_opening"));
 #else
             // editor: simulate a successful purchase so the flow can be tested
             Grant(id, true, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), "");
@@ -222,6 +284,7 @@ namespace PatenteArabo
 #elif UNITY_IOS && !UNITY_EDITOR
             IosNative.StoreRestore();
 #endif
+            _manualRestore = true;
             Toast.Show(Lang.T("restored"));
         }
 
@@ -233,8 +296,18 @@ namespace PatenteArabo
 #endif
 
         // ---------- free-plan counters (per day) ----------
-        static string Today => DateTime.Now.ToString("yyyyMMdd");
+        static string Today => DateTime.Now.ToString("yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);
         static int Used(string what) => PlayerPrefs.GetString("pa_day_" + what, "") == Today ? PlayerPrefs.GetInt("pa_cnt_" + what, 0) : 0;
+        /// <summary>Today's free counters survive "delete my data" (otherwise a wipe would give extra free exams).</summary>
+        public static void KeepDailyCounters(Dictionary<string, string> keepS, Dictionary<string, int> keepI)
+        {
+            foreach (var w in new[] { "exam", "drive", "exam_pro", "exam_c", "exam_cqcm", "exam_cqcp" })
+            {
+                if (PlayerPrefs.HasKey("pa_day_" + w)) keepS["pa_day_" + w] = PlayerPrefs.GetString("pa_day_" + w);
+                if (PlayerPrefs.HasKey("pa_cnt_" + w)) keepI["pa_cnt_" + w] = PlayerPrefs.GetInt("pa_cnt_" + w);
+            }
+        }
+
         static void Use(string what)
         {
             int n = Used(what) + 1;
@@ -320,7 +393,7 @@ namespace PatenteArabo
 
         public static int DaysToExam()
         {
-            if (!DateTime.TryParse(ExamDate, out var d)) return -1;
+            if (!DateTime.TryParseExact(ExamDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var d)) return -1;
             return (int)Math.Ceiling((d.Date - DateTime.Now.Date).TotalDays);
         }
     }
@@ -345,7 +418,40 @@ namespace PatenteArabo
                     u.CallStatic("check", player.GetStatic<AndroidJavaObject>("currentActivity"), new NativeCallback(OnEvent));
             }
             catch (Exception e) { Debug.LogWarning("Update check: " + e.Message); }
+#elif UNITY_IOS && !UNITY_EDITOR
+            // App Store: ask Apple's public lookup for the published version; if newer, offer the update
+            var req = UnityEngine.Networking.UnityWebRequest.Get("https://itunes.apple.com/lookup?bundleId=" + Application.identifier + "&t=" + DateTime.UtcNow.Ticks);
+            req.timeout = 10;
+            req.SendWebRequest().completed += _ =>
+            {
+                try
+                {
+                    if (req.result != UnityEngine.Networking.UnityWebRequest.Result.Success) return;
+                    var m = System.Text.RegularExpressions.Regex.Match(req.downloadHandler.text, "\"version\"\\s*:\\s*\"([0-9.]+)\"");
+                    if (m.Success && Newer(m.Groups[1].Value, Application.version) && PlayerPrefs.GetString("pa_upd_asked", "") != m.Groups[1].Value)
+                    {
+                        PlayerPrefs.SetString("pa_upd_asked", m.Groups[1].Value);
+                        App.I?.Dialog(Lang.T("update_title"), Lang.T("update_body"),
+                            (Lang.T("later"), null, "btn-ghost"),
+                            (Lang.T("update_now"), () => Application.OpenURL("https://apps.apple.com/app/id" + NativeUtil.AppStoreId), "btn-primary"));
+                    }
+                }
+                catch (Exception e) { Debug.LogWarning("Update check: " + e.Message); }
+                finally { req.Dispose(); }
+            };
 #endif
+        }
+
+        /// <summary>True when version a (e.g. "1.2.0") is newer than b.</summary>
+        static bool Newer(string a, string b)
+        {
+            var x = a.Split('.'); var y = b.Split('.');
+            for (int i = 0; i < Math.Max(x.Length, y.Length); i++)
+            {
+                int.TryParse(i < x.Length ? x[i] : "0", out int p); int.TryParse(i < y.Length ? y[i] : "0", out int q);
+                if (p != q) return p > q;
+            }
+            return false;
         }
 
         static void OnEvent(string ev)

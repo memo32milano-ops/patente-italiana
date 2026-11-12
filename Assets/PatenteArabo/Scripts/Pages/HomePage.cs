@@ -121,43 +121,52 @@ namespace PatenteArabo
             var sc = U.Scroll(root);
             var c = sc.contentContainer;
 
-            var brand = U.Row(c, "brand-strip");
+            // ---------- one compact head row: brand on one side, licence switcher on the other
+            var head = U.Row(c, "home-top");
+            var brand = U.Row(head, "brand-strip");
             U.It(brand, Brand.Name, "brand-name");
             if (Lang.Code != "it") U.T(brand, Lang.T("app_sub"), "brand-sub");
             else U.It(brand, Lang.T("app_sub"), "brand-sub");
-            if (!Course.IsB) U.T(brand, "· " + Course.Name, "brand-sub", "gold");
+            CourseSwitcher.Make(head);
 
-            // ---------- licence being studied: B, C/CE, CQC goods, CQC passengers
-            CourseSwitcher.Make(c);
-
-            // ---------- readiness verdict + study plan
+            // ---------- two slim status tiles side by side: readiness (opens progress) and today's quiz
+            var status = U.Row(c, "status-row");
             float ready = Srs.OverallReadiness();
             string verdictKey = ready >= 0.8f ? "ready_yes" : ready >= 0.5f ? "ready_almost" : "ready_not";
-            var banner = U.Row(c, "exam-banner");
-            U.Icon(banner, ready >= 0.8f ? "check" : "progress", 56, U.Hex(ready >= 0.8f ? "6EDC96" : ready >= 0.5f ? "FCD34D" : "FF8282"));
-            var bcol = U.Col(banner);
-            bcol.style.marginLeft = 18; bcol.style.marginRight = 18; bcol.style.flexShrink = 1;
-            U.T(bcol, Lang.T(verdictKey) + "  ·  " + Lang.T("readiness") + " " + Mathf.RoundToInt(ready * 100) + "%", "h2").style.marginBottom = 0;
+            string rc = ready >= 0.8f ? "6EDC96" : ready >= 0.5f ? "FCD34D" : "FF8282";
+            var rt = U.Row(status, "status-tile", "status-ready");
+            U.Icon(rt, ready >= 0.8f ? "check" : "progress", 44, U.Hex(rc));
+            var rcol = U.Col(rt, "status-col");
+            var rtop = U.Row(rcol);
+            rtop.style.alignItems = Align.Center;
+            U.T(rtop, Lang.T(verdictKey), "status-title").style.flexShrink = 1;
+            U.It(rtop, Mathf.RoundToInt(ready * 100) + "%", "status-pct").style.color = U.Hex(rc);
+            var rbar = U.El(rcol, "status-bar");
+            var rfill = U.El(rbar, "status-fill");
+            rfill.style.width = Length.Percent(Mathf.Clamp01(ready) * 100);
+            rfill.style.backgroundColor = U.Hex(rc);
             int days = Reminder.DaysToExam();
+            string rsub;
             if (days > 0)
             {
                 int left = Listato.All.Count(st => Srs.Box(st.id) < 3);
-                U.T(bcol, Lang.T("days_to_exam", days) + "  ·  " + Lang.T("plan_per_day", Mathf.CeilToInt(left / (float)days)), "small", "muted");
+                rsub = Lang.T("days_to_exam", days) + " · " + Lang.T("plan_per_day", Mathf.CeilToInt(left / (float)days));
             }
-            else U.T(bcol, Lang.T("set_exam_date_hint"), "small", "muted");
-            banner.RegisterCallback<ClickEvent>(_ => App.I.Go(() => new ProgressPage()));
+            else rsub = Lang.T("set_exam_date_hint");
+            U.T(rcol, rsub, "status-sub");
+            rt.RegisterCallback<ClickEvent>(_ => App.I.Go(() => new ProgressPage()));
 
-            // ---------- daily quiz hero
-            var daily = U.Row(c, "daily-hero", QuickQuizPage.DailyDone ? "daily-done" : "");
-            U.Icon(daily, QuickQuizPage.DailyDone ? "check" : "star", 70, U.Hex(QuickQuizPage.DailyDone ? "6EDC96" : "F2C94C"));
-            var dcol = U.Col(daily);
-            dcol.style.flexGrow = 1; dcol.style.flexShrink = 1; dcol.style.marginLeft = 20; dcol.style.marginRight = 20;
-            U.T(dcol, Lang.T("daily_quiz"), "gcard-title");
-            U.T(dcol, QuickQuizPage.DailyDone ? Lang.T("daily_done", QuickQuizPage.DailyStreak) : Lang.T("daily_sub"), "small");
-            if (!QuickQuizPage.DailyDone)
+            bool done = QuickQuizPage.DailyDone;
+            var dt = U.Row(status, "status-tile", done ? "status-done" : "status-daily");
+            U.Icon(dt, done ? "check" : "star", 44, U.Hex(done ? "6EDC96" : "F2C94C"));
+            var dcol = U.Col(dt, "status-col");
+            U.T(dcol, Lang.T("daily_quiz"), "status-title");
+            U.T(dcol, done ? Lang.T("daily_done", QuickQuizPage.DailyStreak) : Lang.T("daily_sub"), "status-sub");
+            if (!done)
             {
-                var go = U.IB(daily, "play", Lang.T("play"), () => App.I.Go(() => new QuickQuizPage(QuickQuizPage.Mode.Daily)), "btn-gold", "glow");
+                var go = U.IB(dt, "play", Lang.T("play"), () => App.I.Go(() => new QuickQuizPage(QuickQuizPage.Mode.Daily)), "btn-gold", "btn-small");
                 go.style.flexShrink = 0;
+                dt.RegisterCallback<ClickEvent>(_ => App.I.Go(() => new QuickQuizPage(QuickQuizPage.Mode.Daily)));
             }
 
             var grid = U.Row(c, "wrap");

@@ -55,7 +55,7 @@ namespace PatenteArabo
             {
                 case Source.Chapter:
                     _list = Listato.Chapter(chapter).OrderBy(s => s.q).ThenBy(s => s.id).ToList();
-                    _idx = Math.Max(0, _list.FindIndex(s => !Srs.Seen(s.id)));
+                    _idx = Math.Max(0, _list.FindIndex(s => !Srs.Seen(s.id) && Premium.StmtOpen(s)));
                     break;
                 case Source.Random: _list = Listato.All.OrderBy(_ => rnd.Next()).Take(200).ToList(); break;
                 case Source.Weak: _list = Srs.WeakList().OrderBy(_ => rnd.Next()).ToList(); break;
@@ -71,6 +71,7 @@ namespace PatenteArabo
             if (src != Source.Chapter && src != Source.List && !Premium.Unlocked) _list = _list.Where(Premium.StmtOpen).ToList();
         }
 
+        int _spokenIdx = -1;   // auto-read once per statement, not again after answering
         public override void Tick(float dt) { Gamify.StudyTick(dt); }
         public override void OnHide() { Challenge.Submit(); }
 
@@ -81,7 +82,7 @@ namespace PatenteArabo
                 case Source.Chapter: return _chapter + ". " + QuestionText.ChapterTitle(_chapter);
                 case Source.Weak: return Lang.T("weak_only");
                 case Source.Review: return Lang.T("review");
-                case Source.Figures: return Lang.T("signs_only");
+                case Source.Figures: return Lang.T(Course.IsB ? "signs_only" : "figures_only");
                 case Source.Bookmarks: return Lang.T("bookmarks");
                 case Source.List: return _givenTitle;
                 default: return Lang.T("random_all");
@@ -118,12 +119,18 @@ namespace PatenteArabo
                 var lockBox = U.Col(_body, "center");
                 lockBox.style.flexGrow = 1;
                 U.Icon(lockBox, "lock", 120, U.Hex("F2C94C"));
-                U.T(lockBox, Lang.T("locked_chapter", Premium.FreePerChapter), "h2", "wraptext").style.unityTextAlign = TextAnchor.MiddleCenter;
-                U.IB(lockBox, "premium", Lang.T("go_premium"), () => ProPaywallPage.OpenForCourse(), "btn-gold").style.width = 600;
-                U.B(lockBox, Lang.T("back"), () => App.I.Back(), "btn-ghost").style.width = 600;
+                U.T(lockBox, Course.IsPro ? Lang.T("locked_chapter_pro", Premium.FreePerChapter) : Lang.T("locked_chapter", Premium.FreePerChapter), "h2", "wraptext").style.unityTextAlign = TextAnchor.MiddleCenter;
+                U.IB(lockBox, "premium", Course.IsPro ? Lang.T("go_pro") : Lang.T("go_premium"), () => ProPaywallPage.OpenForCourse(), "btn-gold").style.width = 600;
+                // the learner can still move to the open statements around this one
+                var nav = U.Row(lockBox);
+                nav.style.justifyContent = Justify.Center; nav.style.marginTop = 10;
+                if (_idx > 0) U.IB(nav, "back", Lang.T("prev"), () => { _idx--; Render(); }, "btn-ghost");
+                U.B(nav, Lang.T("back"), () => App.I.Back(), "btn-ghost");
+                if (_idx < _list.Count - 1) U.IB(nav, "forward", Lang.T("next"), () => { _idx++; Render(); }, "btn-ghost");
                 return;
             }
-            if (AutoRead) ItalianTts.Speak(s.it);
+            if (AutoRead && _spokenIdx != _idx) ItalianTts.Speak(s.it);
+            _spokenIdx = _idx;
             _showTr = !ItalianOnly;
 
             var main = U.Row(_body);

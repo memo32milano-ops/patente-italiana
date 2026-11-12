@@ -102,8 +102,8 @@ META = json.load(open(os.path.join(ROOT, 'store/appstore/metadata.json'), encodi
 NOTES = """Patente Italiana is a study app for the Italian driving licence theory exams (licence B, and licence C/CE and CQC for professional drivers).
 No account or login is needed: open the app, choose a language, then use Study, Exam, Review and the other tiles.
 The questions are the public lists published by the Italian Ministry of Transport (Portale dell'Automobilista); the app is not official and says so on the store page and inside the app (Settings > Information).
-Translations: Arabic and English texts are included; for the other languages the app translates on the device with Google ML Kit (the language model downloads once, then it works offline).
-In-app purchases: Premium for licence B (lifetime, 90-day pass, monthly subscription with 3-day free trial, single add-ons) and a separate subscription for the professional licences (C/CE, CQC). Restore purchases is in Settings and on each purchase screen. Terms of Use and Privacy Policy links are on the purchase screens.
+Translations: Italian and Arabic texts are bundled; all other languages, English included, are machine-translated on the device with Google ML Kit (the language model downloads once, then it works offline).
+In-app purchases: Premium for licence B (lifetime, 90-day pass (non-renewing), monthly subscription with 3-day free trial for new subscribers, single add-ons) and a separate subscription for the professional licences (C/CE, CQC). Restore purchases is in Settings and on each purchase screen. Terms of Use and Privacy Policy links are on the purchase screens.
 To see the professional section: on the home screen tap "C/CE" or "CQC Merci" in the row under the title.
 The app has no ads and no tracking. The exam screen intentionally reproduces the layout of the real ministry exam for practice; it is labelled "Simulazione non ufficiale".
 Contact: memo32milano@gmail.com"""

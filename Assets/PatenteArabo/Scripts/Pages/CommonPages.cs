@@ -205,7 +205,7 @@ namespace PatenteArabo
 
             var plans = U.Row(c, "wrap");
             plans.style.justifyContent = Justify.Center;
-            Plan(plans, Lang.T("plan_monthly"), Premium.Price(Premium.Monthly, "€2,99"), Lang.T("plan_monthly_sub"), Premium.Monthly, false);
+            Plan(plans, Lang.T("plan_monthly"), Premium.Price(Premium.Monthly, "€2,99") + Lang.T("per_month"), Premium.SubLine(Premium.Monthly, false, "€2,99"), Premium.Monthly, false);
             Plan(plans, Lang.T("plan_pass"), Premium.Price(Premium.Pass3M, "€4,99"), Lang.T("plan_pass_sub"), Premium.Pass3M, false);
             Plan(plans, Lang.T("plan_lifetime"), Premium.Price(Premium.Lifetime, "€9,99"), Lang.T("plan_lifetime_sub"), Premium.Lifetime, true);
 
@@ -224,7 +224,7 @@ namespace PatenteArabo
             U.B(foot, Lang.T("restore"), Premium.Restore, "btn-ghost", "btn-small");
             U.B(foot, Lang.T("manage_subs"), Premium.ManageSubscriptions, "btn-ghost", "btn-small");
             // App Store rule 3.1.2: subscriptions show the terms of use and the privacy policy
-            U.B(foot, "Terms of Use (EULA)", () => Application.OpenURL(NativeUtil.TermsUrl), "btn-ghost", "btn-small");
+            U.B(foot, Lang.T("terms_eula"), () => Application.OpenURL(NativeUtil.TermsUrl), "btn-ghost", "btn-small");
             U.B(foot, Lang.T("privacy"), () => Application.OpenURL(NativeUtil.PrivacyUrl), "btn-ghost", "btn-small");
             U.T(c, Lang.T("premium_note"), "small", "muted", "wraptext").style.marginTop = 10;
         }
@@ -300,7 +300,12 @@ namespace PatenteArabo
                 ItalianTts.Rate < 0.8f ? 0 : ItalianTts.Rate < 1f ? 1 : 2,
                 i => { ItalianTts.Rate = new[] { 0.7f, 0.9f, 1.1f }[i]; ItalianTts.Speak("Il segnale raffigurato vieta la sosta."); });
             Row("listen", Lang.T("test_voice"), null, () => ItalianTts.Speak("Benvenuto. Il segnale raffigurato indica un incrocio con diritto di precedenza."));
+#if UNITY_IOS
+            // iOS has no direct link to the voice settings: explain the path
+            Row("settings", Lang.T("install_voice"), Lang.T("install_voice_sub_ios"), () => App.I.Dialog(Lang.T("install_voice"), Lang.T("no_voice_ios"), (Lang.T("ok"), null, "btn-primary")));
+#else
             Row("settings", Lang.T("install_voice"), Lang.T("install_voice_sub"), NativeUtil.OpenTtsSettings);
+#endif
             Toggle("sound", Lang.T("sounds"), Sfx.On, v => Sfx.On = v);
             Toggle("bell", Lang.T("vibration"), Sfx.Vibrate, v => Sfx.Vibrate = v);
 
@@ -333,10 +338,10 @@ namespace PatenteArabo
 
             // ---- data & privacy
             Section("sec_privacy");
-            Row("privacy", Lang.T("privacy"), null, () => App.I.Dialog(Lang.T("privacy"), Lang.T("privacy_text"),
+            Row("privacy", Lang.T("privacy"), null, () => App.I.Dialog(Lang.T("privacy"), Lang.T(Challenge.Available ? "privacy_text" : "privacy_text_local"),
                 (Lang.T("privacy_full"), () => Application.OpenURL(NativeUtil.PrivacyUrl), ""), (Lang.T("ok"), null, "btn-primary")));
             Row("review", Lang.T("reset_progress"), null, () => App.I.Dialog(Lang.T("reset_progress"), Lang.T("reset_confirm"),
-                (Lang.T("cancel"), null, ""), (Lang.T("delete"), () => { Srs.DeleteAll(); Toast.Show(Lang.T("deleted")); App.I.GoHome(); }, "btn-red")));
+                (Lang.T("cancel"), null, ""), (Lang.T("delete"), () => { Srs.ResetProgress(); Toast.Show(Lang.T("deleted")); App.I.GoHome(); }, "btn-red")));
             Row("trash", Lang.T("delete_data"), null, () => App.I.Dialog(Lang.T("delete_data"), Lang.T("delete_confirm"),
                 (Lang.T("cancel"), null, ""), (Lang.T("delete"), () => { if (Profile.InChallenge) Challenge.Leave(); Srs.DeleteAll(); QuestionText.ClearMachine(); Toast.Show(Lang.T("deleted")); App.I.GoHome(); }, "btn-red")));
 
@@ -361,10 +366,10 @@ namespace PatenteArabo
             ov.pickingMode = PickingMode.Position;
             var d = U.Col(ov, "dialog");
             U.T(d, Lang.T("exam_date"), "h2");
-            DateTime cur = DateTime.TryParse(Reminder.ExamDate, out var x) ? x : DateTime.Now.Date.AddDays(30);
+            DateTime cur = DateTime.TryParseExact(Reminder.ExamDate, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var x) ? x : DateTime.Now.Date.AddDays(30);
             var lbl = U.It(d, "", "title");
             lbl.style.unityTextAlign = TextAnchor.MiddleCenter;
-            void Show() => lbl.text = cur.ToString("yyyy-MM-dd");
+            void Show() => lbl.text = cur.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
             Show();
             var r1 = U.RowLtr(d); r1.style.justifyContent = Justify.Center;
             U.B(r1, "-7", () => { cur = cur.AddDays(-7); Show(); }, "btn-small");
@@ -374,7 +379,7 @@ namespace PatenteArabo
             U.B(r1, "+30", () => { cur = cur.AddDays(30); Show(); }, "btn-small");
             var r2 = U.Row(d); r2.style.justifyContent = Justify.Center;
             U.B(r2, Lang.T("not_set"), () => { Reminder.ExamDate = ""; ov.RemoveFromHierarchy(); App.I.Rebuild(); }, "btn-ghost");
-            U.B(r2, Lang.T("ok"), () => { Reminder.ExamDate = cur.ToString("yyyy-MM-dd"); ov.RemoveFromHierarchy(); App.I.Rebuild(); }, "btn-primary");
+            U.B(r2, Lang.T("ok"), () => { Reminder.ExamDate = cur.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture); ov.RemoveFromHierarchy(); App.I.Rebuild(); }, "btn-primary");
         }
 
         void Section(string key)
@@ -454,7 +459,7 @@ namespace PatenteArabo
             U.T(c, Lang.T("official_links"), "h2").style.marginTop = 24;
             OfficialLinks.Add(c);
             U.T(c, Lang.T("privacy_title"), "h2").style.marginTop = 24;
-            U.T(c, Lang.T("privacy_short"), "ex-text", "muted");
+            U.T(c, Lang.T(Challenge.Available ? "privacy_short" : "privacy_short_local"), "ex-text", "muted");
             U.T(c, Lang.T("credits"), "h2").style.marginTop = 24;
 #if UNITY_IOS
             U.It(c, "3D: Kenney.nl (CC0) · Machine translation: Google ML Kit (on device) · Speech: Apple AVSpeechSynthesizer · Fonts: Poppins, Noto Sans (OFL)", "ex-text", "muted");

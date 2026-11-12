@@ -15,12 +15,12 @@ namespace PatenteArabo
         [DllImport("__Internal")] static extern IntPtr pa_locale();
         [DllImport("__Internal")] static extern void pa_speak(string text, float rate, int id);
         [DllImport("__Internal")] static extern void pa_stop();
-        [DllImport("__Internal")] static extern bool pa_voice_available();
+        [DllImport("__Internal")] [return: MarshalAs(UnmanagedType.I1)] static extern bool pa_voice_available();   // Swift Bool is 1 byte
         [DllImport("__Internal")] static extern void pa_translate(string source, string text, string target, int id);
         [DllImport("__Internal")] static extern void pa_share(string text);
         [DllImport("__Internal")] static extern void pa_open_settings();
         [DllImport("__Internal")] static extern void pa_pick_photo(int id);
-        [DllImport("__Internal")] static extern void pa_reminder(bool on, int hour, string title, string text);
+        [DllImport("__Internal")] static extern void pa_reminder([MarshalAs(UnmanagedType.I1)] bool on, int hour, string title, string text);
         [DllImport("__Internal")] static extern void pa_store_init(string ids);
         [DllImport("__Internal")] static extern void pa_store_buy(string id);
         [DllImport("__Internal")] static extern void pa_store_restore();
@@ -29,12 +29,13 @@ namespace PatenteArabo
         static int _next = 1;
         static bool _ready;
         public static Action<string> StoreEvents;   // id 0
+        static readonly Callback _cb = OnNative;     // kept alive for the native side
 
         static void Ensure()
         {
             if (_ready) return;
             _ready = true;
-            pa_set_callback(OnNative);
+            pa_set_callback(_cb);
         }
 
         [MonoPInvokeCallback(typeof(Callback))]

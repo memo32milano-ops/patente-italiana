@@ -27,12 +27,22 @@ namespace PatenteArabo
             U.T(col, Lang.T("streak_best", Gamify.Streak, Gamify.BestStreak) + "  ·  " + Lang.T("accuracy") + " " + Mathf.RoundToInt(Gamify.Accuracy * 100) + "%", "muted");
 
             U.T(c, Lang.T("your_name"), "h2").style.marginTop = 20;
+            var nameRow = U.Row(c);
+            nameRow.style.alignItems = Align.Center;
             var tf = new TextField { value = Profile.Name, maxLength = 20 };
-            tf.style.fontSize = 34; tf.style.height = 80;
-            tf.RegisterValueChangedCallback(e => Profile.Name = Filter(e.newValue));   // saved while typing (back button safe)
-            tf.RegisterCallback<FocusOutEvent>(_ => { Profile.Name = Filter(tf.value); tf.SetValueWithoutNotify(Profile.Name); });
-            c.Add(tf);
-            U.T(c, Lang.T("name_note"), "small", "muted", "wraptext");
+            tf.style.fontSize = 34; tf.style.height = 80; tf.style.flexGrow = 1; tf.style.flexShrink = 1;
+            tf.RegisterValueChangedCallback(e => Profile.Name = Filter(e.newValue));   // also saved while typing (back button safe)
+            nameRow.Add(tf);
+            var save = U.IB(nameRow, "check", Lang.T("save"), () =>
+            {
+                Profile.Name = Filter(tf.value);
+                tf.SetValueWithoutNotify(Profile.Name);
+                tf.Blur();
+                Toast.Show(Lang.T("saved"));
+                App.I.Rebuild();
+            }, "btn-primary");
+            save.style.flexShrink = 0; save.style.marginLeft = 16; save.style.marginRight = 16;
+            if (Challenge.Available) U.T(c, Lang.T("name_note"), "small", "muted", "wraptext");
 
             U.T(c, Lang.T("country"), "h2").style.marginTop = 20;
             var cr = U.Row(c, "wrap");
@@ -54,16 +64,19 @@ namespace PatenteArabo
             }
             var pr = U.Row(c, "wrap");
             pr.style.marginTop = 10;
+            void Pick() => Profile.PickPhoto(bytes =>
+            {
+                if (bytes == null) return;
+                Profile.SetPhoto(bytes);
+                Toast.Show(Lang.T("saved"));
+                App.I.Rebuild();
+            });
             U.IB(pr, "image", Lang.T("use_photo"), () =>
             {
-                App.I.Dialog(Lang.T("use_photo"), Lang.T("photo_rules"),
-                    (Lang.T("cancel"), null, ""),
-                    (Lang.T("accept"), () => Profile.PickPhoto(bytes =>
-                    {
-                        if (bytes == null) return;
-                        Profile.SetPhoto(bytes);
-                        App.I.Rebuild();
-                    }), "btn-primary"));
+                // the rules are about the public ranking: only when the online challenge exists
+                if (Challenge.Available)
+                    App.I.Dialog(Lang.T("use_photo"), Lang.T("photo_rules"), (Lang.T("cancel"), null, ""), (Lang.T("accept"), Pick, "btn-primary"));
+                else Pick();
             }, Profile.Avatar < 0 ? "btn-primary" : "");
             if (Profile.Photo != null) U.IB(pr, "trash", Lang.T("remove_photo"), () => { Profile.DeletePhoto(); App.I.Rebuild(); }, "btn-ghost");
 

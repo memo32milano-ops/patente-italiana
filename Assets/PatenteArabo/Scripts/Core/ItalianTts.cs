@@ -60,16 +60,31 @@ namespace PatenteArabo
                 using (var native = new AndroidJavaClass("com.memo.patente.Native"))
                 {
                     var activity = player.GetStatic<AndroidJavaObject>("currentActivity");
-                    native.CallStatic("speak", activity, text, Rate, new NativeCallback(_ => onDone?.Invoke()));
+                    native.CallStatic("speak", activity, text, Rate, new NativeCallback(r => { if (r == "novoice") NoVoice(); onDone?.Invoke(); }));
                 }
             }
             catch (Exception e) { Debug.LogWarning("TTS: " + e.Message); onDone?.Invoke(); }
 #elif UNITY_IOS && !UNITY_EDITOR
+            if (!IosNative.VoiceAvailable()) { NoVoice(); onDone?.Invoke(); return; }
             IosNative.Speak(text, Rate, _ => onDone?.Invoke());
 #else
             Debug.Log("[TTS] " + text);
             Toast.Show(Lang.T("tts_phone_only"));
             if (onDone != null) MainThread.Run(onDone);
+#endif
+        }
+
+        static bool _noVoiceShown;
+        /// <summary>No Italian voice on the phone: explain once per session how to install it (instead of silence).</summary>
+        static void NoVoice()
+        {
+            if (_noVoiceShown || App.I == null) return;
+            _noVoiceShown = true;
+#if UNITY_IOS
+            App.I.Dialog(Lang.T("no_voice_title"), Lang.T("no_voice_ios"), (Lang.T("ok"), null, "btn-primary"));
+#else
+            App.I.Dialog(Lang.T("no_voice_title"), Lang.T("no_voice_android"), (Lang.T("later"), null, "btn-ghost"),
+                (Lang.T("install_voice"), NativeUtil.OpenTtsSettings, "btn-primary"));
 #endif
         }
 

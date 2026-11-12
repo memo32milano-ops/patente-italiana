@@ -175,6 +175,9 @@ namespace PatenteArabo
             go.transform.localScale = scale;
             var r = go.GetComponent<Renderer>();
             r.sharedMaterial = mat;
+            // small parts (windows, markings, poles) don't cast shadows: far fewer draw calls on phones
+            if (t == PrimitiveType.Quad || Mathf.Min(scale.x, Mathf.Min(scale.y, scale.z)) < 0.5f)
+                r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             return go;
         }
 
@@ -270,11 +273,14 @@ namespace PatenteArabo
 
         public void Update(float carZ)
         {
-            while (_nextZ < carZ + 300f)
+            int built = 0;
+            // at start fill the view at once; while driving at most one chunk per frame (no hitches)
+            while (_nextZ < carZ + 300f && (built == 0 || _chunks.Count < 4))
             {
                 var go = BuildChunk(_nextZ, _biomeAt(_nextZ + ChunkLen * 0.5f));
                 _chunks.AddLast((_nextZ, go));
                 _nextZ += ChunkLen;
+                built++;
             }
             while (_chunks.Count > 0 && _chunks.First.Value.z + ChunkLen < carZ - 70f)
             {

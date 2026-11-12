@@ -30,12 +30,12 @@ namespace PatenteArabo
         static void Ensure()
         {
             if (_s != null) return;
-            try { _s = File.Exists(PathFile) ? JsonUtility.FromJson<Store>(File.ReadAllText(PathFile)) : new Store(); } catch { _s = new Store(); }
+            try { _s = SafeFile.Read(PathFile) is string js ? JsonUtility.FromJson<Store>(js) : new Store(); } catch { SafeFile.KeepBad(PathFile); _s = new Store(); }
             if (_s == null) _s = new Store();
             RollWeek();
         }
 
-        static string Today => DateTime.Now.ToString("yyyy-MM-dd");
+        static string Today => DateTime.Now.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
         static string WeekId
         {
             get
@@ -55,14 +55,14 @@ namespace PatenteArabo
         public static void Save()
         {
             Ensure();
-            try { File.WriteAllText(PathFile, JsonUtility.ToJson(_s)); } catch { }
+            try { SafeFile.Write(PathFile, JsonUtility.ToJson(_s)); } catch { }
         }
 
         static void TouchDay()
         {
             string today = Today;
             if (_s.lastDay == today) return;
-            double gap = DateTime.TryParse(_s.lastDay, out var last) ? (DateTime.Now.Date - last.Date).TotalDays : 99;
+            double gap = DateTime.TryParseExact(_s.lastDay, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var last) ? (DateTime.Now.Date - last.Date).TotalDays : 99;
             if (gap <= 1.01) _s.streak++;
             else if (gap <= 2.01 && ShieldReady) { _s.streak++; _s.shieldDay = today; ShieldUsed?.Invoke(); }
             else _s.streak = 1;
@@ -136,7 +136,7 @@ namespace PatenteArabo
             get
             {
                 Ensure();
-                if (!DateTime.TryParse(_s.lastDay, out var last)) return 0;
+                if (!DateTime.TryParseExact(_s.lastDay, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var last)) return 0;
                 double gap = (DateTime.Now.Date - last.Date).TotalDays;
                 if (gap <= 1.01) return _s.streak;
                 return gap <= 2.01 && ShieldReady ? _s.streak : 0;
@@ -149,7 +149,7 @@ namespace PatenteArabo
             get
             {
                 if (!Premium.HasGold) return false;
-                return !DateTime.TryParse(_s.shieldDay, out var d) || (DateTime.Now.Date - d.Date).TotalDays >= 7;
+                return !DateTime.TryParseExact(_s.shieldDay, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var d) || (DateTime.Now.Date - d.Date).TotalDays >= 7;
             }
         }
         public static event Action ShieldUsed;
@@ -281,11 +281,12 @@ namespace PatenteArabo
                 using (var p = new AndroidJavaClass("com.memo.patente.PhotoPicker"))
                     p.CallStatic("pick", player.GetStatic<AndroidJavaObject>("currentActivity"), new NativeCallback(path =>
                     {
-                        if (string.IsNullOrEmpty(path) || !File.Exists(path)) { done?.Invoke(null); return; }
+                        if (path == "cancel") { done?.Invoke(null); return; }
+                        if (string.IsNullOrEmpty(path) || path == "error" || !File.Exists(path)) { Toast.Show(Lang.T("photo_error")); done?.Invoke(null); return; }
                         done?.Invoke(File.ReadAllBytes(path));
                     }));
             }
-            catch (Exception e) { Debug.LogWarning(e.Message); done?.Invoke(null); }
+            catch (Exception e) { Debug.LogWarning(e.Message); Toast.Show(Lang.T("photo_error")); done?.Invoke(null); }
 #elif UNITY_IOS && !UNITY_EDITOR
             IosNative.PickPhoto(path =>
             {

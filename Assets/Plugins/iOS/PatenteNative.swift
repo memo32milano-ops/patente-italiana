@@ -47,7 +47,12 @@ private final class Speech: NSObject, AVSpeechSynthesizerDelegate {
     override init() { super.init(); synth.delegate = self }
     func speechSynthesizer(_ s: AVSpeechSynthesizer, didFinish u: AVSpeechUtterance) { done() }
     func speechSynthesizer(_ s: AVSpeechSynthesizer, didCancel u: AVSpeechUtterance) { done() }
-    func done() { let id = pending; pending = -1; if id >= 0 { send(id, "") } }
+    func done() {
+        let id = pending; pending = -1
+        if id >= 0 { send(id, "") }
+        // give the volume back to the user's music / podcast
+        if !synth.isSpeaking { try? AVAudioSession.sharedInstance().setActive(false, options: [.notifyOthersOnDeactivation]) }
+    }
 }
 
 @_cdecl("pa_speak")
@@ -122,7 +127,7 @@ public func pa_open_settings() {
     }
 }
 
-// ------------------------------------------------------------------ photo picker (96x96 JPEG written to a temp file)
+// ------------------------------------------------------------------ photo picker (256x256 JPEG written to a temp file)
 private final class Picker: NSObject, PHPickerViewControllerDelegate {
     static let shared = Picker()
     var id: Int32 = -1
@@ -133,10 +138,11 @@ private final class Picker: NSObject, PHPickerViewControllerDelegate {
         p.loadObject(ofClass: UIImage.self) { obj, _ in
             guard let img = obj as? UIImage else { send(rid, ""); return }
             let side = min(img.size.width, img.size.height)
-            let r = UIGraphicsImageRenderer(size: CGSize(width: 96, height: 96))
+            let fmt = UIGraphicsImageRendererFormat.default(); fmt.scale = 1
+            let r = UIGraphicsImageRenderer(size: CGSize(width: 256, height: 256), format: fmt)
             let small = r.image { _ in
-                let k = 96 / side
-                img.draw(in: CGRect(x: (96 - img.size.width * k) / 2, y: (96 - img.size.height * k) / 2, width: img.size.width * k, height: img.size.height * k))
+                let k = 256 / side
+                img.draw(in: CGRect(x: (256 - img.size.width * k) / 2, y: (256 - img.size.height * k) / 2, width: img.size.width * k, height: img.size.height * k))
             }
             let url = FileManager.default.temporaryDirectory.appendingPathComponent("pa_photo.jpg")
             do { try small.jpegData(compressionQuality: 0.8)?.write(to: url); send(rid, url.path) } catch { send(rid, "") }
@@ -176,17 +182,34 @@ public func pa_reminder(_ on: Bool, _ hour: Int32, _ title: UnsafePointer<CChar>
 // ------------------------------------------------------------------ App Store purchases (StoreKit 2)
 // Events sent with id 0, same format as the Android billing plugin:
 // price|id|text   owned|id|purchaseMillis|transactionId   pending   cancel   error|msg   ready|ok
-private var products: [String: Product] = [:]
+// all store state lives on the main actor (no data races between init, buy and restore)
+@MainActor private var products: [String: Product] = [:]
+@MainActor private var storeIds: [String] = []
 private var updatesTask: Task<Void, Never>?
 
 private func ev(_ s: String) { send(0, s) }
 
 private func millis(_ d: Date) -> String { String(Int64(d.timeIntervalSince1970 * 1000)) }
 
+@MainActor private func loadProducts(_ list: [String]) async {
+    do {
+        for p in try await Product.products(for: list) {
+            products[p.id] = p
+            ev("price|\(p.id)|\(p.displayPrice)")
+            if let sub = p.subscription, let intro = sub.introductoryOffer, intro.paymentMode == .freeTrial {
+                let ok = await sub.isEligibleForIntroOffer
+                ev("trial|\(p.id)|\(ok ? 1 : 0)")
+            } else if p.subscription != nil {
+                ev("trial|\(p.id)|0")
+            }
+        }
+    } catch { ev("error|unavailable|products \(error.localizedDescription)") }
+}
+
 private func entitlements() async {
+    // currentEntitlements already leaves out expired subscriptions and keeps those in billing grace period
     for await r in Transaction.currentEntitlements {
         if case .verified(let t) = r, t.revocationDate == nil {
-            if let exp = t.expirationDate, exp < Date() { continue }
             ev("owned|\(t.productID)|\(millis(t.purchaseDate))|\(t.id)")
         }
     }
@@ -201,14 +224,14 @@ public func pa_store_init(_ ids: UnsafePointer<CChar>?) {
         for await r in Transaction.updates {
             if case .verified(let t) = r {
                 if t.revocationDate == nil { ev("owned|\(t.productID)|\(millis(t.purchaseDate))|\(t.id)") }
+                else { ev("revoked|\(t.productID)") }
                 await t.finish()
             }
         }
     }
-    Task {
-        do {
-            for p in try await Product.products(for: list) { products[p.id] = p; ev("price|\(p.id)|\(p.displayPrice)") }
-        } catch { ev("error|products \(error.localizedDescription)") }
+    Task { @MainActor in
+        storeIds = list
+        await loadProducts(list)
         await entitlements()
     }
 }
@@ -216,27 +239,28 @@ public func pa_store_init(_ ids: UnsafePointer<CChar>?) {
 @_cdecl("pa_store_buy")
 public func pa_store_buy(_ pid: UnsafePointer<CChar>?) {
     let id = str(pid)
-    Task {
-        guard let p = products[id] else { ev("error|unknown product \(id)"); return }
+    Task { @MainActor in
+        if products[id] == nil { await loadProducts(storeIds.isEmpty ? [id] : storeIds) }   // products not loaded yet (slow network): try again now
+        guard let p = products[id] else { ev("error|noproduct|\(id)"); return }
         do {
             switch try await p.purchase() {
             case .success(let v):
                 if case .verified(let t) = v {
                     ev("owned|\(t.productID)|\(millis(t.purchaseDate))|\(t.id)")
                     await t.finish()
-                } else { ev("error|unverified") }
+                } else { ev("error|other|unverified") }
             case .pending: ev("pending")
             case .userCancelled: ev("cancel")
             @unknown default: ev("cancel")
             }
-        } catch { ev("error|\(error.localizedDescription)") }
+        } catch { ev("error|other|\(error.localizedDescription)") }
     }
 }
 
 @_cdecl("pa_store_restore")
 public func pa_store_restore() {
-    Task {
-        try? await AppStore.sync()
+    Task { @MainActor in
+        do { try await AppStore.sync() } catch { ev("ready|fail"); return }
         await entitlements()
     }
 }

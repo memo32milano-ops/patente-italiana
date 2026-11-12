@@ -211,9 +211,9 @@
 .badge-on { border-color: rgb(252, 211, 77); background-color: rgb(45, 38, 12); }
 
 /* brand strip: "Patente Italiana · <name in your language>" */
-.brand-strip { flex-direction: row; align-items: center; justify-content: center; flex-wrap: wrap; margin: 18px 40px 8px 40px; flex-shrink: 0; }
-.brand-name { font-size: 50px; -unity-font-style: bold; color: #FFFFFF; letter-spacing: 1px; margin-right: 18px; margin-left: 18px; }
-.brand-sub { font-size: 34px; color: #FCD34D; -unity-font-style: bold; padding: 6px 18px; border-radius: 30px; background-color: rgba(252, 211, 77, 0.12); border-width: 2px; border-color: rgba(252, 211, 77, 0.45); }
+.brand-strip { flex-direction: row; align-items: center; flex-wrap: wrap; flex-shrink: 1; }
+.brand-name { font-size: 42px; -unity-font-style: bold; color: #FFFFFF; letter-spacing: 1px; margin-right: 18px; margin-left: 18px; }
+.brand-sub { font-size: 26px; color: #FCD34D; -unity-font-style: bold; padding: 6px 18px; border-radius: 30px; background-color: rgba(252, 211, 77, 0.12); border-width: 2px; border-color: rgba(252, 211, 77, 0.45); }
 .brand-name { -unity-font: resource("PatenteArabo/Fonts/Poppins-Bold"); }
 /* gold profile (Gold add-on / Premium) */
 .gold-frame { border-width: 8px; border-color: #FFD24A; background-color: rgb(60, 45, 10); }
@@ -236,3 +236,19 @@
 
 /* phone app: no desktop scrollbars anywhere (touch scrolling stays) */
 .unity-scroll-view__vertical-scroller, .unity-scroll-view__horizontal-scroller { display: none; }
+
+/* home head: brand + licence switcher in one row, then two slim status tiles (cards stay visible on the first screen) */
+.home-top { flex-direction: row; align-items: center; justify-content: space-between; flex-wrap: wrap; margin: 10px 46px 4px 46px; flex-shrink: 0; }
+.home-top .course-row { margin: 0; }
+.status-row { flex-direction: row; margin: 6px 40px 4px 40px; flex-shrink: 0; }
+.status-tile { flex-direction: row; align-items: center; flex-grow: 1; flex-basis: 0; margin: 0 6px; padding: 12px 20px; border-radius: 22px; border-width: 2px; min-height: 96px; }
+.status-ready { background-color: rgb(30, 31, 74); border-color: rgb(79, 70, 229); }
+.status-daily { background-color: rgb(74, 38, 12); border-color: rgb(217, 160, 50); }
+.status-done { background-color: rgb(16, 58, 34); border-color: rgb(74, 160, 110); }
+.status-col { flex-grow: 1; flex-shrink: 1; margin: 0 16px; }
+.status-title { font-size: 28px; color: white; -unity-font-style: bold; white-space: normal; }
+.status-pct { font-size: 28px; -unity-font-style: bold; margin: 0 12px; flex-shrink: 0; }
+.status-sub { font-size: 20px; color: rgb(203, 213, 225); white-space: normal; margin-top: 2px; }
+.status-bar { height: 8px; border-radius: 4px; background-color: rgba(255, 255, 255, 0.14); margin-top: 6px; overflow: hidden; }
+.status-fill { height: 8px; border-radius: 4px; }
+.row-rtl.home-top, .row-rtl.status-row, .row-rtl.status-tile { flex-direction: row-reverse; }

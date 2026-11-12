@@ -65,7 +65,7 @@ namespace PatenteArabo
             if (!string.IsNullOrEmpty(_reason)) U.T(head, _reason, "gold", "bold", "wraptext").style.unityTextAlign = TextAnchor.MiddleCenter;
 
             var feats = U.Col(c, "card");
-            foreach (var k in new[] { "prof_lists", "prof_exams", "prof_translate", "prof_glossary", "prof_review", "prof_offline", "prof_noads" })
+            foreach (var k in new[] { "prof_lists", "prof_exams", "prof_translate", "prof_glossary", "prof_review", "prof_offline" })
             {
                 var r = U.Row(feats);
                 r.style.marginBottom = 8;
@@ -76,15 +76,15 @@ namespace PatenteArabo
 
             var plans = U.Row(c, "wrap");
             plans.style.justifyContent = Justify.Center;
-            Plan(plans, Lang.T("plan_monthly"), Premium.Price(Premium.ProMonthly, "€3,99"), Lang.T("pro_monthly_sub"), Premium.ProMonthly, false);
-            Plan(plans, Lang.T("plan_yearly"), Premium.Price(Premium.ProYearly, "€24,99"), Lang.T("pro_yearly_sub"), Premium.ProYearly, true);
+            Plan(plans, Lang.T("plan_monthly"), Premium.Price(Premium.ProMonthly, "€3,99") + Lang.T("per_month"), Premium.SubLine(Premium.ProMonthly, false, "€3,99"), Premium.ProMonthly, false);
+            Plan(plans, Lang.T("plan_yearly"), Premium.Price(Premium.ProYearly, "€24,99") + Lang.T("per_year"), Lang.T("pro_yearly_sub") + "\n" + Premium.SubLine(Premium.ProYearly, true, "€24,99"), Premium.ProYearly, true);
 
             var foot = U.Row(c, "wrap");
             foot.style.justifyContent = Justify.Center;
             U.B(foot, Lang.T("restore"), Premium.Restore, "btn-ghost", "btn-small");
             U.B(foot, Lang.T("manage_subs"), Premium.ManageSubscriptions, "btn-ghost", "btn-small");
             // App Store rule 3.1.2: subscriptions show the terms of use and the privacy policy
-            U.B(foot, "Terms of Use (EULA)", () => Application.OpenURL(NativeUtil.TermsUrl), "btn-ghost", "btn-small");
+            U.B(foot, Lang.T("terms_eula"), () => Application.OpenURL(NativeUtil.TermsUrl), "btn-ghost", "btn-small");
             U.B(foot, Lang.T("privacy"), () => Application.OpenURL(NativeUtil.PrivacyUrl), "btn-ghost", "btn-small");
             U.T(c, Lang.T("pro_note"), "small", "muted", "wraptext").style.marginTop = 10;
         }

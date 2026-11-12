@@ -67,8 +67,15 @@ public class Native {
                 pendingText = text;
                 pendingCb = cb;
                 tts = new TextToSpeech(activity.getApplicationContext(), status -> {
-                    if (status != TextToSpeech.SUCCESS) { ready = false; if (pendingCb != null) pendingCb.done("error"); return; }
-                    tts.setLanguage(Locale.ITALY);
+                    if (status != TextToSpeech.SUCCESS) {
+                        // no speech engine: try again next time, and tell Unity (it shows how to install one)
+                        ready = false; tts = null;
+                        Callback c = pendingCb; pendingCb = null; pendingText = null;
+                        if (c != null) c.done("novoice");
+                        return;
+                    }
+                    int lr = tts.setLanguage(Locale.ITALY);
+                    noItalian = lr < TextToSpeech.LANG_AVAILABLE;
                     tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                         @Override public void onStart(String id) { }
                         @Override public void onDone(String id) { fire(id, "done"); }
@@ -81,11 +88,14 @@ public class Native {
             } else if (ready) {
                 say(text, cb);
             } else {
+                if (pendingCb != null && pendingCb != cb) pendingCb.done("stopped");   // replaced before the engine was ready
                 pendingText = text;
                 pendingCb = cb;
             }
         });
     }
+
+    private static boolean noItalian;
 
     private static void fire(String id, String what) {
         Callback c;
@@ -94,6 +104,12 @@ public class Native {
     }
 
     private static void say(String text, Callback cb) {
+        if (noItalian) {
+            // the Italian voice data is missing: re-check (the user may have installed it meanwhile)
+            noItalian = tts.isLanguageAvailable(Locale.ITALY) < TextToSpeech.LANG_AVAILABLE;
+            if (noItalian) { if (cb != null) cb.done("novoice"); return; }
+            tts.setLanguage(Locale.ITALY);
+        }
         String id = "pa" + (++counter);
         if (cb != null) synchronized (callbacks) { callbacks.put(id, cb); }
         tts.setSpeechRate(rate);
@@ -129,6 +145,7 @@ public class Native {
 
     public static boolean italianVoiceAvailable() {
         if (tts == null) return true;
+        if (noItalian) return false;
         int r = tts.isLanguageAvailable(Locale.ITALY);
         return r >= TextToSpeech.LANG_AVAILABLE;
     }

@@ -125,7 +125,7 @@ namespace PatenteArabo.EditorTools
             var root = plist.root;
             root.SetBoolean("ITSAppUsesNonExemptEncryption", false);
             root.SetString("CFBundleDisplayName", "Patente Italiana");
-            root.SetString("NSPhotoLibraryUsageDescription", "Choose a photo for your profile in the weekly challenge (optional).");
+            root.SetString("NSPhotoLibraryUsageDescription", "Choose an optional photo for your profile.");
             var langs = root.CreateArray("CFBundleLocalizations");
             foreach (var l in new[] { "it", "en", "ar", "fr", "es", "de", "pt", "ro", "sq", "uk", "ru", "pl", "bn", "ur", "hi", "zh-Hans", "tr", "fa", "ta", "te", "gu", "ja", "ko", "th", "vi", "id", "ms", "tl", "sw", "el", "bg", "hr", "cs", "sk", "sl", "hu", "nl", "sv", "da", "no", "fi", "et", "lv", "lt", "he", "ka", "mk", "be", "ca", "kn", "mr" })
                 langs.AddString(l);

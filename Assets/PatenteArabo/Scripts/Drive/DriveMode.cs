@@ -210,9 +210,32 @@ namespace PatenteArabo
         }
 
         int _routeIdx;
+        string[] _route;
+
+        /// <summary>
+        /// Every drive is different, but useful: the landscape groups stay together (city, country, highway),
+        /// inside each group the situations where the learner has the most mistakes come first, the rest shuffled.
+        /// The statements themselves are picked mistakes first, then never seen, then the others (spaced repetition).
+        /// </summary>
+        string[] SessionRoute()
+        {
+            var groups = new List<List<string>>();
+            foreach (var t in Route)
+            {
+                if (groups.Count == 0 || Types[groups[groups.Count - 1][0]].biome != Types[t].biome) groups.Add(new List<string>());
+                groups[groups.Count - 1].Add(t);
+            }
+            var outList = new List<string>();
+            foreach (var g in groups)
+                outList.AddRange(g.Select(t => (t, w: PoolFor(t).Count(x => Srs.Weak(x.id)), r: Random.value))
+                                  .OrderByDescending(x => x.w > 0).ThenBy(x => x.r).Select(x => x.t));
+            return outList.ToArray();
+        }
+
         void ScheduleNext()
         {
-            string type = Route[_routeIdx % Route.Length];
+            if (_route == null) _route = SessionRoute();
+            string type = _route[_routeIdx % _route.Length];
             _routeIdx++;
             var info = Types[type];
             float last = _scen.Count > 0 ? _scen[_scen.Count - 1].Z0 : 40f;
@@ -601,7 +624,6 @@ namespace PatenteArabo
                 U.B(row, Lang.T("exit"), () => { Time.timeScale = 1f; App.I.GoHome(); }, "btn-ghost");
                 return;
             }
-            Premium.DriveQuestionAsked();
             Time.timeScale = s.Freeze ? 0f : 1f;
             var pool = PoolFor(s.Type);
             var fresh = pool.Where(x => !_usedStmts.Contains(x.id)).ToList();
@@ -645,6 +667,7 @@ namespace PatenteArabo
             void Choose(bool v)
             {
                 bool ok = v == q.True;
+                Premium.DriveQuestionAsked();   // counted when answered (leaving the drive before answering costs nothing)
                 _asked++;
                 if (ok) { _correct++; Sfx.Right(); } else Sfx.Wrong();
                 Srs.Record(q.id, ok);

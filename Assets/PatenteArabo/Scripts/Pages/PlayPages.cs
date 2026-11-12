@@ -14,18 +14,18 @@ namespace PatenteArabo
     {
         public enum Mode { Daily, Traps, TimeAttack }
 
-        public static string Today => DateTime.Now.ToString("yyyyMMdd");
-        public static bool DailyDone => PlayerPrefs.GetString("pa_daily_done", "") == Today;
+        public static string Today => DateTime.Now.ToString("yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);
+        public static bool DailyDone => PlayerPrefs.GetString("pa_daily_done" + Course.StoreSuffix, "") == Today;
         public static int DailyStreak
         {
             get
             {
-                var last = PlayerPrefs.GetString("pa_daily_done", "");
-                if (last != Today && last != DateTime.Now.AddDays(-1).ToString("yyyyMMdd")) return 0;
-                return PlayerPrefs.GetInt("pa_daily_streak", 0);
+                var last = PlayerPrefs.GetString("pa_daily_done" + Course.StoreSuffix, "");
+                if (last != Today && last != DateTime.Now.AddDays(-1).ToString("yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture)) return 0;
+                return PlayerPrefs.GetInt("pa_daily_streak" + Course.StoreSuffix, 0);
             }
         }
-        public static int BestTimeAttack => PlayerPrefs.GetInt("pa_ta_best", 0);
+        public static int BestTimeAttack => PlayerPrefs.GetInt("pa_ta_best" + Course.StoreSuffix, 0);
 
         const float TimeAttackSeconds = 60f;
 
@@ -47,7 +47,7 @@ namespace PatenteArabo
                 {
                     // same 10 statements for everybody on the same day (seeded by the date)
                     var rnd = new System.Random(int.Parse(Today));
-                    _list = Listato.All.OrderBy(_ => rnd.Next()).Take(10).ToList();
+                    _list = Listato.All.OrderBy(_ => rnd.Next()).Where(Premium.StmtOpen).Take(10).ToList();
                     break;
                 }
                 case Mode.Traps:
@@ -177,9 +177,9 @@ namespace PatenteArabo
                 case Mode.Daily:
                     if (!DailyDone)
                     {
-                        bool continued = PlayerPrefs.GetString("pa_daily_done", "") == DateTime.Now.AddDays(-1).ToString("yyyyMMdd");
-                        PlayerPrefs.SetInt("pa_daily_streak", continued ? PlayerPrefs.GetInt("pa_daily_streak", 0) + 1 : 1);
-                        PlayerPrefs.SetString("pa_daily_done", Today);
+                        bool continued = PlayerPrefs.GetString("pa_daily_done" + Course.StoreSuffix, "") == DateTime.Now.AddDays(-1).ToString("yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);
+                        PlayerPrefs.SetInt("pa_daily_streak" + Course.StoreSuffix, continued ? PlayerPrefs.GetInt("pa_daily_streak" + Course.StoreSuffix, 0) + 1 : 1);
+                        PlayerPrefs.SetString("pa_daily_done" + Course.StoreSuffix, Today);
                         PlayerPrefs.Save();
                         xp = 40 + _right * 5;
                     }
@@ -192,7 +192,7 @@ namespace PatenteArabo
                 default:
                     xp = _right * 3;
                     record = _right > BestTimeAttack;
-                    if (record) { PlayerPrefs.SetInt("pa_ta_best", _right); PlayerPrefs.Save(); }
+                    if (record) { PlayerPrefs.SetInt("pa_ta_best" + Course.StoreSuffix, _right); PlayerPrefs.Save(); }
                     headline = Lang.T("ta_result", _right);
                     break;
             }

@@ -29,8 +29,8 @@ namespace PatenteArabo
         /// <summary>Opens the exam (or the paywall when the free plan limit is reached).</summary>
         public static void Open(bool audio)
         {
-            if (audio && !(Course.IsPro ? Premium.HasPro : Premium.HasListen)) { App.I.Go(() => Course.IsPro ? (Page)new ProPaywallPage(Lang.T("listen_premium")) : new PaywallPage(Lang.T("listen_premium"), Premium.AddListen)); return; }
-            if (!Premium.CanStartExam) { App.I.Go(() => Course.IsPro ? (Page)new ProPaywallPage(Lang.T("exam_limit")) : new PaywallPage(Lang.T("exam_limit"), Premium.AddExams)); return; }
+            if (audio && !(Course.IsPro ? Premium.HasPro : Premium.HasListen)) { App.I.Go(() => Course.IsPro ? (Page)new ProPaywallPage(Lang.T("listen_pro")) : new PaywallPage(Lang.T("listen_premium"), Premium.AddListen)); return; }
+            if (!Premium.CanStartExam) { App.I.Go(() => Course.IsPro ? (Page)new ProPaywallPage(Lang.T("exam_limit_n", Premium.FreeProExamsPerDay)) : new PaywallPage(Lang.T("exam_limit_n", Premium.FreeExamsPerDay), Premium.AddExams)); return; }
             App.I.Go(() => new ExamIntroPage(audio));
         }
 
@@ -132,6 +132,7 @@ namespace PatenteArabo
         bool _running, _finished;
         VisualElement _scaler, _frame;
         Label _timer;
+        double _lastReal = -1;
 
         const float W = 1440, H = 1080;
 
@@ -164,6 +165,7 @@ namespace PatenteArabo
         }
 
         public override void OnHide() { ItalianTts.Stop(); }
+        public override bool Busy => _running && !_finished;
 
         public override void Build(VisualElement root)
         {
@@ -187,8 +189,11 @@ namespace PatenteArabo
 
         public override void Tick(float dt)
         {
-            if (!_running || _finished) return;
-            _timeLeft -= dt;
+            if (!_running || _finished) { _lastReal = -1; return; }
+            // wall-clock time: like the real exam, the clock keeps running while the app is in the background
+            double now = Time.realtimeSinceStartupAsDouble;
+            if (_lastReal >= 0) _timeLeft -= (float)(now - _lastReal);
+            _lastReal = now;
             if (_timer != null)
             {
                 int t = Mathf.Max(0, Mathf.CeilToInt(_timeLeft));

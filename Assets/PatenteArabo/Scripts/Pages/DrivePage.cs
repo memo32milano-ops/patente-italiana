@@ -8,6 +8,7 @@ namespace PatenteArabo
     {
         DriveMode _drive;
         public override bool Transparent => true;
+        public override bool Busy => true;   // a language/translation event must not restart the drive
 
         public override void Build(VisualElement root)
         {
@@ -26,7 +27,7 @@ namespace PatenteArabo
             if (_drive != null) _drive.Shutdown();
             _drive = null;
             var cam = Camera.main;
-            if (cam != null) { cam.clearFlags = CameraClearFlags.SolidColor; cam.backgroundColor = U.Hex("0C1421"); }
+            if (cam != null) { cam.clearFlags = CameraClearFlags.SolidColor; cam.backgroundColor = U.Hex("090E1C"); }
         }
     }
 }

@@ -63,12 +63,15 @@ namespace PatenteArabo
         static byte[] _figData;
         static string _figFile;
         static readonly Dictionary<string, Texture2D> _figCache = new Dictionary<string, Texture2D>();
+        static readonly LinkedList<string> _figOrder = new LinkedList<string>();   // least recently used first
+        const int FigCacheMax = 80;   // a page shows at most a few dozen pictures; older ones are freed (low-memory phones)
 
         /// <summary>The official picture of a statement (all 400+ pictures are packed in one file).</summary>
         public static Texture2D Figure(Stmt s)
         {
             if (s == null || string.IsNullOrEmpty(s.f)) return null;
-            if (_figCache.TryGetValue(s.f, out var tex) && tex != null) return tex;
+            string ck = Course.FigureFile + "/" + s.f;
+            if (_figCache.TryGetValue(ck, out var tex) && tex != null) { _figOrder.Remove(ck); _figOrder.AddLast(ck); return tex; }
             if (_figIndex == null || _figFile != Course.FigureFile)
             {
                 _figFile = Course.FigureFile;
@@ -77,6 +80,7 @@ namespace PatenteArabo
                 if (ta != null)
                 {
                     _figData = ta.bytes;
+                    Resources.UnloadAsset(ta);   // keep one copy of the 5 MB pack, not two
                     int p = 0;
                     int Read() { int v = System.BitConverter.ToInt32(_figData, p); p += 4; return v; }
                     int n = Read();
@@ -94,9 +98,15 @@ namespace PatenteArabo
             var bytes = new byte[e.len];
             System.Buffer.BlockCopy(_figData, e.off, bytes, 0, e.len);
             tex = new Texture2D(2, 2, TextureFormat.RGB24, false);
-            tex.LoadImage(bytes);
             tex.wrapMode = TextureWrapMode.Clamp;
-            _figCache[s.f] = tex;
+            tex.LoadImage(bytes, true);   // no CPU copy: half the memory
+            _figCache[ck] = tex; _figOrder.AddLast(ck);
+            while (_figOrder.Count > FigCacheMax)
+            {
+                var old = _figOrder.First.Value; _figOrder.RemoveFirst();
+                if (_figCache.TryGetValue(old, out var ot) && ot != null) UnityEngine.Object.Destroy(ot);
+                _figCache.Remove(old);
+            }
             return tex;
         }
 
@@ -227,9 +237,11 @@ namespace PatenteArabo
         public static void RequestMachine(Stmt s, Action<string> done)
         {
             if (s == null || !Lang.Info.MlKit || Lang.Code == "it") { done?.Invoke(null); return; }
-            Translator.Translate(s.it, Lang.Code, res =>
+            string lang = Lang.Code, pre = Course.MtPrefix;
+            Translator.Translate(s.it, lang, res =>
             {
-                if (!string.IsNullOrEmpty(res)) { Mt[Course.MtPrefix + s.id] = res; _mtDirty = true; SaveMt(); }
+                if (lang != Lang.Code || pre != Course.MtPrefix) { done?.Invoke(null); return; }   // language changed meanwhile: don't store it under the new one
+                if (!string.IsNullOrEmpty(res)) { Mt[pre + s.id] = res; _mtDirty = true; SaveMt(); }
                 done?.Invoke(res);
             });
         }
@@ -238,18 +250,22 @@ namespace PatenteArabo
         public static void PrefetchAll(IList<Stmt> list, Action<int, int> progress, Func<bool> cancelled = null)
         {
             if (!Lang.Info.MlKit || Lang.Code == "it") { progress?.Invoke(list.Count, list.Count); return; }
-            int i = 0;
+            int i = 0, ok = 0;
+            string lang = Lang.Code, pre = Course.MtPrefix;
             void Next()
             {
+                if (lang != Lang.Code || pre != Course.MtPrefix) return;   // language or course changed: stop
                 while (i < list.Count && Translation(list[i], out _) != null) i++;
                 progress?.Invoke(i, list.Count);
                 if (i >= list.Count || (cancelled != null && cancelled())) { SaveMt(); return; }
                 var s = list[i++];
-                Translator.Translate(s.it, Lang.Code, res =>
+                Translator.Translate(s.it, lang, res =>
                 {
-                    if (!string.IsNullOrEmpty(res)) { Mt[Course.MtPrefix + s.id] = res; _mtDirty = true; }
+                    if (lang != Lang.Code || pre != Course.MtPrefix) return;
+                    if (!string.IsNullOrEmpty(res)) { Mt[pre + s.id] = res; _mtDirty = true; ok++; }
                     if (i % 25 == 0) SaveMt();
-                    if (res == null && i <= 1) { progress?.Invoke(-1, list.Count); return; }
+                    // the first one failed (no internet, model not downloadable): report it instead of "done"
+                    if (res == null && ok == 0) { SaveMt(); progress?.Invoke(-1, list.Count); return; }
                     Next();
                 });
             }
@@ -281,9 +297,10 @@ namespace PatenteArabo
         {
             if (Lang.Code == "it" || !Lang.Info.MlKit || string.IsNullOrEmpty(italian)) return;
             if (Mt.TryGetValue(key, out var hit)) { done?.Invoke(hit); return; }
-            Translator.TranslateFrom("it", italian, Lang.Code, res =>
+            string lang = Lang.Code;
+            Translator.TranslateFrom("it", italian, lang, res =>
             {
-                if (string.IsNullOrEmpty(res)) return;
+                if (string.IsNullOrEmpty(res) || lang != Lang.Code) return;
                 Mt[key] = res; _mtDirty = true; SaveMt();
                 done?.Invoke(res);
             });
@@ -298,10 +315,11 @@ namespace PatenteArabo
             if (string.IsNullOrEmpty(it)) { U.T(parent, s.True ? Lang.T("generic_true") : Lang.T("generic_false"), "ex-text", "muted"); return; }
             var label = U.It(parent, it, "ex-text");
             if (Lang.Code == "it" || !Lang.Info.MlKit) return;
-            Translator.TranslateFrom("it", it, Lang.Code, res =>
+            string lang = Lang.Code, pre = Course.MtPrefix;
+            Translator.TranslateFrom("it", it, lang, res =>
             {
-                if (string.IsNullOrEmpty(res)) return;
-                Mt[Course.MtPrefix + "x" + s.id] = res; _mtDirty = true; SaveMt();
+                if (string.IsNullOrEmpty(res) || lang != Lang.Code || pre != Course.MtPrefix) return;
+                Mt[pre + "x" + s.id] = res; _mtDirty = true; SaveMt();
                 if (label.panel == null) return;
                 var t = U.T(parent, res, "ex-text");
                 t.PlaceBehind(label); label.RemoveFromHierarchy();
@@ -351,8 +369,8 @@ namespace PatenteArabo
         static void Ensure()
         {
             if (_s != null) return;
-            try { _s = File.Exists(PathFile) ? JsonUtility.FromJson<Store>(File.ReadAllText(PathFile)) : new Store(); }
-            catch { _s = new Store(); }
+            try { _s = SafeFile.Read(PathFile) is string js ? JsonUtility.FromJson<Store>(js) : new Store(); }
+            catch { SafeFile.KeepBad(PathFile); _s = new Store(); }
             if (_s == null) _s = new Store();
             _map = _s.items.ToDictionary(i => i.id);
         }
@@ -360,7 +378,7 @@ namespace PatenteArabo
         public static void Save()
         {
             Ensure();
-            try { File.WriteAllText(PathFile, JsonUtility.ToJson(_s)); } catch (Exception e) { Debug.LogWarning(e.Message); }
+            try { SafeFile.Write(PathFile, JsonUtility.ToJson(_s)); } catch (Exception e) { Debug.LogWarning(e.Message); }
         }
 
         public static void Record(int id, bool correct, bool save = true)
@@ -423,8 +441,26 @@ namespace PatenteArabo
         }
 
         /// <summary>Deletes all learning data stored on this phone (GDPR "right to erasure").</summary>
+        /// <summary>"Reset progress": answers, exams, XP, streak, saved questions and the daily games start again.
+        /// Settings, profile, saved words, reminder, purchases and today's free counters stay.</summary>
+        public static void ResetProgress()
+        {
+            _s = new Store();
+            _map = new Dictionary<int, Item>();
+            try { foreach (var f in Directory.GetFiles(Application.persistentDataPath, "progress*.json")) File.Delete(f); } catch { }
+            try { foreach (var f in Directory.GetFiles(Application.persistentDataPath, "exams*.json")) File.Delete(f); } catch { }
+            Gamify.Reset();
+            ExamHistory.Clear();
+            foreach (var k in new[] { "pa_bookmarks", "pa_daily_done", "pa_daily_streak", "pa_ta_best", "pa_exam_date" }) PlayerPrefs.DeleteKey(k);
+            foreach (var suf in new[] { "_c", "_cqc" }) { PlayerPrefs.DeleteKey("pa_bookmarks" + suf); PlayerPrefs.DeleteKey("pa_daily_done" + suf); PlayerPrefs.DeleteKey("pa_daily_streak" + suf); PlayerPrefs.DeleteKey("pa_ta_best" + suf); }
+            PlayerPrefs.Save();
+            Bookmarks.Reload();
+        }
+
+        /// <summary>"Delete my data": everything except the language and what was paid for.</summary>
         public static void DeleteAll()
         {
+            Reminder.Set(false, Reminder.Hour);   // the scheduled notification would keep coming after the wipe
             _s = new Store();
             _map = new Dictionary<int, Item>();
             try { foreach (var f in Directory.GetFiles(Application.persistentDataPath, "progress*.json")) File.Delete(f); } catch { }
@@ -433,7 +469,7 @@ namespace PatenteArabo
                 try { File.Delete(f); } catch { }
             Gamify.Reset();
             ExamHistory.Clear();
-            // keep the language and everything that was paid for (or already given once, like the free trial)
+            // keep the language and everything that was paid for (or already given once, like the free trial), and today's free counters
             var keepS = new Dictionary<string, string>();
             var keepI = new Dictionary<string, int>();
             foreach (var k in new[] { "pa_lang", "pa_pass_until", "pa_course" }) if (PlayerPrefs.HasKey(k)) keepS[k] = PlayerPrefs.GetString(k);
@@ -441,6 +477,7 @@ namespace PatenteArabo
             foreach (var id in Premium.InApp) intKeys.Add("pa_own_" + id);
             foreach (var id in Premium.Subs) intKeys.Add("pa_own_" + id);
             foreach (var k in intKeys) if (PlayerPrefs.HasKey(k)) keepI[k] = PlayerPrefs.GetInt(k);
+            Premium.KeepDailyCounters(keepS, keepI);
             PlayerPrefs.DeleteAll();
             foreach (var kv in keepS) PlayerPrefs.SetString(kv.Key, kv.Value);
             foreach (var kv in keepI) PlayerPrefs.SetInt(kv.Key, kv.Value);
@@ -498,7 +535,7 @@ namespace PatenteArabo
         static void Ensure()
         {
             if (_s != null) return;
-            try { _s = File.Exists(PathFile) ? JsonUtility.FromJson<Store>(File.ReadAllText(PathFile)) : new Store(); } catch { _s = new Store(); }
+            try { _s = SafeFile.Read(PathFile) is string js ? JsonUtility.FromJson<Store>(js) : new Store(); } catch { SafeFile.KeepBad(PathFile); _s = new Store(); }
             if (_s == null) _s = new Store();
         }
 
@@ -512,7 +549,7 @@ namespace PatenteArabo
                 ans = ans.Select(a => a.HasValue ? (a.Value ? 1 : 0) : -1).ToArray()
             });
             if (_s.list.Count > 50) _s.list.RemoveRange(50, _s.list.Count - 50);
-            try { File.WriteAllText(PathFile, JsonUtility.ToJson(_s)); } catch { }
+            try { SafeFile.Write(PathFile, JsonUtility.ToJson(_s)); } catch { }
         }
 
         public static IReadOnlyList<Entry> All { get { Ensure(); return _s.list; } }

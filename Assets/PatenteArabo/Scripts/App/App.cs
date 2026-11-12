@@ -28,6 +28,8 @@ namespace PatenteArabo
         public virtual void Tick(float dt) { }
         /// <summary>Pages that show the 3D world keep the camera visible behind a transparent UI.</summary>
         public virtual bool Transparent => false;
+        /// <summary>Pages with a running session (exam, drive) are not rebuilt by background events: that would restart them.</summary>
+        public virtual bool Busy => false;
     }
 
     public class App : MonoBehaviour
@@ -54,6 +56,7 @@ namespace PatenteArabo
             Screen.autorotateToLandscapeRight = true;
             MainThread.Init();
             Premium.Init();
+            if (Reminder.On) Reminder.Set(true, Reminder.Hour);   // alarms are lost after a force-stop: schedule again at every start
             AppUpdate.Check();
 
             _bgCam = Camera.main;
@@ -144,6 +147,7 @@ namespace PatenteArabo
 
         public void Rebuild()
         {
+            if (_page != null && _page.Busy) return;
             if (_pageFactory != null) Show(_pageFactory);
         }
 
@@ -161,7 +165,7 @@ namespace PatenteArabo
                 }
                 else Back();
             }
-            _page?.Tick(Time.unscaledDeltaTime);
+            _page?.Tick(Mathf.Min(Time.unscaledDeltaTime, 0.25f));   // first frame after resume can be minutes long
             if (Time.frameCount % 30 == 0) ApplySafeArea();
         }
 

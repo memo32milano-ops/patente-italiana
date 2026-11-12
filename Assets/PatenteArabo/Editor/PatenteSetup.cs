@@ -74,6 +74,9 @@ namespace PatenteArabo.EditorTools
         {
             EnsureMaterials();
             EnsurePlayerSettings();
+            // no "Made with Unity" screen at start (allowed for every licence from Unity 6): the app opens straight away
+            PlayerSettings.SplashScreen.show = false;
+            PlayerSettings.SplashScreen.showUnityLogo = false;
             Debug.Log("[PatenteArabo] Setup done.");
         }
 

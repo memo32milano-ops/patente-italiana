@@ -55,7 +55,9 @@ public class ReminderReceiver extends BroadcastReceiver {
         c.set(Calendar.SECOND, 0);
         if (c.getTimeInMillis() <= System.currentTimeMillis() + 1000) c.add(Calendar.DAY_OF_YEAR, 1);
         AlarmManager am = (AlarmManager) ctx.getSystemService(Context.ALARM_SERVICE);
-        am.set(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pending(ctx));
+        // allowed while the phone dozes (no exact-alarm permission needed)
+        if (android.os.Build.VERSION.SDK_INT >= 23) am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pending(ctx));
+        else am.set(AlarmManager.RTC_WAKEUP, c.getTimeInMillis(), pending(ctx));
     }
 
     public static void cancel(Context ctx) {
