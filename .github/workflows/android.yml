@@ -53,12 +53,7 @@ jobs:
           python3 tools/make_manifest.py pm
           rm -rf pm
 
-      - uses: actions/cache@v4
-        with:
-          path: Library
-          key: Library-Android-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-          restore-keys: Library-Android-
-
+      # no Library cache: a restored Library made the editor quit at start (exit 137)
       - name: Check Unity licence secret
         env:
           HAS_LICENSE: ${{ secrets.UNITY_LICENSE != '' }}
