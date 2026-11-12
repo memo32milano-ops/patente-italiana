@@ -88,6 +88,7 @@ namespace PatenteArabo
             if (Premium.TrialJustEarned)
                 root.schedule.Execute(() => App.I.Dialog(Lang.T("trial_title"), Lang.T("trial_body", Premium.TrialDays),
                     (Lang.T("great"), null, "btn-gold"))).StartingIn(500);
+            else Promo.MaybeCard(root);
             root.AddToClassList("home-bg");
 
             // ---------- header: profile, level, streak, goal
@@ -168,6 +169,8 @@ namespace PatenteArabo
                 go.style.flexShrink = 0;
                 dt.RegisterCallback<ClickEvent>(_ => App.I.Go(() => new QuickQuizPage(QuickQuizPage.Mode.Daily)));
             }
+
+            Promo.Banner(c);
 
             var grid = U.Row(c, "wrap");
             grid.style.justifyContent = Justify.Center;

@@ -259,3 +259,8 @@
 .splash-msg { font-size: 40px; color: rgb(252, 211, 77); margin-top: 18px; -unity-font-style: bold; }
 .splash-bar { width: 420px; height: 8px; border-radius: 4px; background-color: rgba(255, 255, 255, 0.12); margin-top: 34px; overflow: hidden; }
 .splash-fill { height: 8px; width: 0; border-radius: 4px; background-color: rgb(252, 211, 77); }
+
+/* plan reminder on home (free users) */
+.promo-banner { flex-direction: row; align-items: center; margin: 6px 46px 2px 46px; padding: 10px 20px; border-radius: 22px; flex-shrink: 0;
+  background-color: rgb(58, 44, 8); border-width: 2px; border-color: rgb(234, 179, 8); }
+.row-rtl.promo-banner { flex-direction: row-reverse; }

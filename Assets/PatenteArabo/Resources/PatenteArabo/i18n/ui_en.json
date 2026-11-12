@@ -465,5 +465,15 @@
 "splash_2": "You are only a few steps away from your licence. Keep going!",
 "splash_3": "Every question today is one less mistake at the exam.",
 "splash_4": "A few minutes a day and the exam becomes easy.",
-"splash_5": "Welcome back! Your licence is waiting for you."
+"splash_5": "Welcome back! Your licence is waiting for you.",
+"promo_title": "Unlock all of licence B",
+"promo_title_pro": "Unlock the whole course with PRO",
+"promo_sub": "All 25 chapters, unlimited exams, 3D driving and audio",
+"promo_sub_pro": "All questions, unlimited exams and technical glossary",
+"promo_trial": "Try it free for 3 days, then you decide.",
+"see_plans": "See plans",
+"not_now": "Not now",
+"promo_card_title": "You're doing great!",
+"promo_card_body": "You are already {0}% ready. With Premium you get to the exam faster: all 25 chapters, unlimited simulations, review of your mistakes and unlimited 3D driving.",
+"promo_card_body_pro": "You are already {0}% ready. With PRO you get every question of the course, unlimited simulations with the official rules and the technical glossary."
 }
