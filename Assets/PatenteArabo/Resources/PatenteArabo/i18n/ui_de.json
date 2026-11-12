@@ -460,5 +460,10 @@
 "no_voice_title": "Die italienische Stimme fehlt",
 "no_voice_android": "Um die Fragen anzuhören, installiere die italienische Stimme: Einstellungen des Telefons > Sprachausgabe (Text-to-speech) > Google-Sprachausgabe > Sprachdaten installieren > Italienisch.",
 "no_voice_ios": "Um die Fragen anzuhören, lade eine italienische Stimme herunter: Einstellungen > Bedienungshilfen > Gesprochene Inhalte > Stimmen > Italienisch.",
-"install_voice_sub_ios": "So lädst du die italienische Stimme auf das iPhone"
+"install_voice_sub_ios": "So lädst du die italienische Stimme auf das iPhone",
+"splash_1": "Du bist hier genau richtig, um deinen Führerschein zu machen.",
+"splash_2": "Du bist nur noch wenige Schritte von deinem Führerschein entfernt. Weiter so!",
+"splash_3": "Jede Frage heute ist ein Fehler weniger in der Prüfung.",
+"splash_4": "Ein paar Minuten am Tag, und die Prüfung wird leicht.",
+"splash_5": "Willkommen zurück! Dein Führerschein wartet auf dich."
 }

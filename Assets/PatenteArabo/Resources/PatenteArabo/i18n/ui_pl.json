@@ -460,5 +460,10 @@
 "no_voice_title": "Brakuje włoskiego głosu",
 "no_voice_android": "Aby słuchać pytań, zainstaluj włoski głos: Ustawienia telefonu > Przetwarzanie tekstu na mowę (Text-to-speech) > mechanizm Google > Zainstaluj dane głosowe > Włoski.",
 "no_voice_ios": "Aby słuchać pytań, pobierz włoski głos: Ustawienia > Dostępność > Treść mówiona > Głosy > Włoski.",
-"install_voice_sub_ios": "Jak pobrać włoski głos na iPhonie"
+"install_voice_sub_ios": "Jak pobrać włoski głos na iPhonie",
+"splash_1": "Wybrałeś dobre miejsce, by zdobyć prawo jazdy.",
+"splash_2": "Jesteś już tylko kilka kroków od prawa jazdy. Tak trzymaj!",
+"splash_3": "Każde dzisiejsze pytanie to jeden błąd mniej na egzaminie.",
+"splash_4": "Kilka minut dziennie i egzamin staje się łatwy.",
+"splash_5": "Witaj ponownie! Twoje prawo jazdy na Ciebie czeka."
 }

@@ -460,5 +460,10 @@
 "no_voice_title": "Itaalia hääl puudub",
 "no_voice_android": "Küsimuste kuulamiseks installi itaalia hääl: Telefoni seaded > Tekst kõneks (Text-to-speech) > Google'i mootor > Installi kõneandmed > Itaalia.",
 "no_voice_ios": "Küsimuste kuulamiseks laadi alla itaalia hääl: Seaded > Hõlbustus > Kõneldav sisu > Hääled > Itaalia.",
-"install_voice_sub_ios": "Kuidas laadida itaalia hääl iPhone'i"
+"install_voice_sub_ios": "Kuidas laadida itaalia hääl iPhone'i",
+"splash_1": "Valisid juhiloa saamiseks õige koha.",
+"splash_2": "Oled oma juhiloast vaid mõne sammu kaugusel. Jätka samamoodi!",
+"splash_3": "Iga tänane küsimus on üks viga eksamil vähem.",
+"splash_4": "Paar minutit päevas ja eksam muutub lihtsaks.",
+"splash_5": "Tere tulemast tagasi! Sinu juhiluba ootab sind."
 }

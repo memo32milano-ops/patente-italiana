@@ -460,5 +460,10 @@
 "no_voice_title": "Italiankielinen ääni puuttuu",
 "no_voice_android": "Jos haluat kuunnella kysymykset, asenna italiankielinen ääni: Puhelimen Asetukset > Tekstistä puheeksi (Text-to-speech) > Googlen moottori > Asenna äänitiedot > Italia.",
 "no_voice_ios": "Jos haluat kuunnella kysymykset, lataa italiankielinen ääni: Asetukset > Käyttöapu > Puhuttu sisältö > Äänet > Italia.",
-"install_voice_sub_ios": "Näin lataat italiankielisen äänen iPhoneen"
+"install_voice_sub_ios": "Näin lataat italiankielisen äänen iPhoneen",
+"splash_1": "Valitsit oikean paikan ajokortin hankkimiseen.",
+"splash_2": "Olet vain muutaman askeleen päässä ajokortistasi. Jatka samaan malliin!",
+"splash_3": "Jokainen tämän päivän kysymys on yksi virhe vähemmän kokeessa.",
+"splash_4": "Muutama minuutti päivässä, ja koe muuttuu helpoksi.",
+"splash_5": "Tervetuloa takaisin! Ajokorttisi odottaa sinua."
 }

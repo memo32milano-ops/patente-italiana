@@ -460,5 +460,10 @@
 "no_voice_title": "Den italienska rösten saknas",
 "no_voice_android": "För att lyssna på frågorna, installera den italienska rösten: Telefonens Inställningar > Text till tal (Text-to-speech) > Googles motor > Installera röstdata > Italienska.",
 "no_voice_ios": "För att lyssna på frågorna, ladda ned en italiensk röst: Inställningar > Tillgänglighet > Uppläst innehåll > Röster > Italienska.",
-"install_voice_sub_ios": "Så laddar du ned den italienska rösten på iPhone"
+"install_voice_sub_ios": "Så laddar du ned den italienska rösten på iPhone",
+"splash_1": "Du har valt rätt ställe för att ta körkort.",
+"splash_2": "Du är bara några steg från ditt körkort. Fortsätt så!",
+"splash_3": "Varje fråga i dag är ett fel mindre på provet.",
+"splash_4": "Några minuter om dagen och provet blir lätt.",
+"splash_5": "Välkommen tillbaka! Ditt körkort väntar på dig."
 }

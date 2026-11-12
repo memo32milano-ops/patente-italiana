@@ -460,5 +460,10 @@
 "no_voice_title": "Chybí italský hlas",
 "no_voice_android": "Chcete-li otázky poslouchat, nainstalujte italský hlas: Nastavení telefonu > Převod textu na řeč (Text-to-speech) > modul Google > Nainstalovat hlasová data > Italština.",
 "no_voice_ios": "Chcete-li otázky poslouchat, stáhněte italský hlas: Nastavení > Zpřístupnění > Mluvený obsah > Hlasy > Italština.",
-"install_voice_sub_ios": "Jak stáhnout italský hlas do iPhonu"
+"install_voice_sub_ios": "Jak stáhnout italský hlas do iPhonu",
+"splash_1": "Vybrali jste si správné místo, kde získat řidičák.",
+"splash_2": "Jste jen pár kroků od svého řidičáku. Jen tak dál!",
+"splash_3": "Každá dnešní otázka je o jednu chybu u zkoušky méně.",
+"splash_4": "Pár minut denně a zkouška bude hračka.",
+"splash_5": "Vítejte zpět! Váš řidičák na vás čeká."
 }

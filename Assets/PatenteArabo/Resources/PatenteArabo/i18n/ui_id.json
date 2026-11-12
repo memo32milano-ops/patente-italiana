@@ -460,5 +460,10 @@
 "no_voice_title": "Suara bahasa Italia belum ada",
 "no_voice_android": "Untuk mendengarkan soal, instal suara bahasa Italia: Setelan ponsel > Output text-ke-ucapan (Text-to-speech) > mesin Google > Instal data suara > Italia.",
 "no_voice_ios": "Untuk mendengarkan soal, unduh suara bahasa Italia: Pengaturan > Aksesibilitas > Konten Lisan > Suara > Italia.",
-"install_voice_sub_ios": "Cara mengunduh suara bahasa Italia di iPhone"
+"install_voice_sub_ios": "Cara mengunduh suara bahasa Italia di iPhone",
+"splash_1": "Anda memilih tempat yang tepat untuk mendapatkan SIM.",
+"splash_2": "Tinggal beberapa langkah lagi menuju SIM Anda. Terus semangat!",
+"splash_3": "Setiap soal hari ini berarti satu kesalahan lebih sedikit saat ujian.",
+"splash_4": "Beberapa menit sehari dan ujian jadi mudah.",
+"splash_5": "Selamat datang kembali! SIM Anda sudah menunggu."
 }

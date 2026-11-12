@@ -460,5 +460,10 @@
 "no_voice_title": "Manjka italijanski glas",
 "no_voice_android": "Če želite poslušati vprašanja, namestite italijanski glas: Nastavitve telefona > Pretvorba besedila v govor (Text-to-speech) > Googlov mehanizem > Namesti glasovne podatke > Italijanščina.",
 "no_voice_ios": "Če želite poslušati vprašanja, prenesite italijanski glas: Nastavitve > Dostopnost > Izgovorjena vsebina > Glasovi > Italijanščina.",
-"install_voice_sub_ios": "Kako prenesti italijanski glas v iPhone"
+"install_voice_sub_ios": "Kako prenesti italijanski glas v iPhone",
+"splash_1": "Izbrali ste pravo mesto za pridobitev vozniškega dovoljenja.",
+"splash_2": "Le nekaj korakov vas loči od vozniškega dovoljenja. Kar tako naprej!",
+"splash_3": "Vsako današnje vprašanje je ena napaka manj na izpitu.",
+"splash_4": "Nekaj minut na dan in izpit postane lahek.",
+"splash_5": "Dobrodošli nazaj! Vaše vozniško dovoljenje vas čaka."
 }

@@ -460,5 +460,10 @@
 "no_voice_title": "Den italienske stemmen mangler",
 "no_voice_android": "For å høre spørsmålene må du installere den italienske stemmen: Telefonens Innstillinger > Tekst-til-tale (Text-to-speech) > Googles motor > Installer taledata > Italiensk.",
 "no_voice_ios": "For å høre spørsmålene må du laste ned en italiensk stemme: Innstillinger > Tilgjengelighet > Opplest innhold > Stemmer > Italiensk.",
-"install_voice_sub_ios": "Slik laster du ned den italienske stemmen på iPhone"
+"install_voice_sub_ios": "Slik laster du ned den italienske stemmen på iPhone",
+"splash_1": "Du har valgt riktig sted for å ta førerkortet.",
+"splash_2": "Du er bare noen få steg unna førerkortet. Fortsett sånn!",
+"splash_3": "Hvert spørsmål i dag er én feil mindre på prøven.",
+"splash_4": "Noen minutter om dagen, så blir prøven lett.",
+"splash_5": "Velkommen tilbake! Førerkortet venter på deg."
 }

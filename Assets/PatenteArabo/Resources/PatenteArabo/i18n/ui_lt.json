@@ -460,5 +460,10 @@
 "no_voice_title": "Trūksta italų kalbos balso",
 "no_voice_android": "Kad galėtumėte klausytis klausimų, įdiekite italų kalbos balsą: Telefono nustatymai > Teksto keitimas kalba (Text-to-speech) > „Google“ variklis > Įdiegti balso duomenis > Italų.",
 "no_voice_ios": "Kad galėtumėte klausytis klausimų, atsisiųskite italų kalbos balsą: Settings (Nustatymai) > Accessibility (Pritaikymas neįgaliesiems) > Spoken Content > Voices > Italian (Italų).",
-"install_voice_sub_ios": "Kaip atsisiųsti italų kalbos balsą į iPhone"
+"install_voice_sub_ios": "Kaip atsisiųsti italų kalbos balsą į iPhone",
+"splash_1": "Pasirinkote tinkamą vietą vairuotojo pažymėjimui gauti.",
+"splash_2": "Iki vairuotojo pažymėjimo jums liko vos keli žingsniai. Taip ir toliau!",
+"splash_3": "Kiekvienas šiandienos klausimas – viena klaida mažiau per egzaminą.",
+"splash_4": "Kelios minutės per dieną – ir egzaminas tampa lengvas.",
+"splash_5": "Sveiki sugrįžę! Jūsų vairuotojo pažymėjimas jūsų laukia."
 }

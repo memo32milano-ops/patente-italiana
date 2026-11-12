@@ -460,5 +460,10 @@
 "no_voice_title": "Nedostaje talijanski glas",
 "no_voice_android": "Da biste slušali pitanja, instalirajte talijanski glas: Postavke telefona > Pretvaranje teksta u govor (Text-to-speech) > Googleov mehanizam > Instaliraj glasovne podatke > Talijanski.",
 "no_voice_ios": "Da biste slušali pitanja, preuzmite talijanski glas: Postavke > Pristupačnost > Izgovoreni sadržaj > Glasovi > Talijanski.",
-"install_voice_sub_ios": "Kako preuzeti talijanski glas na iPhone"
+"install_voice_sub_ios": "Kako preuzeti talijanski glas na iPhone",
+"splash_1": "Odabrali ste pravo mjesto za polaganje vozačke.",
+"splash_2": "Samo ste nekoliko koraka od svoje vozačke. Samo tako nastavite!",
+"splash_3": "Svako današnje pitanje jedna je pogreška manje na ispitu.",
+"splash_4": "Nekoliko minuta dnevno i ispit postaje lagan.",
+"splash_5": "Dobro došli natrag! Vaša vozačka vas čeka."
 }

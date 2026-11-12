@@ -460,5 +460,10 @@
 "no_voice_title": "缺少意大利语语音",
 "no_voice_android": "要收听题目，请安装意大利语语音：手机设置 > 文字转语音输出 (Text-to-speech) > Google 引擎 > 安装语音数据 > 意大利语。",
 "no_voice_ios": "要收听题目，请下载意大利语语音：设置 > 辅助功能 > 朗读内容 > 声音 > 意大利语。",
-"install_voice_sub_ios": "如何在 iPhone 上下载意大利语语音"
+"install_voice_sub_ios": "如何在 iPhone 上下载意大利语语音",
+"splash_1": "你选对了地方来考驾照。",
+"splash_2": "离拿到驾照只差几步了，继续加油！",
+"splash_3": "今天多做一道题，考试就少错一道。",
+"splash_4": "每天几分钟，考试变轻松。",
+"splash_5": "欢迎回来！你的驾照在等着你。"
 }

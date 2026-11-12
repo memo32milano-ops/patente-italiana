@@ -460,5 +460,10 @@
 "no_voice_title": "Hiányzik az olasz hang",
 "no_voice_android": "A kérdések meghallgatásához telepítsd az olasz hangot: Telefon Beállítások > Szövegfelolvasó (Text-to-speech) > Google-motor > Hangadatok telepítése > Olasz.",
 "no_voice_ios": "A kérdések meghallgatásához tölts le egy olasz hangot: Beállítások > Kisegítő lehetőségek > Felolvasott tartalom > Hangok > Olasz.",
-"install_voice_sub_ios": "Az olasz hang letöltése iPhone-ra"
+"install_voice_sub_ios": "Az olasz hang letöltése iPhone-ra",
+"splash_1": "Jó helyet választottál a jogosítványhoz.",
+"splash_2": "Már csak néhány lépésre vagy a jogosítványodtól. Csak így tovább!",
+"splash_3": "Minden mai kérdés eggyel kevesebb hiba a vizsgán.",
+"splash_4": "Napi néhány perc, és a vizsga könnyű lesz.",
+"splash_5": "Örülünk, hogy visszatértél! A jogosítványod már vár rád."
 }

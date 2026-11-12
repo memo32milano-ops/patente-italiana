@@ -460,5 +460,10 @@
 "no_voice_title": "Den italienske stemme mangler",
 "no_voice_android": "For at lytte til spørgsmålene skal du installere den italienske stemme: Telefonens Indstillinger > Tekst-til-tale (Text-to-speech) > Googles maskine > Installer stemmedata > Italiensk.",
 "no_voice_ios": "For at lytte til spørgsmålene skal du downloade en italiensk stemme: Indstillinger > Tilgængelighed > Oplæst indhold > Stemmer > Italiensk.",
-"install_voice_sub_ios": "Sådan downloader du den italienske stemme på iPhone"
+"install_voice_sub_ios": "Sådan downloader du den italienske stemme på iPhone",
+"splash_1": "Du har valgt det rigtige sted at tage dit kørekort.",
+"splash_2": "Du er kun få skridt fra dit kørekort. Bliv ved!",
+"splash_3": "Hvert spørgsmål i dag er en fejl mindre til prøven.",
+"splash_4": "Et par minutter om dagen, og prøven bliver let.",
+"splash_5": "Velkommen tilbage! Dit kørekort venter på dig."
 }

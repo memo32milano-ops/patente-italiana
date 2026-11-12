@@ -460,5 +460,10 @@
 "no_voice_title": "Walang Italian na boses",
 "no_voice_android": "Para mapakinggan ang mga tanong, i-install ang Italian na boses: Settings ng phone > Text-to-speech > Google engine > Install voice data > Italian.",
 "no_voice_ios": "Para mapakinggan ang mga tanong, mag-download ng Italian na boses: Settings > Accessibility > Spoken Content > Voices > Italian.",
-"install_voice_sub_ios": "Paano mag-download ng Italian na boses sa iPhone"
+"install_voice_sub_ios": "Paano mag-download ng Italian na boses sa iPhone",
+"splash_1": "Tama ang pinili mong lugar para makuha ang lisensya mo.",
+"splash_2": "Ilang hakbang na lang at may lisensya ka na. Tuloy lang!",
+"splash_3": "Bawat tanong ngayon ay isang mali na mas kaunti sa exam.",
+"splash_4": "Ilang minuto lang bawat araw at magiging madali ang exam.",
+"splash_5": "Welcome back! Hinihintay ka na ng lisensya mo."
 }

@@ -460,5 +460,10 @@
 "no_voice_title": "اطالوی آواز موجود نہیں",
 "no_voice_android": "سوالات سننے کے لیے اطالوی آواز انسٹال کریں: فون کی Settings (ترتیبات) > Text-to-speech > Google engine > Install voice data > Italian (اطالوی)۔",
 "no_voice_ios": "سوالات سننے کے لیے اطالوی آواز ڈاؤن لوڈ کریں: Settings (ترتیبات) > Accessibility > Spoken Content > Voices > Italian (اطالوی)۔",
-"install_voice_sub_ios": "iPhone پر اطالوی آواز کیسے ڈاؤن لوڈ کریں"
+"install_voice_sub_ios": "iPhone پر اطالوی آواز کیسے ڈاؤن لوڈ کریں",
+"splash_1": "آپ نے لائسنس حاصل کرنے کے لیے صحیح جگہ کا انتخاب کیا ہے۔",
+"splash_2": "آپ اپنے لائسنس سے بس چند قدم دور ہیں۔ یوں ہی جاری رکھیں!",
+"splash_3": "آج کا ہر سوال امتحان میں ایک غلطی کم ہے۔",
+"splash_4": "روزانہ چند منٹ، اور امتحان آسان ہو جاتا ہے۔",
+"splash_5": "دوبارہ خوش آمدید! آپ کا لائسنس آپ کا منتظر ہے۔"
 }

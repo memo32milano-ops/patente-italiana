@@ -460,5 +460,10 @@
 "no_voice_title": "Thiếu giọng tiếng Ý",
 "no_voice_android": "Để nghe câu hỏi, hãy cài giọng tiếng Ý: Cài đặt điện thoại > Đầu ra chuyển văn bản thành giọng nói (Text-to-speech) > công cụ của Google > Cài đặt dữ liệu giọng nói > Tiếng Ý.",
 "no_voice_ios": "Để nghe câu hỏi, hãy tải giọng tiếng Ý: Cài đặt > Trợ năng > Nội dung được đọc > Giọng nói > Tiếng Ý.",
-"install_voice_sub_ios": "Cách tải giọng tiếng Ý trên iPhone"
+"install_voice_sub_ios": "Cách tải giọng tiếng Ý trên iPhone",
+"splash_1": "Bạn đã chọn đúng nơi để lấy bằng lái.",
+"splash_2": "Bạn chỉ còn vài bước nữa là có bằng lái. Cố lên nhé!",
+"splash_3": "Mỗi câu hỏi hôm nay là bớt một lỗi sai khi thi.",
+"splash_4": "Chỉ vài phút mỗi ngày, kỳ thi sẽ trở nên dễ dàng.",
+"splash_5": "Chào mừng bạn quay lại! Bằng lái đang chờ bạn."
 }

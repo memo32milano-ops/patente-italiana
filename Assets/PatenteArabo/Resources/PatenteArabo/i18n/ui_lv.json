@@ -460,5 +460,10 @@
 "no_voice_title": "Trūkst itāļu balss",
 "no_voice_android": "Lai klausītos jautājumus, instalējiet itāļu balsi: Tālruņa iestatījumi > Teksta pārveide runā (Text-to-speech) > Google programma > Instalēt balss datus > Itāļu.",
 "no_voice_ios": "Lai klausītos jautājumus, lejupielādējiet itāļu balsi: Iestatījumi > Pieejamība > Izrunātais saturs > Balsis > Itāļu.",
-"install_voice_sub_ios": "Kā lejupielādēt itāļu balsi iPhone tālrunī"
+"install_voice_sub_ios": "Kā lejupielādēt itāļu balsi iPhone tālrunī",
+"splash_1": "Jūs izvēlējāties īsto vietu, lai iegūtu autovadītāja apliecību.",
+"splash_2": "Līdz jūsu tiesībām atlikuši tikai daži soļi. Tā turpināt!",
+"splash_3": "Katrs šodienas jautājums ir par vienu kļūdu mazāk eksāmenā.",
+"splash_4": "Dažas minūtes dienā, un eksāmens kļūst viegls.",
+"splash_5": "Laipni lūdzam atpakaļ! Jūsu tiesības jūs gaida."
 }

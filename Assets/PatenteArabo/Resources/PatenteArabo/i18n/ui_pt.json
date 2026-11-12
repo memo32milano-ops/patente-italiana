@@ -460,5 +460,10 @@
 "no_voice_title": "Falta a voz em italiano",
 "no_voice_android": "Para ouvir as perguntas, instale a voz em italiano: Configurações do celular > Conversão de texto em voz (Text-to-speech) > mecanismo do Google > Instalar dados de voz > Italiano.",
 "no_voice_ios": "Para ouvir as perguntas, baixe uma voz em italiano: Ajustes > Acessibilidade > Conteúdo Falado > Vozes > Italiano.",
-"install_voice_sub_ios": "Como baixar a voz em italiano no iPhone"
+"install_voice_sub_ios": "Como baixar a voz em italiano no iPhone",
+"splash_1": "Você escolheu o lugar certo para tirar sua carteira de motorista.",
+"splash_2": "Você está a poucos passos da sua carteira. Continue assim!",
+"splash_3": "Cada pergunta de hoje é um erro a menos na prova.",
+"splash_4": "Alguns minutos por dia e a prova fica fácil.",
+"splash_5": "Que bom ter você de volta! Sua carteira está esperando por você."
 }

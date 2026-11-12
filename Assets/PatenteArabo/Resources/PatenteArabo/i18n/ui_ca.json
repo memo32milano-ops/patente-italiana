@@ -460,5 +460,10 @@
 "no_voice_title": "Falta la veu en italià",
 "no_voice_android": "Per escoltar les preguntes, instal·la la veu en italià: Configuració del telèfon > Síntesi de veu (Text-to-speech) > motor de Google > Instal·la les dades de veu > Italià.",
 "no_voice_ios": "Per escoltar les preguntes, baixa una veu en italià: Configuració > Accessibilitat > Contingut parlat > Veus > Italià.",
-"install_voice_sub_ios": "Com baixar la veu en italià a l'iPhone"
+"install_voice_sub_ios": "Com baixar la veu en italià a l'iPhone",
+"splash_1": "Has triat el lloc adequat per treure't el carnet.",
+"splash_2": "Ets a pocs passos del teu carnet. Continua així!",
+"splash_3": "Cada pregunta d'avui és un error menys a l'examen.",
+"splash_4": "Uns quants minuts al dia i l'examen es torna fàcil.",
+"splash_5": "Benvingut de nou! El teu carnet t'espera."
 }

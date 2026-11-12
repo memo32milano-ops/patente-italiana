@@ -460,5 +460,10 @@
 "no_voice_title": "Falta la voz en italiano",
 "no_voice_android": "Para escuchar las preguntas, instala la voz en italiano: Ajustes del teléfono > Síntesis de voz (Text-to-speech) > motor de Google > Instalar datos de voz > Italiano.",
 "no_voice_ios": "Para escuchar las preguntas, descarga una voz en italiano: Ajustes > Accesibilidad > Contenido leído > Voces > Italiano.",
-"install_voice_sub_ios": "Cómo descargar la voz en italiano en el iPhone"
+"install_voice_sub_ios": "Cómo descargar la voz en italiano en el iPhone",
+"splash_1": "Has elegido el lugar adecuado para sacarte el carnet.",
+"splash_2": "Estás a pocos pasos de tu carnet. ¡Sigue así!",
+"splash_3": "Cada pregunta de hoy es un error menos en el examen.",
+"splash_4": "Unos minutos al día y el examen se vuelve fácil.",
+"splash_5": "¡Bienvenido de nuevo! Tu carnet te espera."
 }

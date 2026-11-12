@@ -460,5 +460,10 @@
 "no_voice_title": "Sauti ya Kiitaliano haipo",
 "no_voice_android": "Ili kusikiliza maswali, sakinisha sauti ya Kiitaliano: Mipangilio ya simu (Settings) > Kusoma maandishi kwa sauti (Text-to-speech) > injini ya Google > Sakinisha data ya sauti > Kiitaliano (Italian).",
 "no_voice_ios": "Ili kusikiliza maswali, pakua sauti ya Kiitaliano: Settings (Mipangilio) > Accessibility (Ufikivu) > Spoken Content > Voices > Italian (Kiitaliano).",
-"install_voice_sub_ios": "Jinsi ya kupakua sauti ya Kiitaliano kwenye iPhone"
+"install_voice_sub_ios": "Jinsi ya kupakua sauti ya Kiitaliano kwenye iPhone",
+"splash_1": "Umechagua mahali sahihi pa kupata leseni yako.",
+"splash_2": "Umebakiza hatua chache tu kupata leseni yako. Endelea hivyo!",
+"splash_3": "Kila swali la leo ni kosa moja pungufu kwenye mtihani.",
+"splash_4": "Dakika chache kwa siku na mtihani unakuwa rahisi.",
+"splash_5": "Karibu tena! Leseni yako inakusubiri."
 }

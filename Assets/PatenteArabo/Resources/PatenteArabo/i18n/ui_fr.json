@@ -460,5 +460,10 @@
 "no_voice_title": "La voix italienne est manquante",
 "no_voice_android": "Pour écouter les questions, installez la voix italienne : Paramètres du téléphone > Synthèse vocale (Text-to-speech) > moteur Google > Installer les données vocales > Italien.",
 "no_voice_ios": "Pour écouter les questions, téléchargez une voix italienne : Réglages > Accessibilité > Contenu énoncé > Voix > Italien.",
-"install_voice_sub_ios": "Comment télécharger la voix italienne sur iPhone"
+"install_voice_sub_ios": "Comment télécharger la voix italienne sur iPhone",
+"splash_1": "Vous avez choisi le bon endroit pour obtenir votre permis.",
+"splash_2": "Vous n'êtes plus qu'à quelques pas de votre permis. Continuez comme ça !",
+"splash_3": "Chaque question d'aujourd'hui, c'est une erreur de moins à l'examen.",
+"splash_4": "Quelques minutes par jour, et l'examen devient facile.",
+"splash_5": "Bon retour ! Votre permis vous attend."
 }

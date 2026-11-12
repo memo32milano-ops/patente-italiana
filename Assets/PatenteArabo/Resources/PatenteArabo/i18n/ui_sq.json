@@ -460,5 +460,10 @@
 "no_voice_title": "Mungon zëri italian",
 "no_voice_android": "Për të dëgjuar pyetjet, instalo zërin italian: Cilësimet e telefonit > Shndërrimi i tekstit në të folur (Text-to-speech) > motori i Google > Instalo të dhënat e zërit > Italisht.",
 "no_voice_ios": "Për të dëgjuar pyetjet, shkarko një zë italian: Settings (Cilësimet) > Accessibility (Qasshmëria) > Spoken Content > Voices > Italian (Italisht).",
-"install_voice_sub_ios": "Si të shkarkosh zërin italian në iPhone"
+"install_voice_sub_ios": "Si të shkarkosh zërin italian në iPhone",
+"splash_1": "Ke zgjedhur vendin e duhur për të marrë patentën.",
+"splash_2": "Je vetëm disa hapa larg patentës. Vazhdo kështu!",
+"splash_3": "Çdo pyetje sot është një gabim më pak në provim.",
+"splash_4": "Pak minuta në ditë dhe provimi bëhet i lehtë.",
+"splash_5": "Mirë se u ktheve! Patenta të pret."
 }

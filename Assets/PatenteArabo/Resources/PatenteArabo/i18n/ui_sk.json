@@ -460,5 +460,10 @@
 "no_voice_title": "Chýba taliansky hlas",
 "no_voice_android": "Ak chcete otázky počúvať, nainštalujte taliansky hlas: Nastavenia telefónu > Prevod textu na reč (Text-to-speech) > nástroj Google > Inštalovať hlasové údaje > Taliančina.",
 "no_voice_ios": "Ak chcete otázky počúvať, stiahnite taliansky hlas: Nastavenia > Prístupnosť > Hovorený obsah > Hlasy > Taliančina.",
-"install_voice_sub_ios": "Ako stiahnuť taliansky hlas do iPhonu"
+"install_voice_sub_ios": "Ako stiahnuť taliansky hlas do iPhonu",
+"splash_1": "Vybrali ste si správne miesto, kde získať vodičák.",
+"splash_2": "Ste len pár krokov od svojho vodičáka. Len tak ďalej!",
+"splash_3": "Každá dnešná otázka je o jednu chybu na skúške menej.",
+"splash_4": "Pár minút denne a skúška bude hračka.",
+"splash_5": "Vitajte späť! Váš vodičák na vás čaká."
 }

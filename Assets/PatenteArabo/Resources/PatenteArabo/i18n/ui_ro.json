@@ -460,5 +460,10 @@
 "no_voice_title": "Lipsește vocea italiană",
 "no_voice_android": "Ca să asculți întrebările, instalează vocea italiană: Setările telefonului > Redare text în vorbire (Text-to-speech) > motorul Google > Instalează datele vocale > Italiană.",
 "no_voice_ios": "Ca să asculți întrebările, descarcă o voce italiană: Configurări > Accesibilitate > Conținut vorbit > Voci > Italiană.",
-"install_voice_sub_ios": "Cum descarci vocea italiană pe iPhone"
+"install_voice_sub_ios": "Cum descarci vocea italiană pe iPhone",
+"splash_1": "Ai ales locul potrivit ca să-ți iei permisul.",
+"splash_2": "Ești la doar câțiva pași de permis. Ține-o tot așa!",
+"splash_3": "Fiecare întrebare de azi înseamnă o greșeală mai puțin la examen.",
+"splash_4": "Câteva minute pe zi și examenul devine ușor.",
+"splash_5": "Bine ai revenit! Permisul te așteaptă."
 }

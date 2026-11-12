@@ -460,5 +460,10 @@
 "no_voice_title": "İtalyanca ses eksik",
 "no_voice_android": "Soruları dinlemek için İtalyanca sesi yükle: Telefon Ayarları > Metin okuma (Text-to-speech) > Google motoru > Ses verilerini yükle > İtalyanca.",
 "no_voice_ios": "Soruları dinlemek için bir İtalyanca ses indir: Ayarlar > Erişilebilirlik > Seslendirilen İçerik > Sesler > İtalyanca.",
-"install_voice_sub_ios": "İtalyanca ses iPhone'a nasıl indirilir"
+"install_voice_sub_ios": "İtalyanca ses iPhone'a nasıl indirilir",
+"splash_1": "Ehliyetini almak için doğru yeri seçtin.",
+"splash_2": "Ehliyetine sadece birkaç adım kaldı. Böyle devam et!",
+"splash_3": "Bugün çözdüğün her soru, sınavda bir hata eksik demek.",
+"splash_4": "Günde birkaç dakika ve sınav kolaylaşır.",
+"splash_5": "Tekrar hoş geldin! Ehliyetin seni bekliyor."
 }
