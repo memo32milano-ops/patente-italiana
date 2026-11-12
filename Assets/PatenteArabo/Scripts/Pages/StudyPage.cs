@@ -122,11 +122,11 @@ namespace PatenteArabo
                 U.T(lockBox, Course.IsPro ? Lang.T("locked_chapter_pro", Premium.FreePerChapter) : Lang.T("locked_chapter", Premium.FreePerChapter), "h2", "wraptext").style.unityTextAlign = TextAnchor.MiddleCenter;
                 U.IB(lockBox, "premium", Course.IsPro ? Lang.T("go_pro") : Lang.T("go_premium"), () => ProPaywallPage.OpenForCourse(), "btn-gold").style.width = 600;
                 // the learner can still move to the open statements around this one
-                var nav = U.Row(lockBox);
-                nav.style.justifyContent = Justify.Center; nav.style.marginTop = 10;
-                if (_idx > 0) U.IB(nav, "back", Lang.T("prev"), () => { _idx--; Render(); }, "btn-ghost");
-                U.B(nav, Lang.T("back"), () => App.I.Back(), "btn-ghost");
-                if (_idx < _list.Count - 1) U.IB(nav, "forward", Lang.T("next"), () => { _idx++; Render(); }, "btn-ghost");
+                var lockNav = U.Row(lockBox);
+                lockNav.style.justifyContent = Justify.Center; lockNav.style.marginTop = 10;
+                if (_idx > 0) U.IB(lockNav, "back", Lang.T("prev"), () => { _idx--; Render(); }, "btn-ghost");
+                U.B(lockNav, Lang.T("back"), () => App.I.Back(), "btn-ghost");
+                if (_idx < _list.Count - 1) U.IB(lockNav, "forward", Lang.T("next"), () => { _idx++; Render(); }, "btn-ghost");
                 return;
             }
             if (AutoRead && _spokenIdx != _idx) ItalianTts.Speak(s.it);
