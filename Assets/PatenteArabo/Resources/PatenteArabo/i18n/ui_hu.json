@@ -475,5 +475,10 @@
 "not_now": "Most nem",
 "promo_card_title": "Remekül haladsz!",
 "promo_card_body": "Már {0}%-ban felkészültél. A Premiummal gyorsabban eljutsz a vizsgáig: mind a 25 fejezet, korlátlan próbavizsga, a hibáid átismétlése és korlátlan 3D vezetés.",
-"promo_card_body_pro": "Már {0}%-ban felkészültél. A PRO-val megkapod a tananyag összes kérdését, korlátlan próbavizsgát a hivatalos szabályok szerint és a műszaki szószedetet."
+"promo_card_body_pro": "Már {0}%-ban felkészültél. A PRO-val megkapod a tananyag összes kérdését, korlátlan próbavizsgát a hivatalos szabályok szerint és a műszaki szószedetet.",
+"sc_bump": "Fekvőrendőr",
+"sc_curve": "Veszélyes kanyar",
+"sc_slippery": "Csúszós út",
+"sc_overtake": "Előzni tilos",
+"sc_descent": "Veszélyes lejtő"
 }

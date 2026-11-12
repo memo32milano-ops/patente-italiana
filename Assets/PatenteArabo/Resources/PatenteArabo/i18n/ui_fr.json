@@ -475,5 +475,10 @@
 "not_now": "Pas maintenant",
 "promo_card_title": "Vous vous débrouillez très bien !",
 "promo_card_body": "Votre préparation atteint déjà {0} %. Avec Premium, vous arrivez plus vite à l'examen : les 25 chapitres, simulations illimitées, révision de vos erreurs et conduite 3D sans limite.",
-"promo_card_body_pro": "Votre préparation atteint déjà {0} %. Avec PRO, vous avez toutes les questions du cours, des simulations illimitées selon les règles officielles et le glossaire technique."
+"promo_card_body_pro": "Votre préparation atteint déjà {0} %. Avec PRO, vous avez toutes les questions du cours, des simulations illimitées selon les règles officielles et le glossaire technique.",
+"sc_bump": "Ralentisseur",
+"sc_curve": "Virage dangereux",
+"sc_slippery": "Chaussée glissante",
+"sc_overtake": "Interdiction de dépasser",
+"sc_descent": "Descente dangereuse"
 }

@@ -475,5 +475,10 @@
 "not_now": "Nicht jetzt",
 "promo_card_title": "Du machst das super!",
 "promo_card_body": "Du bist schon zu {0} % bereit. Mit Premium kommst du schneller zur Prüfung: alle 25 Kapitel, unbegrenzte Simulationen, Wiederholung deiner Fehler und 3D-Fahren ohne Limit.",
-"promo_card_body_pro": "Du bist schon zu {0} % bereit. Mit PRO bekommst du alle Fragen des Kurses, unbegrenzte Simulationen nach den offiziellen Regeln und das Fachglossar."
+"promo_card_body_pro": "Du bist schon zu {0} % bereit. Mit PRO bekommst du alle Fragen des Kurses, unbegrenzte Simulationen nach den offiziellen Regeln und das Fachglossar.",
+"sc_bump": "Bodenschwelle",
+"sc_curve": "Gefährliche Kurve",
+"sc_slippery": "Schleudergefahr",
+"sc_overtake": "Überholverbot",
+"sc_descent": "Gefälle"
 }

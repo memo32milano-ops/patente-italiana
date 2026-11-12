@@ -475,5 +475,10 @@
 "not_now": "Agora não",
 "promo_card_title": "Você está indo muito bem!",
 "promo_card_body": "Sua preparação já está em {0}%. Com o Premium você chega mais rápido à prova: todos os 25 capítulos, simulados ilimitados, revisão dos seus erros e direção 3D sem limites.",
-"promo_card_body_pro": "Sua preparação já está em {0}%. Com o PRO você tem todas as perguntas do curso, simulados ilimitados com as regras oficiais e o glossário técnico."
+"promo_card_body_pro": "Sua preparação já está em {0}%. Com o PRO você tem todas as perguntas do curso, simulados ilimitados com as regras oficiais e o glossário técnico.",
+"sc_bump": "Lombada",
+"sc_curve": "Curva perigosa",
+"sc_slippery": "Pista escorregadia",
+"sc_overtake": "Proibido ultrapassar",
+"sc_descent": "Descida íngreme"
 }

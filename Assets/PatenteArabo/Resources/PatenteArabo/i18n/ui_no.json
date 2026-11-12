@@ -475,5 +475,10 @@
 "not_now": "Ikke nå",
 "promo_card_title": "Du gjør det kjempebra!",
 "promo_card_body": "Du er allerede {0} % klar. Med Premium kommer du raskere til prøven: alle 25 kapitler, ubegrensede prøvesimuleringer, repetisjon av feilene dine og ubegrenset 3D-kjøring.",
-"promo_card_body_pro": "Du er allerede {0} % klar. Med PRO får du alle spørsmålene i kurset, ubegrensede prøvesimuleringer etter de offisielle reglene og den tekniske ordlisten."
+"promo_card_body_pro": "Du er allerede {0} % klar. Med PRO får du alle spørsmålene i kurset, ubegrensede prøvesimuleringer etter de offisielle reglene og den tekniske ordlisten.",
+"sc_bump": "Fartsdump",
+"sc_curve": "Farlig sving",
+"sc_slippery": "Glatt kjørebane",
+"sc_overtake": "Forbudt å kjøre forbi",
+"sc_descent": "Bratt bakke"
 }

@@ -475,5 +475,10 @@
 "not_now": "Mitte praegu",
 "promo_card_title": "Sul läheb suurepäraselt!",
 "promo_card_body": "Sinu eksamivalmidus on juba {0}%. Premiumiga jõuad eksamini kiiremini: kõik 25 peatükki, piiramatult proovieksameid, vigade kordamine ja piiramatu 3D-sõit.",
-"promo_card_body_pro": "Sinu eksamivalmidus on juba {0}%. PRO-ga saad kõik kursuse küsimused, piiramatult proovieksameid ametlike reeglite järgi ja tehnilise sõnastiku."
+"promo_card_body_pro": "Sinu eksamivalmidus on juba {0}%. PRO-ga saad kõik kursuse küsimused, piiramatult proovieksameid ametlike reeglite järgi ja tehnilise sõnastiku.",
+"sc_bump": "Lamav politseinik",
+"sc_curve": "Ohtlik kurv",
+"sc_slippery": "Libe tee",
+"sc_overtake": "Möödasõidukeeld",
+"sc_descent": "Järsk langus"
 }

@@ -475,5 +475,10 @@
 "not_now": "Ne zdaj",
 "promo_card_title": "Odlično vam gre!",
 "promo_card_body": "Vaša pripravljenost je že {0} %. S Premium hitreje pridete do izpita: vseh 25 poglavij, neomejene simulacije, ponavljanje napak in neomejena 3D vožnja.",
-"promo_card_body_pro": "Vaša pripravljenost je že {0} %. S PRO dobite vsa vprašanja tečaja, neomejene simulacije po uradnih pravilih in tehnični slovarček."
+"promo_card_body_pro": "Vaša pripravljenost je že {0} %. S PRO dobite vsa vprašanja tečaja, neomejene simulacije po uradnih pravilih in tehnični slovarček.",
+"sc_bump": "Hitrostna ovira",
+"sc_curve": "Nevaren ovinek",
+"sc_slippery": "Spolzko vozišče",
+"sc_overtake": "Prepovedano prehitevanje",
+"sc_descent": "Nevaren spust"
 }

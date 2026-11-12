@@ -475,5 +475,10 @@
 "not_now": "Ei nyt",
 "promo_card_title": "Hienosti menee!",
 "promo_card_body": "Koevalmiutesi on jo {0} %. Premiumilla pääset kokeeseen nopeammin: kaikki 25 lukua, rajattomasti harjoituskokeita, virheiden kertaus ja rajaton 3D-ajo.",
-"promo_card_body_pro": "Koevalmiutesi on jo {0} %. PRO:lla saat kaikki kurssin kysymykset, rajattomasti harjoituskokeita virallisin säännöin ja teknisen sanaston."
+"promo_card_body_pro": "Koevalmiutesi on jo {0} %. PRO:lla saat kaikki kurssin kysymykset, rajattomasti harjoituskokeita virallisin säännöin ja teknisen sanaston.",
+"sc_bump": "Hidastetöyssy",
+"sc_curve": "Vaarallinen mutka",
+"sc_slippery": "Liukas ajorata",
+"sc_overtake": "Ohituskielto",
+"sc_descent": "Jyrkkä alamäki"
 }

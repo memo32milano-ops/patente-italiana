@@ -475,5 +475,10 @@
 "not_now": "Ne dabar",
 "promo_card_title": "Jums puikiai sekasi!",
 "promo_card_body": "Jūsų pasirengimas jau {0} %. Su Premium greičiau pasieksite egzaminą: visi 25 skyriai, neribotos simuliacijos, klaidų kartojimas ir neribotas 3D vairavimas.",
-"promo_card_body_pro": "Jūsų pasirengimas jau {0} %. Su PRO gausite visus kurso klausimus, neribotas simuliacijas pagal oficialias taisykles ir techninį žodynėlį."
+"promo_card_body_pro": "Jūsų pasirengimas jau {0} %. Su PRO gausite visus kurso klausimus, neribotas simuliacijas pagal oficialias taisykles ir techninį žodynėlį.",
+"sc_bump": "Greičio kalnelis",
+"sc_curve": "Pavojingas posūkis",
+"sc_slippery": "Slidus kelias",
+"sc_overtake": "Lenkti draudžiama",
+"sc_descent": "Status nuokalnė"
 }

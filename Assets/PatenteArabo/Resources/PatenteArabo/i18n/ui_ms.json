@@ -475,5 +475,10 @@
 "not_now": "Bukan sekarang",
 "promo_card_title": "Anda hebat!",
 "promo_card_body": "Kesediaan anda sudah {0}%. Dengan Premium anda lebih cepat bersedia untuk peperiksaan: kesemua 25 bab, simulasi tanpa had, ulang kaji kesilapan dan pemanduan 3D tanpa had.",
-"promo_card_body_pro": "Kesediaan anda sudah {0}%. Dengan PRO anda mendapat semua soalan kursus, simulasi tanpa had mengikut peraturan rasmi dan glosari teknikal."
+"promo_card_body_pro": "Kesediaan anda sudah {0}%. Dengan PRO anda mendapat semua soalan kursus, simulasi tanpa had mengikut peraturan rasmi dan glosari teknikal.",
+"sc_bump": "Bonggol jalan",
+"sc_curve": "Selekoh berbahaya",
+"sc_slippery": "Jalan licin",
+"sc_overtake": "Dilarang memotong",
+"sc_descent": "Turunan curam"
 }

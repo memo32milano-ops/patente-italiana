@@ -475,5 +475,10 @@
 "not_now": "Ne sada",
 "promo_card_title": "Odlično vam ide!",
 "promo_card_body": "Vaša spremnost već je {0} %. Uz Premium brže stižete do ispita: svih 25 poglavlja, neograničene simulacije, ponavljanje pogrešaka i 3D vožnja bez ograničenja.",
-"promo_card_body_pro": "Vaša spremnost već je {0} %. Uz PRO dobivate sva pitanja tečaja, neograničene simulacije prema službenim pravilima i tehnički pojmovnik."
+"promo_card_body_pro": "Vaša spremnost već je {0} %. Uz PRO dobivate sva pitanja tečaja, neograničene simulacije prema službenim pravilima i tehnički pojmovnik.",
+"sc_bump": "Usporivač prometa",
+"sc_curve": "Opasan zavoj",
+"sc_slippery": "Sklizak kolnik",
+"sc_overtake": "Zabrana pretjecanja",
+"sc_descent": "Opasna nizbrdica"
 }

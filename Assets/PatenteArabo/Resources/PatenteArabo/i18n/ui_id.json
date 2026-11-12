@@ -475,5 +475,10 @@
 "not_now": "Nanti saja",
 "promo_card_title": "Anda hebat sekali!",
 "promo_card_body": "Kesiapan Anda sudah {0}%. Dengan Premium, Anda lebih cepat siap ujian: semua 25 bab, simulasi tanpa batas, ulasan kesalahan, dan mengemudi 3D tanpa batas.",
-"promo_card_body_pro": "Kesiapan Anda sudah {0}%. Dengan PRO, Anda mendapat semua soal kursus, simulasi tanpa batas dengan aturan resmi, dan glosarium teknis."
+"promo_card_body_pro": "Kesiapan Anda sudah {0}%. Dengan PRO, Anda mendapat semua soal kursus, simulasi tanpa batas dengan aturan resmi, dan glosarium teknis.",
+"sc_bump": "Polisi tidur",
+"sc_curve": "Tikungan berbahaya",
+"sc_slippery": "Jalan licin",
+"sc_overtake": "Dilarang menyalip",
+"sc_descent": "Turunan curam"
 }

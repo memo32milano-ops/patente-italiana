@@ -475,5 +475,10 @@
 "not_now": "Mamaya na",
 "promo_card_title": "Ang galing mo!",
 "promo_card_body": "{0}% handa ka na. Sa Premium, mas mabilis kang makakarating sa exam: lahat ng 25 kabanata, walang limitasyong simulation, pag-review ng mga mali mo at walang limitasyong 3D driving.",
-"promo_card_body_pro": "{0}% handa ka na. Sa PRO, makukuha mo ang lahat ng tanong ng kurso, walang limitasyong simulation ayon sa opisyal na patakaran at ang technical glossary."
+"promo_card_body_pro": "{0}% handa ka na. Sa PRO, makukuha mo ang lahat ng tanong ng kurso, walang limitasyong simulation ayon sa opisyal na patakaran at ang technical glossary.",
+"sc_bump": "Speed hump",
+"sc_curve": "Mapanganib na kurba",
+"sc_slippery": "Madulas na daan",
+"sc_overtake": "Bawal mag-overtake",
+"sc_descent": "Matarik na pababa"
 }

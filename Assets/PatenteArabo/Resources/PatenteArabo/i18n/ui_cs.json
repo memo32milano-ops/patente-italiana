@@ -475,5 +475,10 @@
 "not_now": "Teď ne",
 "promo_card_title": "Vede se vám skvěle!",
 "promo_card_body": "Vaše připravenost je už {0} %. S Premium budete na zkoušku připraveni rychleji: všech 25 kapitol, neomezené simulace, opakování chyb a 3D jízda bez omezení.",
-"promo_card_body_pro": "Vaše připravenost je už {0} %. S PRO získáte všechny otázky kurzu, neomezené simulace podle oficiálních pravidel a technický slovníček."
+"promo_card_body_pro": "Vaše připravenost je už {0} %. S PRO získáte všechny otázky kurzu, neomezené simulace podle oficiálních pravidel a technický slovníček.",
+"sc_bump": "Zpomalovací práh",
+"sc_curve": "Nebezpečná zatáčka",
+"sc_slippery": "Nebezpečí smyku",
+"sc_overtake": "Zákaz předjíždění",
+"sc_descent": "Nebezpečné klesání"
 }

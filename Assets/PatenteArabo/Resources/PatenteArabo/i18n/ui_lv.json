@@ -475,5 +475,10 @@
 "not_now": "Ne tagad",
 "promo_card_title": "Jums lieliski veicas!",
 "promo_card_body": "Jūsu gatavība jau ir {0}%. Ar Premium ātrāk tiksiet līdz eksāmenam: visas 25 nodaļas, neierobežotas simulācijas, kļūdu atkārtošana un neierobežota 3D braukšana.",
-"promo_card_body_pro": "Jūsu gatavība jau ir {0}%. Ar PRO jūs saņemat visus kursa jautājumus, neierobežotas simulācijas pēc oficiālajiem noteikumiem un tehnisko vārdnīcu."
+"promo_card_body_pro": "Jūsu gatavība jau ir {0}%. Ar PRO jūs saņemat visus kursa jautājumus, neierobežotas simulācijas pēc oficiālajiem noteikumiem un tehnisko vārdnīcu.",
+"sc_bump": "Ātrumvaļņis",
+"sc_curve": "Bīstams līkums",
+"sc_slippery": "Slidens ceļš",
+"sc_overtake": "Apdzīt aizliegts",
+"sc_descent": "Stāvs kritums"
 }

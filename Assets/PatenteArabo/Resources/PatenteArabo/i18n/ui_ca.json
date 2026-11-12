@@ -475,5 +475,10 @@
 "not_now": "Ara no",
 "promo_card_title": "Ho estàs fent molt bé!",
 "promo_card_body": "Ja tens un {0}% de preparació. Amb Premium arribes abans a l'examen: els 25 capítols, simulacions il·limitades, repàs dels errors i conducció 3D sense límits.",
-"promo_card_body_pro": "Ja tens un {0}% de preparació. Amb PRO tens totes les preguntes del curs, simulacions il·limitades amb les regles oficials i el glossari tècnic."
+"promo_card_body_pro": "Ja tens un {0}% de preparació. Amb PRO tens totes les preguntes del curs, simulacions il·limitades amb les regles oficials i el glossari tècnic.",
+"sc_bump": "Ressalt",
+"sc_curve": "Revolt perillós",
+"sc_slippery": "Carretera relliscosa",
+"sc_overtake": "Prohibit avançar",
+"sc_descent": "Baixada perillosa"
 }

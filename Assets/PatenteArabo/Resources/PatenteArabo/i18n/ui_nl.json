@@ -475,5 +475,10 @@
 "not_now": "Niet nu",
 "promo_card_title": "Je doet het geweldig!",
 "promo_card_body": "Je bent al voor {0}% klaar. Met Premium ben je sneller klaar voor het examen: alle 25 hoofdstukken, onbeperkt proefexamens, je fouten herhalen en onbeperkt 3D-rijden.",
-"promo_card_body_pro": "Je bent al voor {0}% klaar. Met PRO krijg je alle vragen van de cursus, onbeperkt proefexamens volgens de officiële regels en de technische woordenlijst."
+"promo_card_body_pro": "Je bent al voor {0}% klaar. Met PRO krijg je alle vragen van de cursus, onbeperkt proefexamens volgens de officiële regels en de technische woordenlijst.",
+"sc_bump": "Verkeersdrempel",
+"sc_curve": "Gevaarlijke bocht",
+"sc_slippery": "Slipgevaar",
+"sc_overtake": "Inhaalverbod",
+"sc_descent": "Steile helling"
 }

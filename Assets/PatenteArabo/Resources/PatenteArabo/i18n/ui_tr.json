@@ -475,5 +475,10 @@
 "not_now": "Şimdi değil",
 "promo_card_title": "Harika gidiyorsun!",
 "promo_card_body": "Şimdiden %{0} hazırsın. Premium ile sınava daha hızlı ulaşırsın: 25 bölümün tamamı, sınırsız deneme sınavı, hatalarının tekrarı ve sınırsız 3D sürüş.",
-"promo_card_body_pro": "Şimdiden %{0} hazırsın. PRO ile kurstaki tüm sorulara, resmî kurallarla sınırsız deneme sınavına ve teknik sözlüğe erişirsin."
+"promo_card_body_pro": "Şimdiden %{0} hazırsın. PRO ile kurstaki tüm sorulara, resmî kurallarla sınırsız deneme sınavına ve teknik sözlüğe erişirsin.",
+"sc_bump": "Kasis",
+"sc_curve": "Tehlikeli viraj",
+"sc_slippery": "Kaygan yol",
+"sc_overtake": "Sollamak yasak",
+"sc_descent": "Tehlikeli eğim"
 }

@@ -475,5 +475,10 @@
 "not_now": "Để sau",
 "promo_card_title": "Bạn đang làm rất tốt!",
 "promo_card_body": "Bạn đã sẵn sàng {0}%. Với Premium, bạn sẽ đến kỳ thi nhanh hơn: đủ 25 chương, thi thử không giới hạn, ôn lại lỗi sai và lái xe 3D không giới hạn.",
-"promo_card_body_pro": "Bạn đã sẵn sàng {0}%. Với PRO, bạn có tất cả câu hỏi của khóa học, thi thử không giới hạn theo quy tắc chính thức và bảng thuật ngữ kỹ thuật."
+"promo_card_body_pro": "Bạn đã sẵn sàng {0}%. Với PRO, bạn có tất cả câu hỏi của khóa học, thi thử không giới hạn theo quy tắc chính thức và bảng thuật ngữ kỹ thuật.",
+"sc_bump": "Gờ giảm tốc",
+"sc_curve": "Chỗ ngoặt nguy hiểm",
+"sc_slippery": "Đường trơn",
+"sc_overtake": "Cấm vượt",
+"sc_descent": "Dốc xuống nguy hiểm"
 }

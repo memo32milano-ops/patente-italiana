@@ -475,5 +475,10 @@
 "not_now": "Jo tani",
 "promo_card_title": "Po ia del shkëlqyeshëm!",
 "promo_card_body": "Gatishmëria jote është tashmë {0}%. Me Premium arrin më shpejt te provimi: të 25 kapitujt, simulime pa limit, përsëritje e gabimeve dhe drejtim 3D pa kufi.",
-"promo_card_body_pro": "Gatishmëria jote është tashmë {0}%. Me PRO ke të gjitha pyetjet e kursit, simulime pa limit sipas rregullave zyrtare dhe fjalorthin teknik."
+"promo_card_body_pro": "Gatishmëria jote është tashmë {0}%. Me PRO ke të gjitha pyetjet e kursit, simulime pa limit sipas rregullave zyrtare dhe fjalorthin teknik.",
+"sc_bump": "Pengesë shpejtësie",
+"sc_curve": "Kthesë e rrezikshme",
+"sc_slippery": "Rrugë e rrëshqitshme",
+"sc_overtake": "Ndalohet parakalimi",
+"sc_descent": "Zbritje e pjerrët"
 }

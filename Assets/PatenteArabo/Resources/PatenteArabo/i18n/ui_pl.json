@@ -475,5 +475,10 @@
 "not_now": "Nie teraz",
 "promo_card_title": "Świetnie Ci idzie!",
 "promo_card_body": "Twoja gotowość to już {0}%. Z Premium szybciej dojdziesz do egzaminu: wszystkie 25 rozdziałów, symulacje bez limitu, powtórka błędów i jazda 3D bez ograniczeń.",
-"promo_card_body_pro": "Twoja gotowość to już {0}%. Z PRO masz wszystkie pytania z kursu, symulacje bez limitu według oficjalnych zasad i słowniczek techniczny."
+"promo_card_body_pro": "Twoja gotowość to już {0}%. Z PRO masz wszystkie pytania z kursu, symulacje bez limitu według oficjalnych zasad i słowniczek techniczny.",
+"sc_bump": "Próg zwalniający",
+"sc_curve": "Niebezpieczny zakręt",
+"sc_slippery": "Śliska jezdnia",
+"sc_overtake": "Zakaz wyprzedzania",
+"sc_descent": "Niebezpieczny zjazd"
 }

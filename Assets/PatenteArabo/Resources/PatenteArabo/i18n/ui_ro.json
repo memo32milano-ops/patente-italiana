@@ -475,5 +475,10 @@
 "not_now": "Nu acum",
 "promo_card_title": "Te descurci de minune!",
 "promo_card_body": "Pregătirea ta e deja de {0}%. Cu Premium ajungi mai repede la examen: toate cele 25 de capitole, simulări nelimitate, recapitularea greșelilor și condus 3D fără limite.",
-"promo_card_body_pro": "Pregătirea ta e deja de {0}%. Cu PRO ai toate întrebările din curs, simulări nelimitate după regulile oficiale și glosarul tehnic."
+"promo_card_body_pro": "Pregătirea ta e deja de {0}%. Cu PRO ai toate întrebările din curs, simulări nelimitate după regulile oficiale și glosarul tehnic.",
+"sc_bump": "Limitator de viteză",
+"sc_curve": "Curbă periculoasă",
+"sc_slippery": "Drum alunecos",
+"sc_overtake": "Depășirea interzisă",
+"sc_descent": "Pantă periculoasă"
 }

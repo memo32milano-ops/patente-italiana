@@ -475,5 +475,10 @@
 "not_now": "Si sasa",
 "promo_card_title": "Unafanya vizuri sana!",
 "promo_card_body": "Maandalizi yako tayari yamefikia {0}%. Ukiwa na Premium unafika kwenye mtihani haraka zaidi: sura zote 25, majaribio ya mtihani bila kikomo, marudio ya makosa yako na uendeshaji wa 3D bila kikomo.",
-"promo_card_body_pro": "Maandalizi yako tayari yamefikia {0}%. Ukiwa na PRO unapata maswali yote ya kozi, majaribio ya mtihani bila kikomo kwa sheria rasmi na kamusi ya kiufundi."
+"promo_card_body_pro": "Maandalizi yako tayari yamefikia {0}%. Ukiwa na PRO unapata maswali yote ya kozi, majaribio ya mtihani bila kikomo kwa sheria rasmi na kamusi ya kiufundi.",
+"sc_bump": "Tuta",
+"sc_curve": "Kona hatari",
+"sc_slippery": "Barabara inayoteleza",
+"sc_overtake": "Hakuna kupita",
+"sc_descent": "Mteremko mkali"
 }
