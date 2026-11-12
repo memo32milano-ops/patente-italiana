@@ -182,7 +182,7 @@ def main():
 
     # ---------------- version
     vers = pages(f'/v1/apps/{app}/appStoreVersions', {'filter[platform]': 'IOS'})
-    ver = next((v for v in vers if v['attributes']['appStoreState'] in ('PREPARE_FOR_SUBMISSION', 'DEVELOPER_REJECTED', 'REJECTED', 'METADATA_REJECTED')), None)
+    ver = next((v for v in vers if v['attributes']['appStoreState'] in ('PREPARE_FOR_SUBMISSION', 'READY_FOR_REVIEW', 'DEVELOPER_REJECTED', 'REJECTED', 'METADATA_REJECTED')), None)
     if not ver:
         print('no editable version, states:', [(v['attributes']['versionString'], v['attributes']['appStoreState']) for v in vers]); return
     vid = ver['id']
@@ -317,6 +317,10 @@ def main():
     vinfo = call('GET', f'/v1/appStoreVersions/{vid}') or {}
     print('version state', (vinfo.get('data') or {}).get('attributes', {}).get('appStoreState'), (vinfo.get('data') or {}).get('attributes', {}).get('appVersionState'))
     open_subs = [s for s in pages(f'/v1/apps/{app}/reviewSubmissions', {'filter[platform]': 'IOS'}) if s['attributes']['state'] in ('READY_FOR_REVIEW', 'UNRESOLVED_ISSUES')]
+    def _has_version(s):
+        its = call('GET', f"/v1/reviewSubmissions/{s['id']}/items", params={'include': 'appStoreVersion'}) or {}
+        return any(((it.get('relationships') or {}).get('appStoreVersion') or {}).get('data') for it in its.get('data', []))
+    open_subs.sort(key=lambda s: 0 if _has_version(s) else 1)
     rs = open_subs[0] if open_subs else (call('POST', '/v1/reviewSubmissions', {'data': {'type': 'reviewSubmissions', 'attributes': {'platform': 'IOS'},
                                                                                     'relationships': {'app': rel('apps', app)}}}) or {}).get('data')
     if not rs: print('could not create review submission'); return
