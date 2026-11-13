@@ -329,6 +329,11 @@ namespace PatenteArabo.EditorTools
                 PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
                 // classic Activity entry: GameActivity kept the old surface size after rotation on some devices
                 PlayerSettings.Android.applicationEntry = AndroidApplicationEntry.Activity;
+                // the picture filled only a height x height square on the left of some phones (Honor): Vulkan pre-rotation
+                // drew in the panel's native portrait frame. OpenGL ES 3 first, Vulkan only as fallback, pre-rotation off.
+                PlayerSettings.vulkanEnablePreTransform = false;
+                PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, false);
+                PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { UnityEngine.Rendering.GraphicsDeviceType.OpenGLES3, UnityEngine.Rendering.GraphicsDeviceType.Vulkan });
                 EditorUserBuildSettings.buildAppBundle = aab;
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
                 var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes = scenes, locationPathName = path, target = BuildTarget.Android, options = BuildOptions.None });
