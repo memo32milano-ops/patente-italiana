@@ -6,11 +6,15 @@ name: Build Android
 on:
   push:
     branches: [ main ]
-    paths: [ 'Assets/**', 'ProjectSettings/**', 'Packages/**', '.github/workflows/**' ]
+    paths: [ 'Assets/**', 'ProjectSettings/**', 'Packages/**', '.github/workflows/android.yml' ]
   workflow_dispatch:
     inputs:
       test_apk:
         description: 'Only a test APK signed with a temporary key (to install by hand, not for Google Play)'
+        type: boolean
+        default: false
+      aab_only:
+        description: 'Only the Google Play bundle (no APK)'
         type: boolean
         default: false
 
@@ -27,7 +31,7 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        include: ${{ fromJSON(inputs.test_apk && '[{"kind":"apk","appBundle":false}]' || '[{"kind":"apk","appBundle":false},{"kind":"aab","appBundle":true}]') }}
+        include: ${{ fromJSON(inputs.test_apk && '[{"kind":"apk","appBundle":false}]' || (inputs.aab_only && '[{"kind":"aab","appBundle":true}]' || '[{"kind":"apk","appBundle":false},{"kind":"aab","appBundle":true}]')) }}
     steps:
       - name: Free disk space (Unity images are big)
         uses: jlumbroso/free-disk-space@v1.3.1
