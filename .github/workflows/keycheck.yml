@@ -1,0 +1,20 @@
+name: Check Android upload key
+on: workflow_dispatch
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Decode and open the keystore (prints only sizes and the certificate fingerprint)
+        env:
+          B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          SP: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          AL: ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          KP: ${{ secrets.ANDROID_KEYALIAS_PASS }}
+        run: |
+          echo "base64 length: ${#B64}"
+          printf '%s' "$B64" | tr -d '\r\n ' | base64 -d > k.jks || { echo "::error::not valid base64"; exit 1; }
+          echo "keystore bytes: $(stat -c %s k.jks)"
+          keytool -list -v -keystore k.jks -storepass "$SP" -alias "$AL" 2>&1 | grep -E "Alias name|SHA1:|SHA256:|Valid|keytool error" || true
+          keytool -list -keystore k.jks -storepass "$SP" -alias "$AL" >/dev/null 2>&1 && echo "STORE PASSWORD + ALIAS OK" || echo "::error::store password or alias wrong"
+          keytool -certreq -keystore k.jks -storepass "$SP" -alias "$AL" -keypass "$KP" >/dev/null 2>&1 && echo "KEY PASSWORD OK" || echo "::error::key password wrong"
+          rm -f k.jks
