@@ -86,6 +86,7 @@ jobs:
           androidTargetSdkVersion: AndroidApiLevel36
           buildMethod: PatenteArabo.EditorTools.PatenteSetup.CloudBuild
           versioning: None
+          androidVersionCode: ${{ github.run_number }}
 
       - uses: actions/upload-artifact@v4
         with:

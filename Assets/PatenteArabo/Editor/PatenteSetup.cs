@@ -319,8 +319,16 @@ namespace PatenteArabo.EditorTools
                     PlayerSettings.Android.keyaliasPass = Arg("-androidKeyaliasPass");
                 }
                 else PlayerSettings.Android.useCustomKeystore = false;
-                var vc = System.Environment.GetEnvironmentVariable("GITHUB_RUN_NUMBER");
-                if (int.TryParse(vc, out int run)) PlayerSettings.Android.bundleVersionCode = 100 + run;   // always higher than any PC build
+                // version code: the workflow passes the run number (game-ci does not forward GITHUB_RUN_NUMBER into the editor)
+                var vc = Arg("-androidVersionCode");
+                if (string.IsNullOrEmpty(vc) || vc == "0") vc = System.Environment.GetEnvironmentVariable("GITHUB_RUN_NUMBER");
+                if (int.TryParse(vc, out int run) && run > 0) PlayerSettings.Android.bundleVersionCode = 100 + run;   // always higher than any PC build
+                // Android starts the activity in landscape (an auto-rotation manifest let some phones create the surface in
+                // portrait and keep that width after turning: the app drew only on the left part of the screen).
+                // The app still turns between the two landscape sides at run time (App.Awake sets AutoRotation).
+                PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
+                // classic Activity entry: GameActivity kept the old surface size after rotation on some devices
+                PlayerSettings.Android.applicationEntry = AndroidApplicationEntry.Activity;
                 EditorUserBuildSettings.buildAppBundle = aab;
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
                 var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes = scenes, locationPathName = path, target = BuildTarget.Android, options = BuildOptions.None });
