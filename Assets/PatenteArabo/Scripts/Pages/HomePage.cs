@@ -89,6 +89,7 @@ namespace PatenteArabo
                 root.schedule.Execute(() => App.I.Dialog(Lang.T("trial_title"), Lang.T("trial_body", Premium.TrialDays),
                     (Lang.T("great"), null, "btn-gold"))).StartingIn(500);
             else Promo.MaybeCard(root);
+            Deals.MaybeCard(root);
             root.AddToClassList("home-bg");
 
             // ---------- header: profile, level, streak, goal
@@ -171,6 +172,7 @@ namespace PatenteArabo
             }
 
             Promo.Banner(c);
+            Deals.Banner(c);
 
             var grid = U.Row(c, "wrap");
             grid.style.justifyContent = Justify.Center;
